@@ -1,4 +1,3 @@
-import TestComponent from '@/components/TestComponent'
 import DatabaseStatus from '@/components/DatabaseStatus'
 export default function Home() {
   return (
@@ -15,7 +14,6 @@ export default function Home() {
             🇨🇭 Beta testen
           </button>
         </div>
-        <TestComponent />
         <DatabaseStatus />
       </div>
     </div>
