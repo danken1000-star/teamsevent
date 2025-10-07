@@ -1,4 +1,5 @@
 import TestComponent from '@/components/TestComponent'
+import DatabaseStatus from '@/components/DatabaseStatus'
 export default function Home() {
   return (
     <div className="min-h-screen bg-white">
@@ -15,6 +16,7 @@ export default function Home() {
           </button>
         </div>
         <TestComponent />
+        <DatabaseStatus />
       </div>
     </div>
   )
