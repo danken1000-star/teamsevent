@@ -1,3 +1,4 @@
+import TestComponent from '@/components/TestComponent'
 export default function Home() {
   return (
     <div className="min-h-screen bg-white">
@@ -13,6 +14,7 @@ export default function Home() {
             🇨🇭 Beta testen
           </button>
         </div>
+        <TestComponent />
       </div>
     </div>
   )
