@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation'
 async function LogoutButton() {
   async function handleLogout() {
     'use server'
-    const supabase = createClient()
+    const supabase = await createClient()
     await supabase.auth.signOut()
     redirect('/auth/login')
   }
@@ -27,7 +27,7 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  const supabase = createClient()
+    const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
