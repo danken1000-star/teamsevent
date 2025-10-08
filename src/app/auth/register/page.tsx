@@ -43,9 +43,9 @@ export default function RegisterPage() {
       setSuccess(true)
       
       // Nach 2 Sekunden zum Login weiterleiten
-      setTimeout(() => {
-        router.push('/auth/login')
-      }, 2000)
+setTimeout(() => {
+    window.location.href = '/auth/login'
+  }, 2000)
       
     } catch (err) {
       setError('Ein Fehler ist aufgetreten')

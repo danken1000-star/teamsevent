@@ -26,8 +26,7 @@ export default function LoginPage() {
       }
 
       // Erfolgreich eingeloggt - zum Dashboard
-      router.push('/dashboard')
-      router.refresh()
+window.location.href = '/dashboard'
     } catch (err) {
       setError('Ein Fehler ist aufgetreten')
     } finally {
