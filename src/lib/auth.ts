@@ -1,7 +1,7 @@
-import { createClient } from '@/lib/supabase'
+import { createBrowserClient } from '@/lib/supabase'
 
 export async function signUp(email: string, password: string) {
-  const supabase = createClient()
+  const supabase = createBrowserClient()
   
   const { data, error } = await supabase.auth.signUp({
     email,
@@ -12,7 +12,7 @@ export async function signUp(email: string, password: string) {
 }
 
 export async function signIn(email: string, password: string) {
-  const supabase = createClient()
+  const supabase = createBrowserClient()
   
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
@@ -23,7 +23,7 @@ export async function signIn(email: string, password: string) {
 }
 
 export async function signOut() {
-  const supabase = createClient()
+  const supabase = createBrowserClient()
   
   const { error } = await supabase.auth.signOut()
   
@@ -31,7 +31,7 @@ export async function signOut() {
 }
 
 export async function getCurrentUser() {
-  const supabase = createClient()
+  const supabase = createBrowserClient()
   
   const { data: { user }, error } = await supabase.auth.getUser()
   
