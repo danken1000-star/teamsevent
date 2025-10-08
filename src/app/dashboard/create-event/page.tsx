@@ -25,18 +25,27 @@ export default function CreateEventPage() {
     setError(null)
     
     try {
-      const { error: insertError } = await supabase
-        .from('events')
-        .insert([
-          {
-            title: formData.title,
-            budget: formData.budget,
-            participant_count: formData.participant_count,
-            event_date: formData.event_date || null,
-            status: 'planning'
-          }
-        ])
-        .select()
+      // User ID holen
+const { data: { user } } = await supabase.auth.getUser()
+
+if (!user) {
+  setError('Sie müssen eingeloggt sein')
+  return
+}
+
+const { error: insertError } = await supabase
+  .from('events')
+  .insert([
+    {
+      title: formData.title,
+      budget: formData.budget,
+      participant_count: formData.participant_count,
+      event_date: formData.event_date || null,
+      status: 'planning',
+      user_id: user.id  // <-- NEU!
+    }
+  ])
+  .select()
 
       if (insertError) throw insertError
 

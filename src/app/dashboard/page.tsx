@@ -1,19 +1,30 @@
 import { createClient } from '@/lib/supabase'
+import { redirect } from 'next/navigation'
 
 export default async function DashboardPage() {
   const supabase = createClient()
   
-  // Events aus der Datenbank holen
+  // User-Check
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  
+  if (userError || !user) {
+    redirect('/auth/login')
+  }
+  
+  // Events vom eingeloggten User holen
   const { data: events, error } = await supabase
     .from('events')
     .select('*')
+    .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 
   return (
     <div>
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="mt-2 text-gray-600">Verwalten Sie Ihre Mitarbeiter-Events</p>
+        <p className="mt-2 text-gray-600">
+          Willkommen zurück, {user.email}
+        </p>
       </div>
 
       {/* Event Liste */}
