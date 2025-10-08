@@ -25,6 +25,14 @@ export default async function DashboardPage() {
         <p className="mt-2 text-gray-600">
           Willkommen zurück, {user.email}
         </p>
+        <div className="mt-4">
+          <a
+            href="/locations"
+    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
+  >
+    🏢 15 Event-Locations entdecken
+  </a>
+</div>
       </div>
 
       {/* Event Liste */}
