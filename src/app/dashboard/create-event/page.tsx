@@ -25,7 +25,7 @@ export default function CreateEventPage() {
     setError(null)
     
     try {
-      const { data, error: insertError } = await supabase
+      const { error: insertError } = await supabase
         .from('events')
         .insert([
           {
@@ -47,8 +47,8 @@ export default function CreateEventPage() {
         router.push('/dashboard')
       }, 2000)
       
-    } catch (err: any) {
-      setError(err.message || 'Fehler beim Erstellen des Events')
+    } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'Fehler beim Erstellen des Events')
     } finally {
       setLoading(false)
     }
@@ -109,7 +109,7 @@ export default function CreateEventPage() {
               />
               <div className="flex justify-between text-xs text-gray-500 mt-1">
                 <span>CHF 500</span>
-                <span>CHF 10'000</span>
+                <span>CHF 10&apos;000</span>
               </div>
             </div>
 
