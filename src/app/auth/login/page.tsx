@@ -1,36 +1,23 @@
-'use client'
-
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { signIn } from '@/lib/auth'
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase'
 import Link from 'next/link'
 
 export default function LoginPage() {
-  const router = useRouter()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError(null)
-
-    try {
-      const { error: signInError } = await signIn(email, password)
-      
-      if (signInError) {
-        setError(signInError.message)
-        return
-      }
-
-      // Erfolgreich eingeloggt - zum Dashboard
-window.location.href = '/dashboard'
-    } catch (err) {
-      setError('Ein Fehler ist aufgetreten')
-    } finally {
-      setLoading(false)
+  async function login(formData: FormData) {
+    'use server'
+    
+    const email = formData.get('email') as string
+    const password = formData.get('password') as string
+    
+    const supabase = createClient()
+    
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+    
+    if (!error) {
+      redirect('/dashboard')
     }
   }
 
@@ -53,7 +40,7 @@ window.location.href = '/dashboard'
 
         {/* Login Form */}
         <div className="bg-white py-8 px-6 shadow rounded-lg">
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form action={login} className="space-y-6">
             {/* Email */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
@@ -65,8 +52,6 @@ window.location.href = '/dashboard'
                 type="email"
                 autoComplete="email"
                 required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
               />
             </div>
@@ -82,26 +67,16 @@ window.location.href = '/dashboard'
                 type="password"
                 autoComplete="current-password"
                 required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
               />
             </div>
 
-            {/* Error Message */}
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded text-sm">
-                {error}
-              </div>
-            )}
-
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={loading}
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
             >
-              {loading ? 'Wird angemeldet...' : 'Anmelden'}
+              Anmelden
             </button>
           </form>
 
