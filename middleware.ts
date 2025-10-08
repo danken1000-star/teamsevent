@@ -5,7 +5,7 @@ export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname
   
   // Public paths die immer erreichbar sind
-  const isPublicPath = path === '/' || path.startsWith('/auth/')
+  const isPublicPath = path === '/' || path.startsWith('/auth/login') || path.startsWith('/auth/register') || path.startsWith('/auth/callback')
   
   // Check ob Session Cookie existiert
   const token = request.cookies.get('sb-trsimtgvnueickftwxhl-auth-token')
