@@ -14,7 +14,14 @@ export default function LoginPage() {
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    }
   )
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -29,17 +36,23 @@ export default function LoginPage() {
       })
 
       if (error) {
-        setError(error.message)
+        console.error('Login error:', error)
+        setError(error.message || 'Login fehlgeschlagen')
         return
       }
 
-      if (data.user) {
+      if (data.user && data.session) {
         console.log('Login successful:', data.user.email)
+        // Warten bis Session gesetzt ist
+        await new Promise(resolve => setTimeout(resolve, 100))
         router.push('/dashboard')
         router.refresh()
+      } else {
+        setError('Keine Session erhalten')
       }
     } catch (err) {
-      setError('Ein Fehler ist aufgetreten')
+      console.error('Login exception:', err)
+      setError('Ein unerwarteter Fehler ist aufgetreten')
     } finally {
       setLoading(false)
     }

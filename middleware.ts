@@ -10,7 +10,9 @@ export async function middleware(request: NextRequest) {
   // Einfache Cookie-Prüfung für Supabase Auth Token
   const authToken = request.cookies.get('sb-access-token') || 
                    request.cookies.get('sb-refresh-token') ||
-                   request.cookies.get('supabase-auth-token')
+                   request.cookies.get('supabase-auth-token') ||
+                   request.cookies.get('supabase.auth.token') ||
+                   request.cookies.get('sb-' + process.env.NEXT_PUBLIC_SUPABASE_URL?.split('//')[1]?.split('.')[0] + '-auth-token')
   
   // Debug: Log cookie status
   console.log('Middleware - Path:', path, 'Auth token exists:', !!authToken, 'Is public:', isPublicPath)
