@@ -1,62 +1,38 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient } from '@supabase/supabase-js'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState('')
   const [error, setError] = useState('')
-  const router = useRouter()
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: true
-      }
-    }
-  )
-
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleMagicLink = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
+    setMessage('')
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const response = await fetch('/api/auth/magic-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
       })
 
-      if (error) {
-        console.error('Login error:', error)
-        setError(error.message || 'Login fehlgeschlagen')
+      const data = await response.json()
+
+      if (!response.ok) {
+        setError(data.error || 'Login fehlgeschlagen')
         return
       }
 
-      if (data.user && data.session) {
-        console.log('Login successful:', data.user.email, 'Session:', data.session)
-        
-        // Session explizit setzen
-        await supabase.auth.setSession(data.session)
-        
-        // Warten bis Session gesetzt ist
-        await new Promise(resolve => setTimeout(resolve, 500))
-        
-        // Hard refresh um sicherzustellen, dass alle Cookies gesetzt sind
-        window.location.href = '/dashboard'
-      } else {
-        setError('Keine Session erhalten')
-      }
+      setMessage('✅ Magic Link wurde gesendet! Bitte überprüfen Sie Ihre E-Mails.')
+      setEmail('')
     } catch (err) {
-      console.error('Login exception:', err)
+      console.error('Magic Link error:', err)
       setError('Ein unerwarteter Fehler ist aufgetreten')
     } finally {
       setLoading(false)
@@ -80,10 +56,16 @@ export default function LoginPage() {
         </div>
 
         <div className="bg-white py-8 px-6 shadow rounded-lg">
-          <form onSubmit={handleLogin} className="space-y-6">
+          <form onSubmit={handleMagicLink} className="space-y-6">
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
                 {error}
+              </div>
+            )}
+            
+            {message && (
+              <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
+                {message}
               </div>
             )}
             
@@ -101,22 +83,9 @@ export default function LoginPage() {
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
                 placeholder="ihre@email.com"
               />
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Passwort
-              </label>
-              <input
-                id="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
-                placeholder="Ihr Passwort"
-              />
+              <p className="mt-2 text-xs text-gray-500">
+                Wir senden Ihnen einen Login-Link per E-Mail
+              </p>
             </div>
 
             <button
@@ -124,7 +93,7 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 disabled:opacity-50"
             >
-              {loading ? 'Wird angemeldet...' : 'Anmelden'}
+              {loading ? 'Wird gesendet...' : '🔗 Magic Link senden'}
             </button>
           </form>
 
@@ -136,6 +105,12 @@ export default function LoginPage() {
               Noch kein Konto? Jetzt registrieren
             </Link>
           </div>
+        </div>
+
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <p className="text-sm text-blue-800">
+            <strong>💡 Tipp:</strong> Der Magic Link ist 1 Stunde gültig und kann nur einmal verwendet werden.
+          </p>
         </div>
       </div>
     </div>

@@ -1,20 +1,17 @@
 import { createClient } from '@/lib/supabase'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
 
   if (code) {
-    const supabase = await createClient()
-    const { error } = await supabase.auth.exchangeCodeForSession(code)
+    const supabase = createClient()
     
-    if (error) {
-      console.error('Auth callback error:', error)
-      return NextResponse.redirect(new URL('/auth/login?error=auth_callback_error', request.url))
-    }
+    // Exchange code for session
+    await supabase.auth.exchangeCodeForSession(code)
   }
 
-  // Redirect zum Dashboard nach erfolgreichem Login
+  // Redirect zu Dashboard nach erfolgreichem Login
   return NextResponse.redirect(new URL('/dashboard', request.url))
 }

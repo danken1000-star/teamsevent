@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { createMiddlewareClient } from '@/lib/supabase'
 
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname
@@ -12,24 +13,33 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
   
-  // Für protected routes: Prüfe alle möglichen Supabase Auth Cookies
-  const allCookies = request.cookies.getAll()
-  const hasAuthCookie = allCookies.some(cookie => 
-    cookie.name.includes('sb-') && cookie.name.includes('auth') ||
-    cookie.name.includes('supabase') ||
-    cookie.name.includes('access-token') ||
-    cookie.name.includes('refresh-token')
-  )
+  // Für protected routes: Echte Session-Validierung
+  const { supabase, response } = createMiddlewareClient(request)
   
-  console.log('Middleware - Path:', path, 'Has auth cookie:', hasAuthCookie, 'All cookies:', allCookies.map(c => c.name))
-  
-  // Wenn auf protected route ohne auth cookie -> redirect zu login
-  if (!hasAuthCookie) {
-    console.log('Redirecting unauthenticated user to login')
+  try {
+    // Versuche Session zu bekommen
+    const { data: { session }, error } = await supabase.auth.getSession()
+    
+    console.log('Middleware - Path:', path, 'Has session:', !!session, 'Error:', error?.message)
+    
+    // Wenn keine Session -> redirect zu login
+    if (!session) {
+      console.log('Redirecting unauthenticated user to login')
+      return NextResponse.redirect(new URL('/auth/login', request.url))
+    }
+    
+    // Wenn User eingeloggt ist und auf /auth/login geht -> redirect zu dashboard
+    if (path.startsWith('/auth/') && session) {
+      console.log('Redirecting authenticated user to dashboard')
+      return NextResponse.redirect(new URL('/dashboard', request.url))
+    }
+    
+    return response
+  } catch (error) {
+    console.error('Middleware error:', error)
+    // Bei Fehler: redirect zu login
     return NextResponse.redirect(new URL('/auth/login', request.url))
   }
-  
-  return NextResponse.next()
 }
 
 export const config = {

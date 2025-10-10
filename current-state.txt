@@ -1,0 +1,659 @@
+=== PACKAGE.JSON ===
+{
+  "name": "teamsevent",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.5.2",
+    "@supabase/supabase-js": "^2.45.6",
+    "@tailwindcss/postcss": "^4.1.14",
+    "next": "14.2.0",
+    "react": "18.3.0",
+    "react-dom": "18.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.0",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
+  }
+}
+
+
+=== NEXT.CONFIG ===
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  /* config options here */
+};
+
+module.exports = nextConfig;
+
+
+=== LANDING PAGE (src/app/page.tsx) ===
+import { createClient } from '@/lib/supabase'
+import Link from 'next/link'
+
+export default async function Home() {
+  const supabase = createClient()
+  
+  // Event Count
+  const { count: eventCount } = await supabase
+    .from('events')
+    .select('*', { count: 'exact', head: true })
+  
+  // Location Count
+  const { count: locationCount } = await supabase
+    .from('locations')
+    .select('*', { count: 'exact', head: true })
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
+      {/* Hero Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div className="text-center">
+          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+            <span className="text-red-600">Teams</span>Event.ch
+          </h1>
+          <p className="text-2xl md:text-3xl text-gray-700 mb-4 font-semibold">
+            Von 15 Stunden zu 30 Minuten
+          </p>
+          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+            Die erste Schweizer Software für mühelose Mitarbeiter-Events.
+            Automatisierte Event-Planung spart Ihnen CHF 3&apos;000 pro Event.
+          </p>
+
+          {/* Status Badge */}
+          <div className="inline-flex items-center gap-4 px-6 py-3 bg-green-50 border border-green-200 rounded-full mb-12">
+            <span className="text-green-700 font-medium">
+              ✅ {eventCount || 0} Events
+            </span>
+            <span className="text-gray-400">|</span>
+            <span className="text-green-700 font-medium">
+              🏢 {locationCount || 0} Locations
+            </span>
+            <span className="text-gray-400">|</span>
+            <span className="text-green-700 font-medium">
+              🚀 Live
+            </span>
+          </div>
+
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
+            <Link
+              href="/auth/login"
+              className="px-8 py-4 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors shadow-lg text-lg"
+            >
+              Jetzt starten
+            </Link>
+            <Link
+              href="/locations"
+              className="px-8 py-4 bg-white text-red-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg border-2 border-red-600 text-lg"
+            >
+              📍 {locationCount || 15} Event-Locations entdecken
+            </Link>
+          </div>
+
+          {/* Features Grid */}
+          <div className="grid md:grid-cols-3 gap-8 mt-20">
+            <div className="p-6 bg-white rounded-lg shadow-md">
+              <div className="text-4xl mb-4">⚡</div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                30 Minuten statt 15 Stunden
+              </h3>
+              <p className="text-gray-600">
+                Automatisierte Event-Planung spart massive Zeit bei der Organisation
+              </p>
+            </div>
+
+            <div className="p-6 bg-white rounded-lg shadow-md">
+              <div className="text-4xl mb-4">💰</div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                CHF 3&apos;000 Ersparnis
+              </h3>
+              <p className="text-gray-600">
+                ROI bereits beim ersten Event durch Zeitersparnis vs. CHF 150/Monat
+              </p>
+            </div>
+
+            <div className="p-6 bg-white rounded-lg shadow-md">
+              <div className="text-4xl mb-4">🇨🇭</div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                100% Schweizer Lösung
+              </h3>
+              <p className="text-gray-600">
+                Lokale Locations, Swiss Compliance, Mehrsprachig (DE/FR/IT/EN)
+              </p>
+            </div>
+          </div>
+
+          {/* How it works */}
+          <div className="mt-20">
+            <h2 className="text-3xl font-bold text-gray-900 mb-12">
+              So funktioniert&apos;s
+            </h2>
+            <div className="grid md:grid-cols-4 gap-6">
+              <div className="text-center">
+                <div className="w-12 h-12 bg-red-600 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
+                  1
+                </div>
+                <h4 className="font-semibold text-gray-900 mb-2">Budget & Teilnehmer</h4>
+                <p className="text-sm text-gray-600">Geben Sie Ihr Budget und die Anzahl Teilnehmer ein</p>
+              </div>
+              <div className="text-center">
+                <div className="w-12 h-12 bg-red-600 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
+                  2
+                </div>
+                <h4 className="font-semibold text-gray-900 mb-2">Automatisches Matching</h4>
+                <p className="text-sm text-gray-600">Wir finden die perfekte Location basierend auf Ihren Kriterien</p>
+              </div>
+              <div className="text-center">
+                <div className="w-12 h-12 bg-red-600 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
+                  3
+                </div>
+                <h4 className="font-semibold text-gray-900 mb-2">Team Abstimmung</h4>
+                <p className="text-sm text-gray-600">Ihr Team stimmt über Datum und Location ab</p>
+              </div>
+              <div className="text-center">
+                <div className="w-12 h-12 bg-red-600 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
+                  4
+                </div>
+                <h4 className="font-semibold text-gray-900 mb-2">Fertig!</h4>
+                <p className="text-sm text-gray-600">Event ist geplant und Ihr Team wird informiert</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+=== LOCATIONS PAGE ===
+import { createClient } from '@/lib/supabase'
+
+export default async function LocationsPage() {
+  const supabase = createClient()
+  
+  const { data: locations, error } = await supabase
+    .from('locations')
+    .select('*')
+    .order('city', { ascending: true })
+
+  if (error) {
+    return <div>Error loading locations: {error.message}</div>
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 py-12 px-4">
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-gray-900">
+            Event Locations
+          </h1>
+          <p className="mt-2 text-gray-600">
+            {locations?.length || 0} Schweizer Locations für Ihr Team-Event
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {locations?.map((location) => (
+            <div
+              key={location.id}
+              className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow"
+            >
+              <div className="p-6">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900">
+                      {location.name}
+                    </h3>
+                    <p className="text-sm text-gray-500">📍 {location.city}</p>
+                  </div>
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    {location.category}
+                  </span>
+                </div>
+
+                <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                  {location.description}
+                </p>
+
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-center text-sm text-gray-600">
+                    <span className="font-medium mr-2">👥 Kapazität:</span>
+                    {location.capacity_min} - {location.capacity_max} Personen
+                  </div>
+                  <div className="flex items-center text-sm text-gray-600">
+                    <span className="font-medium mr-2">💰 Preis:</span>
+                    CHF {location.price_per_person}/Person
+                  </div>
+                </div>
+
+                {location.amenities && location.amenities.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {location.amenities.slice(0, 3).map((amenity: string) => (
+                      <span
+                        key={amenity}
+                        className="inline-flex items-center px-2 py-1 rounded text-xs bg-gray-100 text-gray-700"
+                      >
+                        {amenity.replace(/_/g, ' ')}
+                      </span>
+                    ))}
+                    {location.amenities.length > 3 && (
+                      <span className="text-xs text-gray-500">
+                        +{location.amenities.length - 3} mehr
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                {location.website && (
+                  <a
+                    href={location.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center text-sm text-red-600 hover:text-red-700 font-medium"
+                  >
+                    Website besuchen →
+                  </a>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+=== DASHBOARD PAGE ===
+import { createClient } from '@/lib/supabase'
+import { redirect } from 'next/navigation'
+
+export default async function DashboardPage() {
+    const supabase = createClient()
+  
+  // User-Check
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  
+  if (userError || !user) {
+    redirect('/auth/login')
+  }
+  
+  // Events vom eingeloggten User holen
+  const { data: events, error } = await supabase
+    .from('events')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+
+  return (
+    <div>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+        <p className="mt-2 text-gray-600">
+          Willkommen zurück, {user.email}
+        </p>
+        <div className="mt-4">
+          <a
+            href="/locations"
+    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
+  >
+    🏢 15 Event-Locations entdecken
+  </a>
+</div>
+      </div>
+
+      {/* Event Liste */}
+      <div className="bg-white rounded-lg shadow">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <h2 className="text-lg font-semibold text-gray-900">Ihre Events</h2>
+        </div>
+        
+        <div className="p-6">
+          {error && (
+            <div className="text-red-600 mb-4">
+              Fehler beim Laden der Events: {error.message}
+            </div>
+          )}
+          
+          {!events || events.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500 mb-4">Noch keine Events erstellt</p>
+              
+              <a
+                href="/dashboard/create-event"
+                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700"
+              >
+                Erstes Event erstellen
+              </a>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {events.map((event) => (
+                <div
+                  key={event.id}
+                  className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        {event.title}
+                      </h3>
+                      <div className="mt-2 space-y-1 text-sm text-gray-600">
+                        <p>💰 Budget: CHF {event.budget?.toLocaleString('de-CH')}</p>
+                        <p>👥 Teilnehmer: {event.participant_count}</p>
+                        {event.event_date && (
+                          <p>📅 Datum: {new Date(event.event_date).toLocaleDateString('de-CH')}</p>
+                        )}
+                        <p>📊 Status: <span className="capitalize">{event.status || 'planning'}</span></p>
+                      </div>
+                    </div>
+                    <span className="text-xs text-gray-500">
+                      {new Date(event.created_at).toLocaleDateString('de-CH')}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+=== LOGIN PAGE ===
+'use client'
+
+import { useState } from 'react'
+import { createClient } from '@supabase/supabase-js'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+
+export default function LoginPage() {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const router = useRouter()
+
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    }
+  )
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError('')
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+
+      if (error) {
+        console.error('Login error:', error)
+        setError(error.message || 'Login fehlgeschlagen')
+        return
+      }
+
+      if (data.user && data.session) {
+        console.log('Login successful:', data.user.email, 'Session:', data.session)
+        
+        // Session explizit setzen
+        await supabase.auth.setSession(data.session)
+        
+        // Warten bis Session gesetzt ist
+        await new Promise(resolve => setTimeout(resolve, 500))
+        
+        // Hard refresh um sicherzustellen, dass alle Cookies gesetzt sind
+        window.location.href = '/dashboard'
+      } else {
+        setError('Keine Session erhalten')
+      }
+    } catch (err) {
+      console.error('Login exception:', err)
+      setError('Ein unerwarteter Fehler ist aufgetreten')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        <div className="text-center">
+          <Link href="/" className="inline-block">
+            <span className="text-4xl font-bold text-red-600">TeamsEvent</span>
+            <span className="text-4xl font-bold text-gray-900">.ch</span>
+          </Link>
+          <h2 className="mt-6 text-3xl font-bold text-gray-900">
+            Willkommen zurück
+          </h2>
+          <p className="mt-2 text-sm text-gray-600">
+            Melden Sie sich an, um Ihre Events zu verwalten
+          </p>
+        </div>
+
+        <div className="bg-white py-8 px-6 shadow rounded-lg">
+          <form onSubmit={handleLogin} className="space-y-6">
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                {error}
+              </div>
+            )}
+            
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                E-Mail Adresse
+              </label>
+              <input
+                id="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
+                placeholder="ihre@email.com"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                Passwort
+              </label>
+              <input
+                id="password"
+                type="password"
+                autoComplete="current-password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
+                placeholder="Ihr Passwort"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 disabled:opacity-50"
+            >
+              {loading ? 'Wird angemeldet...' : 'Anmelden'}
+            </button>
+          </form>
+
+          <div className="mt-6 text-center">
+            <Link 
+              href="/auth/register"
+              className="text-sm text-red-600 hover:text-red-500"
+            >
+              Noch kein Konto? Jetzt registrieren
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+=== SUPABASE CLIENT ===
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
+import { cookies } from 'next/headers'
+import { NextRequest, NextResponse } from 'next/server'
+
+export function createClient() {
+  const cookieStore = cookies()
+
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value
+        },
+        set(name: string, value: string, options: CookieOptions) {
+          try {
+            cookieStore.set({ name, value, ...options })
+          } catch (error) {
+            // Server Component
+          }
+        },
+        remove(name: string, options: CookieOptions) {
+          try {
+            cookieStore.set({ name, value: '', ...options })
+          } catch (error) {
+            // Server Component
+          }
+        },
+      },
+    }
+  )
+}
+
+// Middleware-spezifischer Client
+export function createMiddlewareClient(request: NextRequest) {
+  let response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  })
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return request.cookies.get(name)?.value
+        },
+        set(name: string, value: string, options: CookieOptions) {
+          request.cookies.set({
+            name,
+            value,
+            ...options,
+          })
+          response = NextResponse.next({
+            request: {
+              headers: request.headers,
+            },
+          })
+          response.cookies.set({
+            name,
+            value,
+            ...options,
+          })
+        },
+        remove(name: string, options: CookieOptions) {
+          request.cookies.set({
+            name,
+            value: '',
+            ...options,
+          })
+          response = NextResponse.next({
+            request: {
+              headers: request.headers,
+            },
+          })
+          response.cookies.set({
+            name,
+            value: '',
+            ...options,
+          })
+        },
+      },
+    }
+  )
+
+  return { supabase, response }
+}
+
+=== MIDDLEWARE ===
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+
+export async function middleware(request: NextRequest) {
+  const path = request.nextUrl.pathname
+  
+  // Public paths die immer erreichbar sind
+  const isPublicPath = path === '/' || path === '/locations' || path.startsWith('/auth/')
+  
+  // Wenn es eine öffentliche Route ist, einfach durchlassen
+  if (isPublicPath) {
+    return NextResponse.next()
+  }
+  
+  // Für protected routes: Prüfe alle möglichen Supabase Auth Cookies
+  const allCookies = request.cookies.getAll()
+  const hasAuthCookie = allCookies.some(cookie => 
+    cookie.name.includes('sb-') && cookie.name.includes('auth') ||
+    cookie.name.includes('supabase') ||
+    cookie.name.includes('access-token') ||
+    cookie.name.includes('refresh-token')
+  )
+  
+  console.log('Middleware - Path:', path, 'Has auth cookie:', hasAuthCookie, 'All cookies:', allCookies.map(c => c.name))
+  
+  // Wenn auf protected route ohne auth cookie -> redirect zu login
+  if (!hasAuthCookie) {
+    console.log('Redirecting unauthenticated user to login')
+    return NextResponse.redirect(new URL('/auth/login', request.url))
+  }
+  
+  return NextResponse.next()
+}
+
+export const config = {
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+  ]
+}
