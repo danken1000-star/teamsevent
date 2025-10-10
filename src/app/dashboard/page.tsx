@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase'
 import { redirect } from 'next/navigation'
 
 export default async function DashboardPage() {
-    const supabase = createClient()
+  const supabase = createClient()
   
   // User-Check
   const { data: { user }, error: userError } = await supabase.auth.getUser()
@@ -28,11 +28,11 @@ export default async function DashboardPage() {
         <div className="mt-4">
           <a
             href="/locations"
-    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
-  >
-    🏢 15 Event-Locations entdecken
-  </a>
-</div>
+            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
+          >
+            🏢 15 Event-Locations entdecken
+          </a>
+        </div>
       </div>
 
       {/* Event Liste */}
