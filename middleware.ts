@@ -7,17 +7,18 @@ export async function middleware(request: NextRequest) {
   // Public paths die immer erreichbar sind
   const isPublicPath = path === '/' || path === '/locations' || path.startsWith('/auth/')
   
-  // Check ob Session Cookie existiert
-  const token = request.cookies.get('sb-trsimtgvnueickftwxhl-auth-token')
+  // Einfache Cookie-Prüfung für Supabase Auth Token
+  const authToken = request.cookies.get('sb-access-token') || 
+                   request.cookies.get('sb-refresh-token') ||
+                   request.cookies.get('supabase-auth-token')
   
-  // Wenn auf protected route ohne token -> redirect zu login
-  if (!isPublicPath && !token) {
+  // Debug: Log cookie status
+  console.log('Middleware - Path:', path, 'Auth token exists:', !!authToken, 'Is public:', isPublicPath)
+  
+  // Wenn auf protected route ohne auth token -> redirect zu login
+  if (!isPublicPath && !authToken) {
+    console.log('Redirecting unauthenticated user to login')
     return NextResponse.redirect(new URL('/auth/login', request.url))
-  }
-  
-  // Wenn auf login/register MIT token -> redirect zu dashboard
-  if (path.startsWith('/auth/') && token) {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
   }
   
   return NextResponse.next()
