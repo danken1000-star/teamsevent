@@ -42,11 +42,16 @@ export default function LoginPage() {
       }
 
       if (data.user && data.session) {
-        console.log('Login successful:', data.user.email)
+        console.log('Login successful:', data.user.email, 'Session:', data.session)
+        
+        // Session explizit setzen
+        await supabase.auth.setSession(data.session)
+        
         // Warten bis Session gesetzt ist
-        await new Promise(resolve => setTimeout(resolve, 100))
-        router.push('/dashboard')
-        router.refresh()
+        await new Promise(resolve => setTimeout(resolve, 500))
+        
+        // Hard refresh um sicherzustellen, dass alle Cookies gesetzt sind
+        window.location.href = '/dashboard'
       } else {
         setError('Keine Session erhalten')
       }

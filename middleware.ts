@@ -7,18 +7,24 @@ export async function middleware(request: NextRequest) {
   // Public paths die immer erreichbar sind
   const isPublicPath = path === '/' || path === '/locations' || path.startsWith('/auth/')
   
-  // Einfache Cookie-Prüfung für Supabase Auth Token
-  const authToken = request.cookies.get('sb-access-token') || 
-                   request.cookies.get('sb-refresh-token') ||
-                   request.cookies.get('supabase-auth-token') ||
-                   request.cookies.get('supabase.auth.token') ||
-                   request.cookies.get('sb-' + process.env.NEXT_PUBLIC_SUPABASE_URL?.split('//')[1]?.split('.')[0] + '-auth-token')
+  // Wenn es eine öffentliche Route ist, einfach durchlassen
+  if (isPublicPath) {
+    return NextResponse.next()
+  }
   
-  // Debug: Log cookie status
-  console.log('Middleware - Path:', path, 'Auth token exists:', !!authToken, 'Is public:', isPublicPath)
+  // Für protected routes: Prüfe alle möglichen Supabase Auth Cookies
+  const allCookies = request.cookies.getAll()
+  const hasAuthCookie = allCookies.some(cookie => 
+    cookie.name.includes('sb-') && cookie.name.includes('auth') ||
+    cookie.name.includes('supabase') ||
+    cookie.name.includes('access-token') ||
+    cookie.name.includes('refresh-token')
+  )
   
-  // Wenn auf protected route ohne auth token -> redirect zu login
-  if (!isPublicPath && !authToken) {
+  console.log('Middleware - Path:', path, 'Has auth cookie:', hasAuthCookie, 'All cookies:', allCookies.map(c => c.name))
+  
+  // Wenn auf protected route ohne auth cookie -> redirect zu login
+  if (!hasAuthCookie) {
     console.log('Redirecting unauthenticated user to login')
     return NextResponse.redirect(new URL('/auth/login', request.url))
   }
@@ -27,5 +33,14 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)']
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+  ]
 }
