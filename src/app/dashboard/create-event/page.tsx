@@ -1,12 +1,15 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
 
 export default function CreateEventPage() {
   const router = useRouter()
-  const supabase = createClient()
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
   
   const [formData, setFormData] = useState({
     title: '',
@@ -26,8 +29,7 @@ export default function CreateEventPage() {
     
     try {
       // User ID holen
-const supabase = createClient()
-const { data: { user } } = await supabase.auth.getUser()
+      const { data: { user } } = await supabase.auth.getUser()
 
 if (!user) {
   setError('Sie müssen eingeloggt sein')
