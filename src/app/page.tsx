@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase'
 import Link from 'next/link'
 
 export default async function Home() {
-  const supabase = await createClient()
+  const supabase = createClient()
   
   // Event Count
   const { count: eventCount } = await supabase

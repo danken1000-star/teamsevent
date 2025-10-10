@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase'
 
 export default async function LocationsPage() {
-  const supabase = await createClient()
+  const supabase = createClient()
   
   const { data: locations, error } = await supabase
     .from('locations')

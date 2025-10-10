@@ -6,7 +6,7 @@ export default function LoginPage() {
     'use server'
     
     const email = formData.get('email') as string
-    const supabase = await createClient()
+    const supabase = createClient()
     
     const { error } = await supabase.auth.signInWithOtp({
       email,
