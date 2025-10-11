@@ -87,9 +87,10 @@ export default async function DashboardPage() {
           ) : (
             <div className="space-y-4">
               {events.map((event) => (
-                <div
+                <a
                   key={event.id}
-                  className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                  href={`/dashboard/events/${event.id}`}
+                  className="block border border-gray-200 rounded-lg p-4 hover:shadow-md hover:border-red-300 transition-all cursor-pointer"
                 >
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
@@ -133,7 +134,7 @@ export default async function DashboardPage() {
                       <DeleteEventButton eventId={event.id} eventTitle={event.title} />
                     </div>
                   </div>
-                </div>
+                </a>
               ))}
             </div>
           )}
