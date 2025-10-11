@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase'
+import { sendVotingInvitation } from '@/lib/email'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(
@@ -27,10 +28,10 @@ export async function POST(
       )
     }
 
-    // Verify event ownership
+    // Get event details for email
     const { data: event, error: eventError } = await supabase
       .from('events')
-      .select('id')
+      .select('id, title, user_id')
       .eq('id', params.id)
       .eq('user_id', user.id)
       .single()
@@ -58,7 +59,7 @@ export async function POST(
     }
 
     // Add team member
-    const { error: insertError } = await supabase
+    const { data: newMember, error: insertError } = await supabase
       .from('team_members')
       .insert([
         {
@@ -67,8 +68,10 @@ export async function POST(
           name: name || null,
         }
       ])
+      .select()
+      .single()
 
-    if (insertError) {
+    if (insertError || !newMember) {
       console.error('Insert error:', insertError)
       return NextResponse.json(
         { error: 'Fehler beim Einladen' },
@@ -76,9 +79,27 @@ export async function POST(
       )
     }
 
-    // TODO: Send email invitation (für später mit Email Service)
-    // Für jetzt: Team Member ist eingeladen, Email wird später implementiert
+    // Send email invitation
+    console.log('Sending invitation email to:', email)
+    const emailResult = await sendVotingInvitation({
+      email,
+      name: name || undefined,
+      eventId: params.id,
+      memberId: newMember.id,
+      eventTitle: event.title,
+    })
 
+    if (!emailResult.success) {
+      console.error('Email sending failed:', emailResult.error)
+      // Note: We still return success because the member was added to DB
+      // Email failure shouldn't prevent the invitation
+      return NextResponse.json({ 
+        success: true,
+        warning: 'Mitglied eingeladen, aber E-Mail konnte nicht versendet werden'
+      })
+    }
+
+    console.log('Invitation successful - Member added and email sent')
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Invite exception:', error)
