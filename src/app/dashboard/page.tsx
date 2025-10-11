@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase'
 import { redirect } from 'next/navigation'
+import LogoutButton from './logoutButton'
 
 export default async function DashboardPage() {
   const supabase = createClient()
@@ -20,19 +21,37 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="mt-2 text-gray-600">
-          Willkommen zurück, {user.email}
-        </p>
-        <div className="mt-4">
-          <a
-            href="/locations"
-            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
-          >
-            🏢 15 Event-Locations entdecken
-          </a>
+      <div className="mb-8 flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+          <p className="mt-2 text-gray-600">
+            Willkommen zurück, {user.email}
+          </p>
         </div>
+        <LogoutButton />
+      </div>
+
+      <div className="flex gap-4 mb-8 flex-wrap">
+        <a
+          href="/locations"
+          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
+        >
+          🏢 15 Event-Locations entdecken
+        </a>
+        
+        <a
+          href="/dashboard/create-event"
+          className="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors text-sm font-medium"
+        >
+          ➕ Neues Event erstellen
+        </a>
+        
+        <a
+          href="/dashboard/match-locations"
+          className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm font-medium"
+        >
+          🎯 Location Matching testen
+        </a>
       </div>
 
       {/* Event Liste */}
