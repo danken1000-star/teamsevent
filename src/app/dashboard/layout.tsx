@@ -7,7 +7,7 @@ async function LogoutButton() {
     'use server'
     const supabase = createClient()
     await supabase.auth.signOut()
-    redirect('/auth/login')
+    redirect('/')
   }
 
   return (
@@ -16,7 +16,7 @@ async function LogoutButton() {
         type="submit"
         className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100"
       >
-        Abmelden
+        🚪 Abmelden
       </button>
     </form>
   )
@@ -27,7 +27,7 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-    const supabase = await createClient()
+  const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
@@ -53,13 +53,19 @@ export default async function DashboardLayout({
                   href="/dashboard" 
                   className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100"
                 >
-                  Übersicht
+                  📊 Übersicht
+                </Link>
+                <Link 
+                  href="/locations" 
+                  className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+                >
+                  🏢 Locations
                 </Link>
                 <Link 
                   href="/dashboard/create-event" 
                   className="px-3 py-2 rounded-md text-sm font-medium bg-red-600 text-white hover:bg-red-700"
                 >
-                  + Neues Event
+                  ➕ Neues Event
                 </Link>
               </div>
             </div>
