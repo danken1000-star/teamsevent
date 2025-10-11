@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase'
 import { redirect } from 'next/navigation'
+import DeleteEventButton from './DeleteEventButton'
 
 export default async function DashboardPage() {
   const supabase = createClient()
@@ -82,7 +83,7 @@ export default async function DashboardPage() {
                   className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
                 >
                   <div className="flex justify-between items-start">
-                    <div>
+                    <div className="flex-1">
                       <h3 className="text-lg font-semibold text-gray-900">
                         {event.title}
                       </h3>
@@ -95,9 +96,13 @@ export default async function DashboardPage() {
                         <p>📊 Status: <span className="capitalize">{event.status || 'planning'}</span></p>
                       </div>
                     </div>
-                    <span className="text-xs text-gray-500">
-                      {new Date(event.created_at).toLocaleDateString('de-CH')}
-                    </span>
+                    
+                    <div className="flex flex-col items-end gap-2 ml-4">
+                      <span className="text-xs text-gray-500">
+                        {new Date(event.created_at).toLocaleDateString('de-CH')}
+                      </span>
+                      <DeleteEventButton eventId={event.id} eventTitle={event.title} />
+                    </div>
                   </div>
                 </div>
               ))}
