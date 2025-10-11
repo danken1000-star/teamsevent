@@ -76,6 +76,9 @@ export async function POST(
       )
     }
 
+    // TODO: Send email invitation (für später mit Email Service)
+    // Für jetzt: Team Member ist eingeladen, Email wird später implementiert
+
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Invite exception:', error)

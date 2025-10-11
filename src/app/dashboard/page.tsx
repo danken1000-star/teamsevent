@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase'
 import { redirect } from 'next/navigation'
 import DeleteEventButton from './DeleteEventButton'
+import EditEventButton from './EditEventButton'
 
 export default async function DashboardPage() {
   const supabase = createClient()
@@ -131,7 +132,10 @@ export default async function DashboardPage() {
                       <span className="text-xs text-gray-500">
                         {new Date(event.created_at).toLocaleDateString('de-CH')}
                       </span>
-                      <DeleteEventButton eventId={event.id} eventTitle={event.title} />
+                      <div className="flex gap-2">
+                        <EditEventButton eventId={event.id} />
+                        <DeleteEventButton eventId={event.id} eventTitle={event.title} />
+                      </div>
                     </div>
                   </div>
                 </a>
