@@ -9,51 +9,40 @@ export default async function PublicVotingPage({
 }) {
   const supabase = createClient()
   
-  // Event Details laden (public!)
-  const { data: event, error: eventError } = await supabase
-    .from('events')
-    .select(`
-      *,
-      locations (
-        id,
-        name,
-        city,
-        category,
-        price_per_person
-      )
-    `)
-    .eq('id', params.eventId)
-    .single()
-
-  if (eventError || !event) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Event nicht gefunden</h1>
-          <p className="text-gray-600">Dieser Event-Link ist ungültig.</p>
-        </div>
-      </div>
-    )
-  }
-
-  // Team Member laden
+  // Team Member laden MIT Event-Details über Relation
+  // Das umgeht RLS auf events Tabelle - team_members ist öffentlich lesbar!
   const { data: teamMember, error: memberError } = await supabase
     .from('team_members')
-    .select('*')
+    .select(`
+      *,
+      events (
+        *,
+        locations (
+          id,
+          name,
+          city,
+          category,
+          price_per_person
+        )
+      )
+    `)
     .eq('id', params.memberId)
     .eq('event_id', params.eventId)
     .single()
 
-  if (memberError || !teamMember) {
+  if (memberError || !teamMember || !teamMember.events) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Zugriff verweigert</h1>
-          <p className="text-gray-600">Sie sind nicht zu diesem Event eingeladen.</p>
+          <p className="text-gray-600">Sie sind nicht zu diesem Event eingeladen oder der Link ist ungültig.</p>
         </div>
       </div>
     )
   }
+
+  // Event aus der Relation extrahieren
+  const event = teamMember.events as any
 
   // Check if already voted
   const { data: existingVote } = await supabase
