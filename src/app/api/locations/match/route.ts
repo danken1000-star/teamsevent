@@ -14,12 +14,11 @@ export async function POST(request: NextRequest) {
 
     const supabase = createClient()
 
-    // Alle Locations holen die passen
+    // ALLE Locations holen (kein Kapazitäts-Filter!)
+    // Kapazität wird nur im Score berücksichtigt, nicht als harter Filter
     const { data: locations, error } = await supabase
       .from('locations')
       .select('*')
-      .lte('capacity_min', participantCount)
-      .gte('capacity_max', participantCount)
 
     if (error) {
       console.error('Location fetch error:', error)
@@ -38,16 +37,24 @@ export async function POST(request: NextRequest) {
         // Score berechnen (0-100)
         let score = 0
         
-        // 1. Preis-Match (40 Punkte)
+        // 1. Preis-Match (50 Punkte) - Wichtigster Faktor!
         const priceDiff = Math.abs(budgetPerPerson - location.price_per_person)
-        const priceScore = Math.max(0, 40 - (priceDiff / budgetPerPerson * 40))
+        const priceScore = Math.max(0, 50 - (priceDiff / budgetPerPerson * 50))
         score += priceScore
         
-        // 2. Kapazitäts-Match (30 Punkte)
-        const capacityMid = (location.capacity_min + location.capacity_max) / 2
-        const capacityDiff = Math.abs(capacityMid - participantCount)
-        const capacityScore = Math.max(0, 30 - (capacityDiff / capacityMid * 30))
-        score += capacityScore
+        // 2. Kapazitäts-Match (20 Punkte) - Flexibel!
+        // Kleine Teams können große Locations buchen - nur leichte Penalty
+        if (participantCount >= location.capacity_min && participantCount <= location.capacity_max) {
+          score += 20 // Perfekt innerhalb der Kapazität
+        } else if (participantCount < location.capacity_min) {
+          // Zu wenig Teilnehmer - nur kleine Penalty
+          const diff = location.capacity_min - participantCount
+          const penalty = Math.min(15, diff / location.capacity_min * 15)
+          score += (20 - penalty)
+        } else {
+          // Zu viele Teilnehmer - größere Penalty
+          score += 0
+        }
         
         // 3. Budget passt genau (30 Punkte)
         const budgetFits = totalCost <= budget
@@ -61,9 +68,9 @@ export async function POST(request: NextRequest) {
           fits_budget: budgetFits
         }
       })
-      .filter(loc => loc.match_score > 30) // Nur relevante Matches
+      .filter(loc => loc.match_score > 20) // Flexibler Threshold
       .sort((a, b) => b.match_score - a.match_score)
-      .slice(0, 5) // Top 5
+      .slice(0, 8) // Top 8 statt nur 5
 
     return NextResponse.json({
       matches,
