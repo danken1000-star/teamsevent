@@ -1,7 +1,11 @@
 import { createClient } from '@/lib/supabase'
+import Link from 'next/link'
 
 export default async function LocationsPage() {
   const supabase = createClient()
+  
+  // Check if user is logged in
+  const { data: { user } } = await supabase.auth.getUser()
   
   const { data: locations, error } = await supabase
     .from('locations')
@@ -13,8 +17,64 @@ export default async function LocationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gray-50">
+      {/* Navigation Header */}
+      <nav className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            <div className="flex items-center">
+              {/* Logo */}
+              <Link href="/" className="flex items-center">
+                <span className="text-2xl font-bold text-red-600">TeamsEvent</span>
+                <span className="text-2xl font-bold text-gray-900">.ch</span>
+              </Link>
+              
+              {/* Navigation Links */}
+              <div className="ml-10 flex items-center space-x-4">
+                <Link 
+                  href="/" 
+                  className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+                >
+                  🏠 Home
+                </Link>
+                {user && (
+                  <Link 
+                    href="/dashboard" 
+                    className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+                  >
+                    📊 Dashboard
+                  </Link>
+                )}
+              </div>
+            </div>
+
+            {/* Auth Buttons */}
+            <div className="flex items-center space-x-4">
+              {user ? (
+                <>
+                  <span className="text-sm text-gray-600">{user.email}</span>
+                  <Link
+                    href="/dashboard/create-event"
+                    className="px-4 py-2 rounded-md text-sm font-medium bg-red-600 text-white hover:bg-red-700"
+                  >
+                    ➕ Event erstellen
+                  </Link>
+                </>
+              ) : (
+                <Link
+                  href="/auth/login"
+                  className="px-4 py-2 rounded-md text-sm font-medium bg-red-600 text-white hover:bg-red-700"
+                >
+                  Jetzt starten
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* Page Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900">
             Event Locations
