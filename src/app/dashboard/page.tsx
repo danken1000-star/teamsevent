@@ -12,10 +12,19 @@ export default async function DashboardPage() {
     redirect('/auth/login')
   }
   
-  // Events vom eingeloggten User holen
+  // Events vom eingeloggten User holen MIT Location-Details
   const { data: events, error } = await supabase
     .from('events')
-    .select('*')
+    .select(`
+      *,
+      locations (
+        id,
+        name,
+        city,
+        category,
+        price_per_person
+      )
+    `)
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 
@@ -84,16 +93,36 @@ export default async function DashboardPage() {
                 >
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-900">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
                         {event.title}
                       </h3>
-                      <div className="mt-2 space-y-1 text-sm text-gray-600">
-                        <p>💰 Budget: CHF {event.budget?.toLocaleString('de-CH')}</p>
-                        <p>👥 Teilnehmer: {event.participant_count}</p>
-                        {event.event_date && (
-                          <p>📅 Datum: {new Date(event.event_date).toLocaleDateString('de-CH')}</p>
+                      
+                      <div className="grid md:grid-cols-2 gap-4 mb-3">
+                        <div className="space-y-1 text-sm text-gray-600">
+                          <p>💰 Budget: CHF {event.budget?.toLocaleString('de-CH')}</p>
+                          <p>👥 Teilnehmer: {event.participant_count}</p>
+                          {event.event_date && (
+                            <p>📅 Datum: {new Date(event.event_date).toLocaleDateString('de-CH')}</p>
+                          )}
+                          <p>📊 Status: <span className="capitalize">{event.status || 'planning'}</span></p>
+                        </div>
+                        
+                        {/* Location Details */}
+                        {event.locations && (
+                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                            <p className="text-xs font-medium text-blue-900 mb-1">📍 Location</p>
+                            <p className="font-semibold text-gray-900">{event.locations.name}</p>
+                            <p className="text-sm text-gray-600">{event.locations.city}</p>
+                            <div className="mt-2 text-xs text-gray-600">
+                              <span className="inline-flex items-center px-2 py-1 rounded bg-blue-100 text-blue-800">
+                                {event.locations.category}
+                              </span>
+                              <span className="ml-2">
+                                CHF {event.locations.price_per_person}/Person
+                              </span>
+                            </div>
+                          </div>
                         )}
-                        <p>📊 Status: <span className="capitalize">{event.status || 'planning'}</span></p>
                       </div>
                     </div>
                     

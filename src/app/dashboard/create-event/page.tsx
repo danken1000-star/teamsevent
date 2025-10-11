@@ -1,9 +1,9 @@
 import { createClient } from '@/lib/supabase'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
-import CreateEventForm from './CreateEventForm'
+import CreateEventWizard from './CreateEventWizard'
 
-async function createEvent(formData: FormData) {
+async function createEventWithLocation(formData: FormData) {
   'use server'
   
   const supabase = createClient()
@@ -15,7 +15,7 @@ async function createEvent(formData: FormData) {
     throw new Error('Nicht authentifiziert')
   }
   
-  // Event erstellen
+  // Event erstellen MIT Location
   const { error } = await supabase
     .from('events')
     .insert([
@@ -24,6 +24,7 @@ async function createEvent(formData: FormData) {
         budget: parseInt(formData.get('budget') as string),
         participant_count: parseInt(formData.get('participant_count') as string),
         event_date: formData.get('event_date') || null,
+        location_id: formData.get('location_id') || null,
         status: 'planning',
         user_id: user.id
       }
@@ -51,15 +52,15 @@ export default async function CreateEventPage() {
   }
 
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-4xl mx-auto">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Neues Event erstellen</h1>
         <p className="mt-2 text-gray-600">
-          Erstellen Sie ein neues Mitarbeiter-Event in wenigen Schritten
+          Wir finden die perfekte Location für Ihr Team-Event in 3 Schritten
         </p>
       </div>
 
-      <CreateEventForm createEvent={createEvent} />
+      <CreateEventWizard createEvent={createEventWithLocation} />
     </div>
   )
 }
