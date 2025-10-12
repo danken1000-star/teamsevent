@@ -1,168 +1,190 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase'
 
-type Location = {
-  id: string
-  name: string
-  city: string
-  category: string
-  price_per_person: number
-  capacity_min: number
-  capacity_max: number
-  match_score: number
-  total_cost: number
-  fits_budget: boolean
-}
-
-type EventData = {
-  title: string
-  budget: number
-  participant_count: number
-  event_date: string
-  selectedLocation: Location | null
-}
-
-type ConfirmationStepProps = {
-  eventData: EventData
-  createEvent: (formData: FormData) => Promise<void>
+interface ConfirmationStepProps {
+  eventData: {
+    title: string
+    budget: number
+    participant_count: number
+    event_date: string
+    location_id: string
+    event_type: string
+  }
+  selectedLocation: any
   onBack: () => void
 }
 
 export default function ConfirmationStep({
   eventData,
-  createEvent,
+  selectedLocation,
   onBack
 }: ConfirmationStepProps) {
+  const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSubmit = async () => {
     setLoading(true)
     setError(null)
 
     try {
-      const formData = new FormData()
-      formData.append('title', eventData.title)
-      formData.append('budget', eventData.budget.toString())
-      formData.append('participant_count', eventData.participant_count.toString())
-      formData.append('event_date', eventData.event_date)
-      if (eventData.selectedLocation) {
-        formData.append('location_id', eventData.selectedLocation.id)
+      const supabase = createClient()
+      
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser()
+      
+      if (userError || !user) {
+        throw new Error('Nicht eingeloggt')
       }
 
-      await createEvent(formData)
-    } catch (err) {
-      console.error('Create event error:', err)
-      setError(err instanceof Error ? err.message : 'Fehler beim Erstellen des Events')
+      // Create event with event_type
+      const { data, error: insertError } = await supabase
+        .from('events')
+        .insert({
+          user_id: user.id,
+          title: eventData.title,
+          budget: eventData.budget,
+          participant_count: eventData.participant_count,
+          event_date: eventData.event_date || null,
+          location_id: eventData.location_id || null,
+          event_type: eventData.event_type || null,  // ← NEU
+          status: 'planning'
+        })
+        .select()
+        .single()
+
+      if (insertError) throw insertError
+
+      // Redirect to dashboard
+      router.push('/dashboard')
+      router.refresh()
+    } catch (err: any) {
+      console.error('Error creating event:', err)
+      setError(err.message || 'Fehler beim Erstellen des Events')
+    } finally {
       setLoading(false)
     }
   }
 
+  const totalCost = selectedLocation 
+    ? selectedLocation.price_per_person * eventData.participant_count 
+    : 0
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold text-gray-900 mb-4">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">
           Bestätigung
         </h2>
-        <p className="text-sm text-gray-600 mb-6">
-          Überprüfen Sie Ihre Event-Details vor dem Erstellen
+        <p className="text-gray-600">
+          Prüfe deine Event-Details bevor du speicherst
         </p>
       </div>
 
-      {/* Event Summary */}
+      {/* Event Details */}
       <div className="bg-gray-50 rounded-lg p-6 space-y-4">
+        <h3 className="font-semibold text-lg text-gray-900">Event-Details</h3>
+        
         <div>
-          <h3 className="text-lg font-bold text-gray-900 mb-4">
-            {eventData.title}
-          </h3>
+          <span className="font-medium text-gray-700">Event Name:</span>
+          <p className="text-gray-900">{eventData.title}</p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-4">
+        {eventData.event_type && (
           <div>
-            <p className="text-sm text-gray-600">Budget</p>
-            <p className="text-lg font-semibold text-gray-900">
-              CHF {eventData.budget.toLocaleString('de-CH')}
-            </p>
+            <span className="font-medium text-gray-700">Event-Typ:</span>
+            <p className="text-gray-900">{eventData.event_type}</p>
           </div>
-          <div>
-            <p className="text-sm text-gray-600">Teilnehmer</p>
-            <p className="text-lg font-semibold text-gray-900">
-              {eventData.participant_count} Personen
-            </p>
-          </div>
-          {eventData.event_date && (
-            <div>
-              <p className="text-sm text-gray-600">Datum</p>
-              <p className="text-lg font-semibold text-gray-900">
-                {new Date(eventData.event_date).toLocaleDateString('de-CH')}
-              </p>
-            </div>
-          )}
+        )}
+
+        <div>
+          <span className="font-medium text-gray-700">Budget:</span>
+          <p className="text-gray-900">CHF {eventData.budget.toLocaleString()}</p>
         </div>
 
-        {/* Selected Location */}
-        {eventData.selectedLocation && (
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <p className="text-sm text-gray-600 mb-3">Gewählte Location</p>
-            <div className="bg-white rounded-lg p-4 border border-gray-200">
-              <div className="flex justify-between items-start mb-3">
-                <div>
-                  <h4 className="font-bold text-gray-900">
-                    {eventData.selectedLocation.name}
-                  </h4>
-                  <p className="text-sm text-gray-500">
-                    📍 {eventData.selectedLocation.city}
-                  </p>
-                </div>
-                <span className="text-lg font-bold text-red-600">
-                  {eventData.selectedLocation.match_score}% Match
-                </span>
-              </div>
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div>
-                  <span className="text-gray-600">Gesamtkosten:</span>
-                  <span className="font-semibold text-gray-900 ml-2">
-                    CHF {eventData.selectedLocation.total_cost.toLocaleString('de-CH')}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-gray-600">Pro Person:</span>
-                  <span className="font-semibold text-gray-900 ml-2">
-                    CHF {eventData.selectedLocation.price_per_person}
-                  </span>
-                </div>
-              </div>
-            </div>
+        <div>
+          <span className="font-medium text-gray-700">Teilnehmer:</span>
+          <p className="text-gray-900">{eventData.participant_count} Personen</p>
+        </div>
+
+        {eventData.event_date && (
+          <div>
+            <span className="font-medium text-gray-700">Datum:</span>
+            <p className="text-gray-900">
+              {new Date(eventData.event_date).toLocaleDateString('de-CH')}
+            </p>
           </div>
         )}
       </div>
 
-      {/* Error Message */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-          {error}
+      {/* Location Details */}
+      {selectedLocation && (
+        <div className="bg-blue-50 rounded-lg p-6 space-y-4">
+          <h3 className="font-semibold text-lg text-gray-900">Gewählte Location</h3>
+          
+          <div>
+            <span className="font-medium text-gray-700">Name:</span>
+            <p className="text-gray-900">{selectedLocation.name}</p>
+          </div>
+
+          <div>
+            <span className="font-medium text-gray-700">Stadt:</span>
+            <p className="text-gray-900">{selectedLocation.city}</p>
+          </div>
+
+          <div>
+            <span className="font-medium text-gray-700">Kategorie:</span>
+            <p className="text-gray-900">{selectedLocation.category}</p>
+          </div>
+
+          <div>
+            <span className="font-medium text-gray-700">Preis pro Person:</span>
+            <p className="text-gray-900">CHF {selectedLocation.price_per_person}</p>
+          </div>
+
+          <div className="pt-4 border-t border-blue-200">
+            <span className="font-medium text-gray-700">Gesamtkosten:</span>
+            <p className="text-2xl font-bold text-blue-600">
+              CHF {totalCost.toLocaleString()}
+            </p>
+            {totalCost <= eventData.budget ? (
+              <p className="text-green-600 text-sm mt-1">✓ Im Budget</p>
+            ) : (
+              <p className="text-orange-600 text-sm mt-1">
+                ⚠ CHF {(totalCost - eventData.budget).toLocaleString()} über Budget
+              </p>
+            )}
+          </div>
         </div>
       )}
 
-      {/* Action Buttons */}
-      <div className="flex gap-4 pt-4">
+      {/* Error Message */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-800">{error}</p>
+        </div>
+      )}
+
+      {/* Actions */}
+      <div className="flex gap-4">
         <button
-          type="button"
           onClick={onBack}
-          className="px-6 py-3 border border-gray-300 rounded-md font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+          disabled={loading}
+          className="flex-1 bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors disabled:opacity-50"
         >
           ← Zurück
         </button>
         <button
-          type="submit"
+          onClick={handleSubmit}
           disabled={loading}
-          className="flex-1 px-6 py-3 bg-red-600 text-white rounded-md font-semibold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50"
         >
-          {loading ? '✨ Event wird erstellt...' : '✅ Event jetzt erstellen'}
+          {loading ? 'Erstelle Event...' : 'Event jetzt erstellen ✓'}
         </button>
       </div>
-    </form>
+    </div>
   )
 }

@@ -5,108 +5,89 @@ import EventDetailsStep from './EventDetailsStep'
 import LocationSelectionStep from './LocationSelectionStep'
 import ConfirmationStep from './ConfirmationStep'
 
-type Location = {
-  id: string
-  name: string
-  city: string
-  category: string
-  price_per_person: number
-  capacity_min: number
-  capacity_max: number
-  match_score: number
-  total_cost: number
-  fits_budget: boolean
-}
-
-type EventData = {
-  title: string
-  budget: number
-  participant_count: number
-  event_date: string
-  selectedLocation: Location | null
-}
-
-type CreateEventWizardProps = {
-  createEvent: (formData: FormData) => Promise<void>
-}
-
-export default function CreateEventWizard({ createEvent }: CreateEventWizardProps) {
-  const [step, setStep] = useState(1)
-  const [eventData, setEventData] = useState<EventData>({
+export default function CreateEventWizard() {
+  const [currentStep, setCurrentStep] = useState(1)
+  const [eventData, setEventData] = useState({
     title: '',
-    budget: 2500,
+    budget: 5000,
     participant_count: 20,
     event_date: '',
-    selectedLocation: null
+    location_id: '',
+    event_type: '',  // ← NEU
   })
 
-  const handleEventDetails = (data: Omit<EventData, 'selectedLocation'>) => {
-    setEventData({ ...eventData, ...data })
-    setStep(2)
-  }
+  const [selectedLocation, setSelectedLocation] = useState<any>(null)
 
-  const handleLocationSelect = (location: Location) => {
-    setEventData({ ...eventData, selectedLocation: location })
-    setStep(3)
-  }
-
-  const handleBack = () => {
-    setStep(step - 1)
-  }
+  const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 3))
+  const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1))
 
   return (
-    <div className="bg-white rounded-lg shadow">
+    <div className="max-w-4xl mx-auto">
       {/* Progress Bar */}
-      <div className="px-6 py-4 border-b border-gray-200">
+      <div className="mb-8">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className={`flex items-center ${step >= 1 ? 'text-red-600' : 'text-gray-400'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step >= 1 ? 'bg-red-600 text-white' : 'bg-gray-200'}`}>
-                1
+          {[1, 2, 3].map((step) => (
+            <div key={step} className="flex items-center">
+              <div
+                className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
+                  currentStep >= step
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-200 text-gray-600'
+                }`}
+              >
+                {step}
               </div>
-              <span className="ml-2 text-sm font-medium hidden sm:block">Event-Details</span>
+              {step < 3 && (
+                <div
+                  className={`h-1 w-24 mx-2 ${
+                    currentStep > step ? 'bg-blue-600' : 'bg-gray-200'
+                  }`}
+                />
+              )}
             </div>
-            <div className="w-12 h-0.5 bg-gray-200" />
-            <div className={`flex items-center ${step >= 2 ? 'text-red-600' : 'text-gray-400'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step >= 2 ? 'bg-red-600 text-white' : 'bg-gray-200'}`}>
-                2
-              </div>
-              <span className="ml-2 text-sm font-medium hidden sm:block">Location</span>
-            </div>
-            <div className="w-12 h-0.5 bg-gray-200" />
-            <div className={`flex items-center ${step >= 3 ? 'text-red-600' : 'text-gray-400'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step >= 3 ? 'bg-red-600 text-white' : 'bg-gray-200'}`}>
-                3
-              </div>
-              <span className="ml-2 text-sm font-medium hidden sm:block">Bestätigung</span>
-            </div>
-          </div>
+          ))}
+        </div>
+        <div className="flex justify-between mt-2 text-sm">
+          <span className={currentStep >= 1 ? 'text-blue-600 font-medium' : 'text-gray-500'}>
+            Details
+          </span>
+          <span className={currentStep >= 2 ? 'text-blue-600 font-medium' : 'text-gray-500'}>
+            Location
+          </span>
+          <span className={currentStep >= 3 ? 'text-blue-600 font-medium' : 'text-gray-500'}>
+            Bestätigung
+          </span>
         </div>
       </div>
 
-      {/* Step Content */}
-      <div className="p-6">
-        {step === 1 && (
+      {/* Steps */}
+      <div className="bg-white rounded-lg shadow-lg p-8">
+        {currentStep === 1 && (
           <EventDetailsStep
-            initialData={eventData}
-            onNext={handleEventDetails}
+            eventData={eventData}
+            setEventData={setEventData}
+            onNext={nextStep}
           />
         )}
-        
-        {step === 2 && (
+
+        {currentStep === 2 && (
           <LocationSelectionStep
             budget={eventData.budget}
             participantCount={eventData.participant_count}
-            onSelect={handleLocationSelect}
-            onBack={handleBack}
+            onSelect={(location) => {
+              setSelectedLocation(location)
+              setEventData({ ...eventData, location_id: location.id })
+              nextStep()
+            }}
+            onBack={prevStep}
           />
         )}
-        
-        {step === 3 && (
+
+        {currentStep === 3 && (
           <ConfirmationStep
             eventData={eventData}
-            createEvent={createEvent}
-            onBack={handleBack}
+            selectedLocation={selectedLocation}
+            onBack={prevStep}
           />
         )}
       </div>

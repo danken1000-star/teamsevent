@@ -60,7 +60,7 @@ export default async function CreateEventPage() {
         </p>
       </div>
 
-      <CreateEventWizard createEvent={createEventWithLocation} />
+      <CreateEventWizard />
     </div>
   )
 }
