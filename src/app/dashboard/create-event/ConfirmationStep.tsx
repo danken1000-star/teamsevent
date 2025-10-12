@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createBrowserSupabaseClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase-browser'
 
 interface ConfirmationStepProps {
   eventData: {
@@ -31,7 +31,7 @@ export default function ConfirmationStep({
     setError(null)
 
     try {
-        const supabase = createBrowserSupabaseClient()
+      const supabase = createClient()
       
       // Get current user
       const { data: { user }, error: userError } = await supabase.auth.getUser()
@@ -50,7 +50,7 @@ export default function ConfirmationStep({
           participant_count: eventData.participant_count,
           event_date: eventData.event_date || null,
           location_id: eventData.location_id || null,
-          event_type: eventData.event_type || null,  // ← NEU
+          event_type: eventData.event_type || null,
           status: 'planning'
         })
         .select()
