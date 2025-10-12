@@ -99,6 +99,15 @@ export default async function DashboardPage() {
                         {event.title}
                       </h3>
                       
+                      {/* Event-Typ Badge - NEU! */}
+                      {event.event_type && (
+                        <div className="mb-3">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+                            📋 {event.event_type}
+                          </span>
+                        </div>
+                      )}
+                      
                       <div className="grid md:grid-cols-2 gap-4 mb-3">
                         <div className="space-y-1 text-sm text-gray-600">
                           <p>💰 Budget: CHF {event.budget?.toLocaleString('de-CH')}</p>
