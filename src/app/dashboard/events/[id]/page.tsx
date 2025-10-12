@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import InviteTeamMembers from './InviteTeamMembers'
 import VotingResults from './VotingResults'
 import Link from 'next/link'
+import EventCreatedToast from './EventCreatedToast'
 
 export default async function EventDetailPage({
   params,
@@ -56,6 +57,9 @@ export default async function EventDetailPage({
 
   return (
     <div className="max-w-5xl mx-auto">
+      {/* Toast Component - NEU! */}
+      <EventCreatedToast />
+
       {/* Back Button */}
       <div className="mb-6">
         <Link 

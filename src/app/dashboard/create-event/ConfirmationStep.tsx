@@ -3,186 +3,218 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
+import type { EventFormData } from './types.js'
 
 interface ConfirmationStepProps {
-  eventData: {
-    title: string
-    budget: number
-    participant_count: number
-    event_date: string
-    location_id: string
-    event_type: string
-  }
-  selectedLocation: any
+  formData: EventFormData
   onBack: () => void
 }
 
-export default function ConfirmationStep({
-  eventData,
-  selectedLocation,
-  onBack
-}: ConfirmationStepProps) {
+export default function ConfirmationStep({ formData, onBack }: ConfirmationStepProps) {
   const router = useRouter()
-  const [loading, setLoading] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async () => {
-    setLoading(true)
-    setError(null)
-
     try {
+      setIsSubmitting(true)
+      setError(null)
+
       const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
       
-      // Get current user
-      const { data: { user }, error: userError } = await supabase.auth.getUser()
-      
-      if (userError || !user) {
-        throw new Error('Nicht eingeloggt')
+      if (!user) {
+        setError('Du musst angemeldet sein')
+        return
       }
 
-      // Create event with event_type
-      const { data, error: insertError } = await supabase
+      // Event erstellen
+      const { data: event, error: eventError } = await supabase
         .from('events')
         .insert({
-          user_id: user.id,
-          title: eventData.title,
-          budget: eventData.budget,
-          participant_count: eventData.participant_count,
-          event_date: eventData.event_date || null,
-          location_id: eventData.location_id || null,
-          event_type: eventData.event_type || null,
-          status: 'planning'
+          name: formData.eventName,
+          description: formData.description,
+          date: formData.eventDate,
+          start_time: formData.startTime,
+          end_time: formData.endTime,
+          budget: formData.totalBudget,
+          participant_count: formData.participantCount,
+          event_type: formData.eventType,
+          organizer_id: user.id,
         })
         .select()
         .single()
 
-      if (insertError) throw insertError
+      if (eventError) throw eventError
 
-      // Redirect to dashboard
-      router.push('/dashboard')
-      router.refresh()
-    } catch (err: any) {
+      // Locations hinzufügen
+      if (formData.selectedLocations.length > 0) {
+        const locationInserts = formData.selectedLocations.map((location) => ({
+          event_id: event.id,
+          name: location.name,
+          address: location.address,
+          price_per_person: location.pricePerPerson,
+          total_price: location.totalPrice,
+          capacity: location.capacity,
+          ranking: location.ranking,
+        }))
+
+        const { error: locationsError } = await supabase
+          .from('event_locations')
+          .insert(locationInserts)
+
+        if (locationsError) throw locationsError
+      }
+
+      // 🎉 SUCCESS - Redirect zum Event mit Toast!
+      router.push(`/dashboard/events/${event.id}?created=true`)
+      
+    } catch (err) {
       console.error('Error creating event:', err)
-      setError(err.message || 'Fehler beim Erstellen des Events')
+      setError(err instanceof Error ? err.message : 'Fehler beim Erstellen')
     } finally {
-      setLoading(false)
+      setIsSubmitting(false)
     }
   }
 
-  const totalCost = selectedLocation 
-    ? selectedLocation.price_per_person * eventData.participant_count 
-    : 0
+  const eventTypeBadge = formData.eventType ? (
+    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+      {formData.eventType === 'team_building' && '🤝 Team Building'}
+      {formData.eventType === 'celebration' && '🎉 Feier'}
+      {formData.eventType === 'workshop' && '📚 Workshop'}
+      {formData.eventType === 'sports' && '⚽ Sport'}
+      {formData.eventType === 'culture' && '🎭 Kultur'}
+      {formData.eventType === 'outdoor' && '🏕️ Outdoor'}
+      {formData.eventType === 'food_drink' && '🍽️ Essen & Trinken'}
+      {formData.eventType === 'other' && '📌 Sonstiges'}
+    </span>
+  ) : null
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          Bestätigung
-        </h2>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Event-Bestätigung</h2>
         <p className="text-gray-600">
-          Prüfe deine Event-Details bevor du speicherst
+          Überprüfe alle Details bevor du das Event erstellst.
         </p>
       </div>
 
-      {/* Event Details */}
-      <div className="bg-gray-50 rounded-lg p-6 space-y-4">
-        <h3 className="font-semibold text-lg text-gray-900">Event-Details</h3>
-        
-        <div>
-          <span className="font-medium text-gray-700">Event Name:</span>
-          <p className="text-gray-900">{eventData.title}</p>
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+          {error}
         </div>
+      )}
 
-        {eventData.event_type && (
-          <div>
-            <span className="font-medium text-gray-700">Event-Typ:</span>
-            <p className="text-gray-900">{eventData.event_type}</p>
+      <div className="bg-white rounded-lg shadow-sm border p-6 space-y-6">
+        {/* Event Details */}
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Event-Details</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm text-gray-600">Name</p>
+              <p className="font-medium text-gray-900">{formData.eventName}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-600">Typ</p>
+              <div>{eventTypeBadge}</div>
+            </div>
+            <div>
+              <p className="text-sm text-gray-600">Datum</p>
+              <p className="font-medium text-gray-900">
+                {new Date(formData.eventDate).toLocaleDateString('de-CH')}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-600">Zeit</p>
+              <p className="font-medium text-gray-900">
+                {formData.startTime} - {formData.endTime}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-600">Teilnehmer</p>
+              <p className="font-medium text-gray-900">{formData.participantCount} Personen</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-600">Budget</p>
+              <p className="font-medium text-gray-900">CHF {formData.totalBudget.toLocaleString()}</p>
+            </div>
           </div>
-        )}
-
-        <div>
-          <span className="font-medium text-gray-700">Budget:</span>
-          <p className="text-gray-900">CHF {eventData.budget.toLocaleString()}</p>
+          {formData.description && (
+            <div className="mt-4">
+              <p className="text-sm text-gray-600">Beschreibung</p>
+              <p className="text-gray-900 mt-1">{formData.description}</p>
+            </div>
+          )}
         </div>
 
-        <div>
-          <span className="font-medium text-gray-700">Teilnehmer:</span>
-          <p className="text-gray-900">{eventData.participant_count} Personen</p>
-        </div>
-
-        {eventData.event_date && (
+        {/* Selected Locations */}
+        {formData.selectedLocations.length > 0 && (
           <div>
-            <span className="font-medium text-gray-700">Datum:</span>
-            <p className="text-gray-900">
-              {new Date(eventData.event_date).toLocaleDateString('de-CH')}
-            </p>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Ausgewählte Locations ({formData.selectedLocations.length})
+            </h3>
+            <div className="space-y-3">
+              {formData.selectedLocations.map((location, index) => (
+                <div
+                  key={index}
+                  className="border rounded-lg p-4 bg-gray-50"
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h4 className="font-medium text-gray-900">{location.name}</h4>
+                      <p className="text-sm text-gray-600 mt-1">{location.address}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold text-gray-900">
+                        CHF {location.totalPrice.toLocaleString()}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        CHF {location.pricePerPerson} / Person
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
 
-      {/* Location Details */}
-      {selectedLocation && (
-        <div className="bg-blue-50 rounded-lg p-6 space-y-4">
-          <h3 className="font-semibold text-lg text-gray-900">Gewählte Location</h3>
-          
-          <div>
-            <span className="font-medium text-gray-700">Name:</span>
-            <p className="text-gray-900">{selectedLocation.name}</p>
-          </div>
-
-          <div>
-            <span className="font-medium text-gray-700">Stadt:</span>
-            <p className="text-gray-900">{selectedLocation.city}</p>
-          </div>
-
-          <div>
-            <span className="font-medium text-gray-700">Kategorie:</span>
-            <p className="text-gray-900">{selectedLocation.category}</p>
-          </div>
-
-          <div>
-            <span className="font-medium text-gray-700">Preis pro Person:</span>
-            <p className="text-gray-900">CHF {selectedLocation.price_per_person}</p>
-          </div>
-
-          <div className="pt-4 border-t border-blue-200">
-            <span className="font-medium text-gray-700">Gesamtkosten:</span>
-            <p className="text-2xl font-bold text-blue-600">
-              CHF {totalCost.toLocaleString()}
-            </p>
-            {totalCost <= eventData.budget ? (
-              <p className="text-green-600 text-sm mt-1">✓ Im Budget</p>
-            ) : (
-              <p className="text-orange-600 text-sm mt-1">
-                ⚠ CHF {(totalCost - eventData.budget).toLocaleString()} über Budget
-              </p>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Error Message */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-800">{error}</p>
-        </div>
-      )}
-
-      {/* Actions */}
+      {/* Action Buttons */}
       <div className="flex gap-4">
         <button
+          type="button"
           onClick={onBack}
-          disabled={loading}
-          className="flex-1 bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors disabled:opacity-50"
+          disabled={isSubmitting}
+          className="flex-1 bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-medium 
+                     hover:bg-gray-200 disabled:opacity-50 transition-colors"
         >
-          ← Zurück
+          Zurück
         </button>
         <button
+          type="button"
           onClick={handleSubmit}
-          disabled={loading}
-          className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50"
+          disabled={isSubmitting}
+          className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg font-medium 
+                     hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed
+                     transition-all duration-200 flex items-center justify-center gap-2"
         >
-          {loading ? 'Erstelle Event...' : 'Event jetzt erstellen ✓'}
+          {isSubmitting ? (
+            <>
+              <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" 
+                        stroke="currentColor" strokeWidth="4" fill="none" />
+                <path className="opacity-75" fill="currentColor" 
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+              Erstelle Event...
+            </>
+          ) : (
+            <>
+              Event erstellen
+              <span className="text-lg">🎉</span>
+            </>
+          )}
         </button>
       </div>
     </div>

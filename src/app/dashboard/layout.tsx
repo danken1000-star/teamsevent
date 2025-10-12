@@ -1,26 +1,7 @@
-import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
 import { redirect } from 'next/navigation'
-
-async function LogoutButton() {
-  async function handleLogout() {
-    'use server'
-    const supabase = createClient()
-    await supabase.auth.signOut()
-    redirect('/')
-  }
-
-  return (
-    <form action={handleLogout}>
-      <button
-        type="submit"
-        className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100"
-      >
-        🚪 Abmelden
-      </button>
-    </form>
-  )
-}
+import Link from 'next/link'
+import { Toaster } from 'sonner'
 
 export default async function DashboardLayout({
   children,
@@ -28,58 +9,62 @@ export default async function DashboardLayout({
   children: React.ReactNode
 }) {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect('/auth/login')
+    redirect('/login')
+  }
+
+  const handleSignOut = async () => {
+    'use server'
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    redirect('/login')
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navigation Header */}
-      <nav className="bg-white border-b border-gray-200">
+      <Toaster position="top-center" richColors />
+      
+      <nav className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex">
-              {/* Logo */}
-              <Link href="/" className="flex items-center">
-                <span className="text-2xl font-bold text-red-600">TeamsEvent</span>
-                <span className="text-2xl font-bold text-gray-900">.ch</span>
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center gap-8">
+              <Link href="/dashboard" className="text-xl font-bold text-blue-600">
+                TeamsEvent.ch
               </Link>
-              
-              {/* Navigation Links */}
-              <div className="ml-10 flex items-center space-x-4">
-                <Link 
-                  href="/dashboard" 
-                  className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+              <div className="hidden sm:flex gap-4">
+                <Link
+                  href="/dashboard"
+                  className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
                 >
-                  📊 Übersicht
+                  Dashboard
                 </Link>
-                <Link 
-                  href="/locations" 
-                  className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+                <Link
+                  href="/dashboard/create-event"
+                  className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
                 >
-                  🏢 Locations
-                </Link>
-                <Link 
-                  href="/dashboard/create-event" 
-                  className="px-3 py-2 rounded-md text-sm font-medium bg-red-600 text-white hover:bg-red-700"
-                >
-                  ➕ Neues Event
+                  Event erstellen
                 </Link>
               </div>
             </div>
-
-            {/* User Menu */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center gap-4">
               <span className="text-sm text-gray-600">{user.email}</span>
-              <LogoutButton />
+              <form action={handleSignOut}>
+                <button
+                  type="submit"
+                  className="text-sm text-gray-600 hover:text-gray-900"
+                >
+                  Abmelden
+                </button>
+              </form>
             </div>
           </div>
         </div>
       </nav>
 
-      {/* Page Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {children}
       </main>
