@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase'
 import { redirect } from 'next/navigation'
 import DeleteEventButton from './DeleteEventButton'
 import EditEventButton from './EditEventButton'
+import EmptyState from './components/EmptyState'
 
 export default async function DashboardPage() {
   const supabase = createClient()
@@ -75,17 +76,8 @@ export default async function DashboardPage() {
           )}
           
           {!events || events.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-500 mb-4">Noch keine Events erstellt</p>
-              
-              <a
-                href="/dashboard/create-event"
-                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700"
-              >
-                Erstes Event erstellen
-              </a>
-            </div>
-          ) : (
+  <EmptyState />
+) : (
             <div className="space-y-4">
               {events.map((event) => (
                 <a
