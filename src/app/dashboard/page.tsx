@@ -99,7 +99,7 @@ export default async function DashboardPage() {
                         {event.title}
                       </h3>
                       
-                      {/* Event-Typ Badge - NEU! */}
+                      {/* Event-Typ Badge */}
                       {event.event_type && (
                         <div className="mb-3">
                           <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
