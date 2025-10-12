@@ -25,20 +25,20 @@ export default function EventDetailsStep({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
           Event-Details
         </h2>
-        <p className="text-gray-600">
+        <p className="text-sm sm:text-base text-gray-600">
           Erzähl uns mehr über dein geplantes Event
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
         {/* Event Name */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
             Event Name *
           </label>
           <input
@@ -47,30 +47,30 @@ export default function EventDetailsStep({
             value={eventData.title}
             onChange={(e) => setEventData({ ...eventData, title: e.target.value })}
             placeholder="z.B. Team-Ausflug Sommer 2025"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
 
         {/* Event Type - NEU */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
             Was für ein Event? (Optional)
           </label>
           <input
             type="text"
             value={eventData.event_type || ''}
             onChange={(e) => setEventData({ ...eventData, event_type: e.target.value })}
-            placeholder="z.B. Essen mit Bowlen, Team-Workshop, Sommerfest, Weihnachtsfeier..."
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="z.B. Essen mit Bowlen, Team-Workshop, Sommerfest..."
+            className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-xs sm:text-sm text-gray-500">
             💡 Hilft uns die perfekte Location zu finden
           </p>
         </div>
 
         {/* Budget */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
             Budget (CHF) *
           </label>
           <input
@@ -82,7 +82,7 @@ export default function EventDetailsStep({
             onChange={(e) => setEventData({ ...eventData, budget: parseInt(e.target.value) })}
             className="w-full"
           />
-          <div className="flex justify-between text-sm text-gray-600 mt-2">
+          <div className="flex justify-between text-xs sm:text-sm text-gray-600 mt-2">
             <span>CHF 500</span>
             <span className="font-semibold text-blue-600">
               CHF {eventData.budget.toLocaleString()}
@@ -93,7 +93,7 @@ export default function EventDetailsStep({
 
         {/* Teilnehmer */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
             Anzahl Teilnehmer *
           </label>
           <input
@@ -103,25 +103,25 @@ export default function EventDetailsStep({
             max="100"
             value={eventData.participant_count}
             onChange={(e) => setEventData({ ...eventData, participant_count: parseInt(e.target.value) })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-xs sm:text-sm text-gray-500">
             Minimum 3 Personen
           </p>
         </div>
 
         {/* Event Datum */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
             Gewünschtes Datum (Optional)
           </label>
           <input
             type="date"
             value={eventData.event_date}
             onChange={(e) => setEventData({ ...eventData, event_date: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-xs sm:text-sm text-gray-500">
             Du kannst das Datum auch später mit deinem Team abstimmen
           </p>
         </div>
@@ -129,7 +129,7 @@ export default function EventDetailsStep({
         {/* Submit Button */}
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+          className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold text-sm sm:text-base hover:bg-blue-700 transition-colors"
         >
           Weiter zur Location-Auswahl →
         </button>

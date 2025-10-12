@@ -32,11 +32,11 @@ export default function DashboardStats() {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
         {[1, 2, 3].map(i => (
-          <div key={i} className="bg-white rounded-lg shadow p-6 animate-pulse">
-            <div className="h-4 bg-gray-200 rounded w-20 mb-2"></div>
-            <div className="h-8 bg-gray-200 rounded w-16"></div>
+          <div key={i} className="bg-white rounded-lg shadow p-4 sm:p-6 animate-pulse">
+            <div className="h-3 sm:h-4 bg-gray-200 rounded w-20 mb-2"></div>
+            <div className="h-6 sm:h-8 bg-gray-200 rounded w-16"></div>
           </div>
         ))}
       </div>
@@ -44,20 +44,20 @@ export default function DashboardStats() {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-      <div className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
-        <div className="text-gray-600 text-sm font-medium mb-1">📅 Events</div>
-        <div className="text-3xl font-bold text-gray-900">{stats.events}</div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
+      <div className="bg-white rounded-lg shadow p-4 sm:p-6 hover:shadow-lg transition-shadow">
+        <div className="text-gray-600 text-xs sm:text-sm font-medium mb-1">📅 Events</div>
+        <div className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.events}</div>
         <div className="text-xs text-gray-500 mt-1">Insgesamt erstellt</div>
       </div>
-      <div className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
-        <div className="text-gray-600 text-sm font-medium mb-1">👥 Teilnehmer</div>
-        <div className="text-3xl font-bold text-gray-900">{stats.participants}</div>
+      <div className="bg-white rounded-lg shadow p-4 sm:p-6 hover:shadow-lg transition-shadow">
+        <div className="text-gray-600 text-xs sm:text-sm font-medium mb-1">👥 Teilnehmer</div>
+        <div className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.participants}</div>
         <div className="text-xs text-gray-500 mt-1">Total über alle Events</div>
       </div>
-      <div className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
-        <div className="text-gray-600 text-sm font-medium mb-1">💰 Budget</div>
-        <div className="text-3xl font-bold text-gray-900">
+      <div className="bg-white rounded-lg shadow p-4 sm:p-6 hover:shadow-lg transition-shadow sm:col-span-2 lg:col-span-1">
+        <div className="text-gray-600 text-xs sm:text-sm font-medium mb-1">💰 Budget</div>
+        <div className="text-2xl sm:text-3xl font-bold text-gray-900">
           CHF {stats.budget >= 1000 
             ? `${(stats.budget / 1000).toFixed(1)}k` 
             : stats.budget.toLocaleString()}
