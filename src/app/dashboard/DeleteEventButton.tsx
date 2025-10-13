@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createBrowserClient } from '@/lib/supabase-browser'
+import { createClient as createBrowserClient } from '@/lib/supabase-browser'
 import { toast } from 'sonner'
 
 interface DeleteEventButtonProps {
