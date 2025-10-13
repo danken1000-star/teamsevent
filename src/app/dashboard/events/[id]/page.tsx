@@ -4,6 +4,7 @@ import InviteTeamMembers from './InviteTeamMembers'
 import VotingResults from './VotingResults'
 import Link from 'next/link'
 import EventCreatedToast from './EventCreatedToast'
+import CopyLinkButton from './CopyLinkButton'
 
 export default async function EventDetailPage({
   params,
@@ -85,6 +86,10 @@ export default async function EventDetailPage({
                 </span>
               </div>
             )}
+            {/* Copy Vote Link Button */}
+<div className="mb-3">
+  <CopyLinkButton eventId={params.id} />
+</div>
             
             <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600">
               <span>💰 CHF {event.budget?.toLocaleString('de-CH')}</span>
