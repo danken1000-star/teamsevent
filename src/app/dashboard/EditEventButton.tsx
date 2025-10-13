@@ -8,9 +8,9 @@ export default function EditEventButton({ eventId }: EditEventButtonProps) {
   return (
     <a
       href={`/dashboard/events/${eventId}`}
-      className="px-3 py-1 text-xs font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded hover:bg-blue-100 transition-colors"
+      className="px-4 py-2 text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 rounded-lg hover:border-black transition-colors text-center"
     >
-      📝 Details
+      ✏️ Bearbeiten
     </a>
   )
 }

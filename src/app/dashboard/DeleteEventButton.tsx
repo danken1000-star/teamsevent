@@ -30,7 +30,7 @@ export default function DeleteEventButton({ eventId, eventTitle }: DeleteEventBu
       return
     }
 
-    toast.success('Event gelöscht! ✓')
+    toast.success('Event gelöscht!')
     setShowModal(false)
     router.push('/dashboard')
     router.refresh()
@@ -40,34 +40,35 @@ export default function DeleteEventButton({ eventId, eventTitle }: DeleteEventBu
     <>
       <button
         onClick={() => setShowModal(true)}
-        className="text-red-600 hover:text-red-700 text-sm font-medium"
+        className="px-4 py-2 text-sm font-semibold text-white bg-red-600 border-2 border-red-600 rounded-lg hover:bg-red-700 hover:border-red-700 transition-colors"
       >
-        Löschen
+        🗑️ Löschen
       </button>
 
-      {/* Modal */}
+      {/* Confirmation Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-            <h3 className="text-lg font-bold text-gray-900 mb-2">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8">
+            <h3 className="text-2xl font-bold text-black mb-4">
               Event löschen?
             </h3>
-            <p className="text-sm text-gray-600 mb-4">
-              Möchtest du "<strong>{eventTitle}</strong>" wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.
+            <p className="text-gray-600 mb-6 leading-relaxed">
+              Möchten Sie "<strong className="text-black">{eventTitle}</strong>" wirklich löschen? 
+              Diese Aktion kann nicht rückgängig gemacht werden.
             </p>
             
-            <div className="flex gap-3 justify-end">
+            <div className="flex gap-3">
               <button
                 onClick={() => setShowModal(false)}
                 disabled={isDeleting}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 disabled:opacity-50"
+                className="flex-1 px-6 py-3 text-sm font-bold text-black bg-white border-2 border-gray-200 rounded-xl hover:border-black transition-colors disabled:opacity-50"
               >
                 Abbrechen
               </button>
               <button
                 onClick={handleDelete}
                 disabled={isDeleting}
-                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50"
+                className="flex-1 px-6 py-3 text-sm font-bold text-white bg-red-600 rounded-xl hover:bg-red-700 transition-colors disabled:opacity-50"
               >
                 {isDeleting ? 'Lösche...' : 'Ja, löschen'}
               </button>
