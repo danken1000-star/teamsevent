@@ -14,11 +14,18 @@ export async function POST(request: NextRequest) {
 
     const supabase = createClient()
 
+    // Use explicit URL (not dynamic origin) to avoid www/non-www issues
+    const redirectUrl = process.env.NEXT_PUBLIC_BASE_URL 
+      ? `${process.env.NEXT_PUBLIC_BASE_URL}/auth/callback`
+      : `${request.nextUrl.origin}/auth/callback`
+
+    console.log('Magic link redirect URL:', redirectUrl)
+
     // Magic Link senden
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${request.nextUrl.origin}/auth/callback`,
+        emailRedirectTo: redirectUrl,
       },
     })
 
