@@ -3,11 +3,16 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
+  
+  // Get all possible auth parameters
   const token_hash = requestUrl.searchParams.get('token_hash')
+  const token = requestUrl.searchParams.get('token') // PKCE token
   const type = requestUrl.searchParams.get('type')
   const code = requestUrl.searchParams.get('code')
   const error = requestUrl.searchParams.get('error')
   const errorDescription = requestUrl.searchParams.get('error_description')
+
+  console.log('Auth callback params:', { token_hash, token, type, code, error })
 
   // Handle errors from Supabase
   if (error) {
@@ -19,34 +24,36 @@ export async function GET(request: NextRequest) {
 
   const supabase = createClient()
 
-  // Handle Magic Link / Email Confirmation (token_hash)
-  if (token_hash && type) {
+  // Handle PKCE flow with token parameter (NEW Supabase format)
+  if (token && type) {
     try {
+      console.log('Attempting PKCE token verification...')
       const { error: verifyError } = await supabase.auth.verifyOtp({
-        token_hash,
+        token_hash: token,
         type: type as any,
       })
       
       if (verifyError) {
-        console.error('Token verification error:', verifyError)
+        console.error('PKCE verification error:', verifyError)
         const loginUrl = new URL('/auth/login', request.url)
         loginUrl.searchParams.set('error', 'Magic Link ungültig oder abgelaufen')
         return NextResponse.redirect(loginUrl)
       }
 
-      // Success - redirect to dashboard
+      console.log('PKCE verification successful!')
       return NextResponse.redirect(new URL('/dashboard', request.url))
     } catch (err) {
-      console.error('Verify exception:', err)
+      console.error('PKCE exception:', err)
       const loginUrl = new URL('/auth/login', request.url)
       loginUrl.searchParams.set('error', 'Ein Fehler ist aufgetreten')
       return NextResponse.redirect(loginUrl)
     }
   }
 
-  // Handle OAuth code exchange (for OAuth providers like Google, etc.)
+  // Handle code exchange (OAuth providers)
   if (code) {
     try {
+      console.log('Attempting code exchange...')
       const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
       
       if (exchangeError) {
@@ -56,7 +63,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.redirect(loginUrl)
       }
 
-      // Success - redirect to dashboard
+      console.log('Code exchange successful!')
       return NextResponse.redirect(new URL('/dashboard', request.url))
     } catch (err) {
       console.error('Callback exception:', err)
@@ -66,7 +73,34 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // No token or code provided
+  // Handle token_hash flow (older magic link format)
+  if (token_hash && type) {
+    try {
+      console.log('Attempting token_hash verification...')
+      const { error: verifyError } = await supabase.auth.verifyOtp({
+        token_hash,
+        type: type as any,
+      })
+      
+      if (verifyError) {
+        console.error('Token hash verification error:', verifyError)
+        const loginUrl = new URL('/auth/login', request.url)
+        loginUrl.searchParams.set('error', 'Magic Link ungültig oder abgelaufen')
+        return NextResponse.redirect(loginUrl)
+      }
+
+      console.log('Token hash verification successful!')
+      return NextResponse.redirect(new URL('/dashboard', request.url))
+    } catch (err) {
+      console.error('Verify exception:', err)
+      const loginUrl = new URL('/auth/login', request.url)
+      loginUrl.searchParams.set('error', 'Ein Fehler ist aufgetreten')
+      return NextResponse.redirect(loginUrl)
+    }
+  }
+
+  // No valid auth parameters
+  console.error('No valid auth parameters found')
   const loginUrl = new URL('/auth/login', request.url)
   loginUrl.searchParams.set('error', 'Kein gültiger Login-Link')
   return NextResponse.redirect(loginUrl)
