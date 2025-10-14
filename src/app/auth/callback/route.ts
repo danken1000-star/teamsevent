@@ -24,26 +24,30 @@ export async function GET(request: NextRequest) {
 
   const supabase = createClient()
 
-  // Handle PKCE flow with token parameter (NEW Supabase format)
+  // For PKCE flow, Supabase already verified the token
+  // We just need to check if session exists
   if (token && type) {
     try {
-      console.log('Attempting PKCE token verification...')
-      const { error: verifyError } = await supabase.auth.verifyOtp({
-        token_hash: token,
-        type: type as any,
-      })
+      console.log('PKCE flow detected, checking session...')
       
-      if (verifyError) {
-        console.error('PKCE verification error:', verifyError)
-        const loginUrl = new URL('/auth/login', request.url)
-        loginUrl.searchParams.set('error', 'Magic Link ungültig oder abgelaufen')
-        return NextResponse.redirect(loginUrl)
+      // Get current session
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+      
+      console.log('Session check result:', { hasSession: !!session, error: sessionError })
+      
+      if (session) {
+        console.log('Session exists! Redirecting to dashboard...')
+        return NextResponse.redirect(new URL('/dashboard', request.url))
       }
-
-      console.log('PKCE verification successful!')
-      return NextResponse.redirect(new URL('/dashboard', request.url))
+      
+      // If no session, redirect to login
+      console.error('No session found after PKCE redirect')
+      const loginUrl = new URL('/auth/login', request.url)
+      loginUrl.searchParams.set('error', 'Bitte versuchen Sie es erneut')
+      return NextResponse.redirect(loginUrl)
+      
     } catch (err) {
-      console.error('PKCE exception:', err)
+      console.error('PKCE session check exception:', err)
       const loginUrl = new URL('/auth/login', request.url)
       loginUrl.searchParams.set('error', 'Ein Fehler ist aufgetreten')
       return NextResponse.redirect(loginUrl)
