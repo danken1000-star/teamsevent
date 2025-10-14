@@ -15,13 +15,14 @@ export async function sendVotingInvitation({
   memberId: string;
   eventTitle: string;
 }) {
-  const votingUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://teamsevent.vercel.app'}/vote/${eventId}/${memberId}`;
+  // Simple anonymous voting URL (no memberId needed)
+  const votingUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://www.teamsevent.ch'}/vote/${eventId}`;
   
   const displayName = name || email.split('@')[0];
 
   try {
     const result = await resend.emails.send({
-      from: 'TeamsEvent <onboarding@resend.dev>',
+      from: 'TeamEvent <noreply@teamsevent.ch>', // ✅ Verifizierte Domain
       to: email,
       subject: `🗳️ Abstimmung für "${eventTitle}"`,
       html: getEmailTemplate(displayName, eventTitle, votingUrl),
@@ -54,7 +55,7 @@ function getEmailTemplate(name: string, eventTitle: string, votingUrl: string) {
           <tr>
             <td style="padding: 40px 40px 30px; text-align: center; background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); border-radius: 12px 12px 0 0;">
               <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">
-                🎉 TeamsEvent.ch
+                🎉 TeamEvent.ch
               </h1>
             </td>
           </tr>
@@ -97,8 +98,8 @@ function getEmailTemplate(name: string, eventTitle: string, votingUrl: string) {
           <tr>
             <td style="padding: 30px 40px; background-color: #f9fafb; border-radius: 0 0 12px 12px; border-top: 1px solid #e5e7eb;">
               <p style="margin: 0; color: #6b7280; font-size: 14px; text-align: center; line-height: 1.5;">
-                Diese Einladung wurde über <strong>TeamsEvent.ch</strong> versendet<br>
-                <a href="https://teamsevent.vercel.app" style="color: #dc2626; text-decoration: none;">teamsevent.vercel.app</a>
+                Diese Einladung wurde über <strong>TeamEvent.ch</strong> versendet<br>
+                <a href="https://www.teamsevent.ch" style="color: #dc2626; text-decoration: none;">www.teamsevent.ch</a>
               </p>
             </td>
           </tr>
