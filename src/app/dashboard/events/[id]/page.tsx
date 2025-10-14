@@ -7,6 +7,16 @@ import EventCreatedToast from './EventCreatedToast'
 import CopyLinkButton from './CopyLinkButton'
 import FinalizeEventButton from './FinalizeEventButton'
 
+const CATEGORY_LABELS: Record<string, string> = {
+  food: '🍔 Essen',
+  sport: '⚽ Sport',
+  games: '🎮 Games',
+  culture: '🎨 Kultur',
+  wellness: '💆 Wellness',
+  outdoor: '🏔️ Outdoor',
+  creative: '✨ Kreativ'
+}
+
 export default async function EventDetailPage({
   params,
 }: {
@@ -24,18 +34,7 @@ export default async function EventDetailPage({
   // Event Details laden
   const { data: event, error: eventError } = await supabase
     .from('events')
-    .select(`
-      *,
-      locations (
-        id,
-        name,
-        city,
-        category,
-        price_per_person,
-        capacity_min,
-        capacity_max
-      )
-    `)
+    .select('*')
     .eq('id', params.id)
     .eq('user_id', user.id)
     .single()
@@ -43,6 +42,24 @@ export default async function EventDetailPage({
   if (eventError || !event) {
     redirect('/dashboard')
   }
+
+  // Activities laden (via Junction Table)
+  const { data: eventActivities } = await supabase
+    .from('event_activities')
+    .select(`
+      *,
+      activities (
+        id,
+        name,
+        description,
+        category,
+        price_per_person,
+        duration_hours,
+        tags
+      )
+    `)
+    .eq('event_id', params.id)
+    .order('order_index', { ascending: true })
 
   // Team Members laden
   const { data: teamMembers } = await supabase
@@ -56,6 +73,17 @@ export default async function EventDetailPage({
     .from('votes')
     .select('*')
     .eq('event_id', params.id)
+
+  // Extract activities from junction
+  const activities = eventActivities?.map(ea => ea.activities).filter(Boolean) || []
+
+  // Calculate totals
+  const totalCost = activities.reduce(
+    (sum, activity) => sum + (activity.price_per_person * event.participant_count),
+    0
+  )
+  const costPerPerson = activities.length > 0 ? totalCost / event.participant_count : 0
+  const totalDuration = activities.reduce((sum, activity) => sum + activity.duration_hours, 0)
 
   return (
     <div className="max-w-5xl mx-auto">
@@ -119,30 +147,107 @@ export default async function EventDetailPage({
           </div>
         </div>
 
-        {/* Location Info */}
-        {event.locations && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 mt-4">
-            <p className="text-xs sm:text-sm font-medium text-blue-900 mb-2">📍 Gewählte Location</p>
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
-              <div className="flex-1 min-w-0">
-                <p className="font-bold text-sm sm:text-base text-gray-900 truncate">{event.locations.name}</p>
-                <p className="text-xs sm:text-sm text-gray-600">{event.locations.city}</p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  <span className="inline-flex items-center px-2 py-1 rounded text-xs bg-blue-100 text-blue-800">
-                    {event.locations.category}
-                  </span>
-                  <span className="text-xs text-gray-600">
-                    CHF {event.locations.price_per_person}/Person
-                  </span>
+        {/* Activities Section */}
+        {activities.length > 0 ? (
+          <div className="space-y-4">
+            {/* Budget Overview */}
+            <div className="bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-200 rounded-lg p-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div>
+                  <p className="text-xs text-gray-600 mb-1">Gesamtkosten</p>
+                  <p className="text-lg font-bold text-gray-900">
+                    CHF {totalCost.toLocaleString('de-CH')}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-600 mb-1">Pro Person</p>
+                  <p className="text-lg font-bold text-gray-900">
+                    CHF {Math.round(costPerPerson)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-600 mb-1">Gesamtdauer</p>
+                  <p className="text-lg font-bold text-gray-900">
+                    ~{totalDuration}h
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-600 mb-1">Budget-Status</p>
+                  {totalCost <= event.budget ? (
+                    <span className="inline-flex items-center text-sm font-bold text-green-600">
+                      ✓ Im Budget
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center text-sm font-bold text-red-600">
+                      ⚠️ Über Budget
+                    </span>
+                  )}
                 </div>
               </div>
-              <div className="text-left sm:text-right">
-                <p className="text-xs sm:text-sm text-gray-600">Gesamtkosten</p>
-                <p className="text-base sm:text-lg font-bold text-gray-900">
-                  CHF {(event.locations.price_per_person * event.participant_count).toLocaleString('de-CH')}
+              {totalCost <= event.budget && (
+                <p className="text-xs text-gray-600 mt-3">
+                  💰 Verfügbares Budget: CHF {(event.budget - totalCost).toLocaleString('de-CH')}
                 </p>
+              )}
+            </div>
+
+            {/* Activities List */}
+            <div>
+              <p className="text-xs sm:text-sm font-medium text-gray-700 mb-3">
+                🎯 Gewählte Activities ({activities.length})
+              </p>
+              <div className="space-y-3">
+                {activities.map((activity, index) => (
+                  <div 
+                    key={activity.id}
+                    className="bg-white border-2 border-gray-200 rounded-lg p-3 sm:p-4 hover:border-red-300 transition-colors"
+                  >
+                    <div className="flex justify-between items-start gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-base sm:text-lg font-bold text-gray-900">
+                            {index + 1}. {activity.name}
+                          </span>
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            {CATEGORY_LABELS[activity.category] || activity.category}
+                          </span>
+                        </div>
+                        <p className="text-xs sm:text-sm text-gray-600 mb-2">
+                          {activity.description}
+                        </p>
+                        <div className="flex flex-wrap gap-3 text-xs text-gray-500">
+                          <span>⏱️ {activity.duration_hours}h</span>
+                          <span>👥 {event.participant_count} Personen</span>
+                          {activity.tags && activity.tags.length > 0 && (
+                            <span className="flex gap-1">
+                              {activity.tags.slice(0, 3).map((tag: string) => (
+                                <span key={tag} className="px-2 py-0.5 bg-gray-100 rounded-full">
+                                  {tag}
+                                </span>
+                              ))}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-base sm:text-lg text-gray-900">
+                          CHF {(activity.price_per_person * event.participant_count).toLocaleString('de-CH')}
+                        </p>
+                        <p className="text-xs text-gray-600">
+                          CHF {activity.price_per_person} / Person
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
+          </div>
+        ) : (
+          <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4 text-center">
+            <p className="text-sm text-yellow-800">
+              ⚠️ Keine Activities ausgewählt für dieses Event
+            </p>
           </div>
         )}
       </div>
