@@ -5,6 +5,7 @@ import VotingResults from './VotingResults'
 import Link from 'next/link'
 import EventCreatedToast from './EventCreatedToast'
 import CopyLinkButton from './CopyLinkButton'
+import FinalizeEventButton from './FinalizeEventButton'
 
 export default async function EventDetailPage({
   params,
@@ -86,10 +87,11 @@ export default async function EventDetailPage({
                 </span>
               </div>
             )}
+            
             {/* Copy Vote Link Button */}
-<div className="mb-3">
-  <CopyLinkButton eventId={params.id} />
-</div>
+            <div className="mb-3">
+              <CopyLinkButton eventId={params.id} />
+            </div>
             
             <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600">
               <span>💰 CHF {event.budget?.toLocaleString('de-CH')}</span>
@@ -99,9 +101,22 @@ export default async function EventDetailPage({
               )}
             </div>
           </div>
-          <span className="px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium bg-blue-100 text-blue-800 capitalize self-start">
-            {event.status || 'planning'}
-          </span>
+          
+          {/* Status & Finalize Button */}
+          <div className="flex flex-col gap-2 self-start">
+            <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium capitalize text-center ${
+              event.status === 'finalized' 
+                ? 'bg-green-100 text-green-800' 
+                : 'bg-blue-100 text-blue-800'
+            }`}>
+              {event.status === 'finalized' ? '✓ Finalisiert' : event.status || 'planning'}
+            </span>
+            
+            <FinalizeEventButton 
+              eventId={params.id} 
+              currentStatus={event.status || 'planning'} 
+            />
+          </div>
         </div>
 
         {/* Location Info */}
