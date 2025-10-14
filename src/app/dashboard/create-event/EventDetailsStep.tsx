@@ -7,10 +7,22 @@ interface EventDetailsStepProps {
     participant_count: number
     event_date: string
     event_type: string
+    preferences: string[]
   }
   setEventData: (data: any) => void
   onNext: () => void
 }
+
+const PREFERENCE_OPTIONS = [
+  { id: 'active', label: '⚡ Aktiv', description: 'Sport & Bewegung' },
+  { id: 'food', label: '🍔 Essen', description: 'Kulinarik & Genuss' },
+  { id: 'indoor', label: '🏢 Indoor', description: 'Drinnen stattfindend' },
+  { id: 'outdoor', label: '🏔️ Outdoor', description: 'Draussen in der Natur' },
+  { id: 'relaxed', label: '😌 Entspannt', description: 'Gemütlich & locker' },
+  { id: 'team', label: '👥 Team', description: 'Team-Building Fokus' },
+  { id: 'culture', label: '🎨 Kultur', description: 'Kulturell & Bildung' },
+  { id: 'games', label: '🎮 Games', description: 'Spiele & Unterhaltung' },
+]
 
 export default function EventDetailsStep({ 
   eventData, 
@@ -21,6 +33,21 @@ export default function EventDetailsStep({
     e.preventDefault()
     if (eventData.title && eventData.budget && eventData.participant_count) {
       onNext()
+    }
+  }
+
+  const togglePreference = (prefId: string) => {
+    const currentPrefs = eventData.preferences || []
+    if (currentPrefs.includes(prefId)) {
+      setEventData({
+        ...eventData,
+        preferences: currentPrefs.filter(p => p !== prefId)
+      })
+    } else {
+      setEventData({
+        ...eventData,
+        preferences: [...currentPrefs, prefId]
+      })
     }
   }
 
@@ -47,31 +74,14 @@ export default function EventDetailsStep({
             value={eventData.title}
             onChange={(e) => setEventData({ ...eventData, title: e.target.value })}
             placeholder="z.B. Team-Ausflug Sommer 2025"
-            className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
           />
-        </div>
-
-        {/* Event Type - NEU */}
-        <div>
-          <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
-            Was für ein Event? (Optional)
-          </label>
-          <input
-            type="text"
-            value={eventData.event_type || ''}
-            onChange={(e) => setEventData({ ...eventData, event_type: e.target.value })}
-            placeholder="z.B. Essen mit Bowlen, Team-Workshop, Sommerfest..."
-            className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-          <p className="mt-1 text-xs sm:text-sm text-gray-500">
-            💡 Hilft uns die perfekte Location zu finden
-          </p>
         </div>
 
         {/* Budget */}
         <div>
           <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
-            Budget (CHF) *
+            Gesamtbudget (CHF) *
           </label>
           <input
             type="range"
@@ -80,15 +90,18 @@ export default function EventDetailsStep({
             step="100"
             value={eventData.budget}
             onChange={(e) => setEventData({ ...eventData, budget: parseInt(e.target.value) })}
-            className="w-full"
+            className="w-full accent-red-600"
           />
           <div className="flex justify-between text-xs sm:text-sm text-gray-600 mt-2">
             <span>CHF 500</span>
-            <span className="font-semibold text-blue-600">
-              CHF {eventData.budget.toLocaleString()}
+            <span className="font-bold text-lg text-red-600">
+              CHF {eventData.budget.toLocaleString('de-CH')}
             </span>
             <span>CHF 10'000</span>
           </div>
+          <p className="mt-2 text-xs text-gray-500">
+            💡 Pro Person: CHF {Math.round(eventData.budget / eventData.participant_count)}
+          </p>
         </div>
 
         {/* Teilnehmer */}
@@ -103,10 +116,45 @@ export default function EventDetailsStep({
             max="100"
             value={eventData.participant_count}
             onChange={(e) => setEventData({ ...eventData, participant_count: parseInt(e.target.value) })}
-            className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
           />
           <p className="mt-1 text-xs sm:text-sm text-gray-500">
             Minimum 3 Personen
+          </p>
+        </div>
+
+        {/* Präferenzen - NEU! */}
+        <div>
+          <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-3">
+            Was wünscht sich das Team? (Optional)
+          </label>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+            {PREFERENCE_OPTIONS.map((pref) => {
+              const isSelected = (eventData.preferences || []).includes(pref.id)
+              return (
+                <button
+                  key={pref.id}
+                  type="button"
+                  onClick={() => togglePreference(pref.id)}
+                  className={`p-3 rounded-lg border-2 transition-all text-left ${
+                    isSelected
+                      ? 'border-red-500 bg-red-50 shadow-sm'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <div className="text-lg sm:text-xl mb-1">{pref.label}</div>
+                  <div className="text-xs text-gray-600">{pref.description}</div>
+                  {isSelected && (
+                    <div className="mt-2 text-xs font-semibold text-red-600">
+                      ✓ Ausgewählt
+                    </div>
+                  )}
+                </button>
+              )
+            })}
+          </div>
+          <p className="mt-2 text-xs text-gray-500">
+            💡 Wir schlagen passende Activities basierend auf deinen Präferenzen vor
           </p>
         </div>
 
@@ -119,7 +167,7 @@ export default function EventDetailsStep({
             type="date"
             value={eventData.event_date}
             onChange={(e) => setEventData({ ...eventData, event_date: e.target.value })}
-            className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
           />
           <p className="mt-1 text-xs sm:text-sm text-gray-500">
             Du kannst das Datum auch später mit deinem Team abstimmen
@@ -129,9 +177,9 @@ export default function EventDetailsStep({
         {/* Submit Button */}
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold text-sm sm:text-base hover:bg-blue-700 transition-colors"
+          className="w-full bg-red-600 text-white px-6 py-3 rounded-lg font-semibold text-sm sm:text-base hover:bg-red-700 transition-colors shadow-md"
         >
-          Weiter zur Location-Auswahl →
+          Weiter zu Activities auswählen →
         </button>
       </form>
     </div>

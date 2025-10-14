@@ -2,8 +2,21 @@
 
 import { useState } from 'react'
 import EventDetailsStep from './EventDetailsStep'
-import LocationSelectionStep from './LocationSelectionStep'
+import ActivitySelectionStep from './ActivitySelectionStep'
 import ConfirmationStep from './ConfirmationStep'
+
+type Activity = {
+  id: string
+  name: string
+  description: string
+  category: string
+  price_per_person: number
+  min_persons: number
+  max_persons: number
+  duration_hours: number
+  tags: string[]
+  popular: boolean
+}
 
 export default function CreateEventPage() {
   const [currentStep, setCurrentStep] = useState(1)
@@ -13,9 +26,9 @@ export default function CreateEventPage() {
     participant_count: 10,
     event_date: '',
     event_type: '',
-    location_id: ''
+    preferences: [] as string[]
   })
-  const [selectedLocation, setSelectedLocation] = useState<any>(null)
+  const [selectedActivities, setSelectedActivities] = useState<Activity[]>([])
 
   const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 3))
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1))
@@ -29,23 +42,23 @@ export default function CreateEventPage() {
             <div key={step} className="flex items-center flex-1">
               <div className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full text-xs sm:text-sm font-semibold transition-colors ${
                 currentStep >= step 
-                  ? 'bg-blue-600 text-white' 
+                  ? 'bg-red-600 text-white' 
                   : 'bg-gray-200 text-gray-600'
               }`}>
                 {step}
               </div>
               {step < 3 && (
                 <div className={`flex-1 h-1 mx-1 sm:mx-2 rounded transition-colors ${
-                  currentStep > step ? 'bg-blue-600' : 'bg-gray-200'
+                  currentStep > step ? 'bg-red-600' : 'bg-gray-200'
                 }`} />
               )}
             </div>
           ))}
         </div>
         <div className="flex justify-between text-xs sm:text-sm text-gray-600 px-1">
-          <span className={currentStep === 1 ? 'font-semibold text-blue-600' : ''}>Details</span>
-          <span className={currentStep === 2 ? 'font-semibold text-blue-600' : ''}>Location</span>
-          <span className={currentStep === 3 ? 'font-semibold text-blue-600' : ''}>Bestätigung</span>
+          <span className={currentStep === 1 ? 'font-semibold text-red-600' : ''}>Details</span>
+          <span className={currentStep === 2 ? 'font-semibold text-red-600' : ''}>Activities</span>
+          <span className={currentStep === 3 ? 'font-semibold text-red-600' : ''}>Bestätigung</span>
         </div>
       </div>
 
@@ -60,12 +73,12 @@ export default function CreateEventPage() {
         )}
 
         {currentStep === 2 && (
-          <LocationSelectionStep
+          <ActivitySelectionStep
             budget={eventData.budget}
             participantCount={eventData.participant_count}
-            onSelect={(location) => {
-              setSelectedLocation(location)
-              setEventData({ ...eventData, location_id: location.id })
+            preferences={eventData.preferences}
+            onSelect={(activities) => {
+              setSelectedActivities(activities)
               nextStep()
             }}
             onBack={prevStep}
@@ -75,7 +88,7 @@ export default function CreateEventPage() {
         {currentStep === 3 && (
           <ConfirmationStep
             eventData={eventData}
-            selectedLocation={selectedLocation}
+            selectedActivities={selectedActivities}
             onBack={prevStep}
           />
         )}

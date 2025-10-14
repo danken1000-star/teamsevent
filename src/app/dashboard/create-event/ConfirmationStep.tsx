@@ -4,6 +4,15 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient as createBrowserClient } from '@/lib/supabase-browser'
 
+type Activity = {
+  id: string
+  name: string
+  description: string
+  category: string
+  price_per_person: number
+  duration_hours: number
+}
+
 interface ConfirmationStepProps {
   eventData: {
     title: string
@@ -11,20 +20,41 @@ interface ConfirmationStepProps {
     participant_count: number
     event_date: string
     event_type: string
-    location_id?: string
+    preferences: string[]
   }
-  selectedLocation: any
+  selectedActivities: Activity[]
   onBack: () => void
+}
+
+const CATEGORY_LABELS: Record<string, string> = {
+  food: '🍔 Essen',
+  sport: '⚽ Sport',
+  games: '🎮 Games',
+  culture: '🎨 Kultur',
+  wellness: '💆 Wellness',
+  outdoor: '🏔️ Outdoor',
+  creative: '✨ Kreativ'
 }
 
 export default function ConfirmationStep({ 
   eventData, 
-  selectedLocation,
+  selectedActivities,
   onBack 
 }: ConfirmationStepProps) {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Calculate totals
+  const totalCost = selectedActivities.reduce(
+    (sum, activity) => sum + (activity.price_per_person * eventData.participant_count),
+    0
+  )
+  const costPerPerson = totalCost / eventData.participant_count
+  const totalDuration = selectedActivities.reduce(
+    (sum, activity) => sum + activity.duration_hours,
+    0
+  )
 
   const handleSubmit = async () => {
     try {
@@ -39,16 +69,17 @@ export default function ConfirmationStep({
         return
       }
 
-      // Event erstellen
+      // 1. Event erstellen
       const { data: event, error: eventError } = await supabase
         .from('events')
         .insert({
           title: eventData.title,
           budget: eventData.budget,
           participant_count: eventData.participant_count,
+          person_count: eventData.participant_count, // Alias für neue Activities Logic
           event_date: eventData.event_date || null,
           event_type: eventData.event_type || null,
-          location_id: eventData.location_id || null,
+          preferences: eventData.preferences || [],
           user_id: user.id,
           status: 'planning'
         })
@@ -56,6 +87,23 @@ export default function ConfirmationStep({
         .single()
 
       if (eventError) throw eventError
+
+      // 2. Event-Activities verknüpfen (Junction Table)
+      const eventActivities = selectedActivities.map((activity, index) => ({
+        event_id: event.id,
+        activity_id: activity.id,
+        order_index: index
+      }))
+
+      const { error: junctionError } = await supabase
+        .from('event_activities')
+        .insert(eventActivities)
+
+      if (junctionError) {
+        console.error('Junction insert error:', junctionError)
+        // Event wurde erstellt, aber Activities nicht verknüpft
+        // Trotzdem weiterleiten, User kann später nochmal probieren
+      }
 
       // 🎉 SUCCESS - Redirect zum Event mit Toast!
       router.push(`/dashboard/events/${event.id}?created=true`)
@@ -92,12 +140,6 @@ export default function ConfirmationStep({
               <p className="text-sm text-gray-600">Name</p>
               <p className="font-medium text-gray-900">{eventData.title}</p>
             </div>
-            {eventData.event_type && (
-              <div>
-                <p className="text-sm text-gray-600">Typ</p>
-                <p className="font-medium text-gray-900">📋 {eventData.event_type}</p>
-              </div>
-            )}
             {eventData.event_date && (
               <div>
                 <p className="text-sm text-gray-600">Datum</p>
@@ -112,36 +154,91 @@ export default function ConfirmationStep({
             </div>
             <div>
               <p className="text-sm text-gray-600">Budget</p>
-              <p className="font-medium text-gray-900">CHF {eventData.budget.toLocaleString()}</p>
+              <p className="font-medium text-gray-900">CHF {eventData.budget.toLocaleString('de-CH')}</p>
             </div>
           </div>
         </div>
 
-        {/* Selected Location */}
-        {selectedLocation && (
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Ausgewählte Location
-            </h3>
-            <div className="border rounded-lg p-4 bg-gray-50">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h4 className="font-medium text-gray-900">{selectedLocation.name}</h4>
-                  <p className="text-sm text-gray-600 mt-1">{selectedLocation.city}</p>
-                  <p className="text-xs text-gray-500 mt-1">{selectedLocation.category}</p>
-                </div>
-                <div className="text-right">
-                  <p className="font-semibold text-gray-900">
-                    CHF {(selectedLocation.price_per_person * eventData.participant_count).toLocaleString()}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    CHF {selectedLocation.price_per_person} / Person
-                  </p>
+        {/* Selected Activities */}
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            Ausgewählte Activities ({selectedActivities.length})
+          </h3>
+          <div className="space-y-3">
+            {selectedActivities.map((activity, index) => (
+              <div key={activity.id} className="border rounded-lg p-4 bg-gray-50">
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-lg font-semibold text-gray-900">
+                        {index + 1}. {activity.name}
+                      </span>
+                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
+                        {CATEGORY_LABELS[activity.category] || activity.category}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-2">{activity.description}</p>
+                    <div className="flex gap-4 text-xs text-gray-500">
+                      <span>⏱️ {activity.duration_hours}h</span>
+                      <span>👥 {eventData.participant_count} Personen</span>
+                    </div>
+                  </div>
+                  <div className="text-right ml-4">
+                    <p className="font-semibold text-gray-900">
+                      CHF {(activity.price_per_person * eventData.participant_count).toLocaleString('de-CH')}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      CHF {activity.price_per_person} / Person
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
+            ))}
           </div>
-        )}
+        </div>
+
+        {/* Cost Summary */}
+        <div className="border-t pt-4">
+          <div className="bg-gray-50 rounded-lg p-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
+              <div>
+                <p className="text-xs text-gray-600">Gesamtkosten</p>
+                <p className="text-lg font-bold text-gray-900">
+                  CHF {totalCost.toLocaleString('de-CH')}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-600">Pro Person</p>
+                <p className="text-lg font-bold text-gray-900">
+                  CHF {Math.round(costPerPerson)}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-600">Gesamtdauer</p>
+                <p className="text-lg font-bold text-gray-900">
+                  ~{totalDuration}h
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-600">Budget-Status</p>
+                {totalCost <= eventData.budget ? (
+                  <p className="text-lg font-bold text-green-600">
+                    ✓ Im Budget
+                  </p>
+                ) : (
+                  <p className="text-lg font-bold text-red-600">
+                    ⚠️ Über Budget
+                  </p>
+                )}
+              </div>
+            </div>
+            {totalCost <= eventData.budget && (
+              <p className="text-xs text-gray-600">
+                💰 Verfügbares Budget: CHF {(eventData.budget - totalCost).toLocaleString('de-CH')}
+              </p>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Action Buttons */}
@@ -153,15 +250,15 @@ export default function ConfirmationStep({
           className="flex-1 bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-medium 
                      hover:bg-gray-200 disabled:opacity-50 transition-colors"
         >
-          Zurück
+          ← Zurück
         </button>
         <button
           type="button"
           onClick={handleSubmit}
           disabled={isSubmitting}
-          className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg font-medium 
-                     hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed
-                     transition-all duration-200 flex items-center justify-center gap-2"
+          className="flex-1 bg-red-600 text-white px-6 py-3 rounded-lg font-medium 
+                     hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed
+                     transition-all duration-200 flex items-center justify-center gap-2 shadow-md"
         >
           {isSubmitting ? (
             <>
