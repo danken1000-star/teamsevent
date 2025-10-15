@@ -102,7 +102,19 @@ export default function ConfirmationStep({
       if (junctionError) {
         console.error('Junction insert error:', junctionError)
         // Event wurde erstellt, aber Activities nicht verknüpft
-        // Trotzdem weiterleiten, User kann später nochmal probieren
+      }
+
+      // 3. Aktivierten Key laden und Counter erhöhen
+      const { data: userRow } = await supabase
+        .from('users')
+        .select('active_key_id')
+        .eq('id', user.id)
+        .single()
+
+      if (userRow?.active_key_id) {
+        await supabase.rpc('increment_key_events', {
+          key_id: userRow.active_key_id
+        })
       }
 
       // 🎉 SUCCESS - Redirect zum Event mit Toast!
