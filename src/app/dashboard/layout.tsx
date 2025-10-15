@@ -14,10 +14,6 @@ export default async function DashboardLayout({
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user) {
-    redirect('/auth/login')
-  }
-
   return (
     <div className="min-h-screen bg-gray-50">
       <Toaster position="top-center" richColors />
@@ -49,9 +45,11 @@ export default async function DashboardLayout({
 
             {/* User Menu */}
             <div className="flex items-center gap-2 sm:gap-4">
-              <span className="text-xs sm:text-sm text-gray-600 truncate max-w-[120px] sm:max-w-none">
-                {user.email}
-              </span>
+              {user?.email && (
+                <span className="text-xs sm:text-sm text-gray-600 truncate max-w-[120px] sm:max-w-none">
+                  {user.email}
+                </span>
+              )}
               <LogoutButton />
             </div>
           </div>
