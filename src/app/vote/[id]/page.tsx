@@ -1,19 +1,24 @@
 import Link from 'next/link'
 
 export default async function PublicVotePage({ params }: { params: { id: string } }) {
-  // Hole Event + Activities über API, damit Service-Role (RLS-bypass) greifen kann
-  const res = await fetch(`/api/vote/${params.id}`, {
-    // Force dynamic on Edge/CDN
-    cache: 'no-store',
-    next: { revalidate: 0 },
-  })
-
   let event: any = null
   let activities: any[] = []
-  if (res.ok) {
-    const json = await res.json()
-    event = json.event
-    activities = json.activities || []
+
+  try {
+    const res = await fetch(`/api/vote/${params.id}`, {
+      cache: 'no-store',
+      next: { revalidate: 0 },
+    })
+
+    if (res.ok) {
+      const json = await res.json()
+      event = json.event
+      activities = json.activities || []
+    }
+  } catch (_) {
+    // Server-render safe fallback
+    event = null
+    activities = []
   }
 
   return (
