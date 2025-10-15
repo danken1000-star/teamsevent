@@ -20,6 +20,7 @@ export async function middleware(request: NextRequest) {
     path.startsWith('/auth/') ||
     path.startsWith('/vote/') ||
     path.startsWith('/api/vote/') ||
+    path.startsWith('/api/vote-submit') ||
     // Allow client-side auth/key handling for the event wizard (MVP)
     path.startsWith('/dashboard/create-event')
 

@@ -53,43 +53,27 @@ export default function PublicVotePage() {
     setSubmitting(true)
 
     try {
-      // Create team member first
-      const memberResponse = await fetch('/api/team-members', {
+      const response = await fetch('/api/vote-submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           event_id: params.id,
-          email: email,
-          name: name,
-          status: 'pending'
-        })
+          name,
+          email,
+        }),
       })
 
-      if (!memberResponse.ok) {
-        throw new Error('Failed to create team member')
-      }
+      const data = await response.json()
 
-      const member = await memberResponse.json()
-
-      // Submit vote
-      const voteResponse = await fetch(`/api/events/${params.id}/vote`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          team_member_id: member.id,
-          vote_type: 'participation',
-          vote_value: 'yes'
-        })
-      })
-
-      if (!voteResponse.ok) {
-        throw new Error('Failed to submit vote')
+      if (!response.ok) {
+        console.error('Vote error:', data)
+        throw new Error(data.error || 'Failed to submit vote')
       }
 
       setVoteSuccess(true)
-    } catch (error) {
-      console.error('Vote error:', error)
-      alert('Fehler beim Speichern. Bitte versuchen Sie es erneut.')
+    } catch (error: any) {
+      console.error('Vote submit error:', error)
+      alert(`Fehler beim Vote: ${error.message}`)
     } finally {
       setSubmitting(false)
     }
