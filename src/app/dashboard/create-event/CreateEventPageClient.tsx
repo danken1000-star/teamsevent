@@ -28,10 +28,7 @@ export default function CreateEventPageClient() {
 
   useEffect(() => {
     const checkAuthAndKey = async () => {
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      )
+      const supabase = createClient()
 
       try {
         // 1) Auth Check (robust mit kurzem Retry)
