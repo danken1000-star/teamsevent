@@ -191,6 +191,18 @@ export default async function EventDetailPage({
               )}
             </div>
 
+            {/* Contact Locations Button - Only for finalized events */}
+            {event.status === 'finalized' && (
+              <div className="mb-8">
+                <Link
+                  href={`/dashboard/events/${event.id}/contact-locations`}
+                  className="w-full inline-flex items-center justify-center bg-red-600 text-white px-6 py-4 rounded-lg font-semibold text-lg hover:bg-red-700 transition-colors shadow-lg"
+                >
+                  📧 Locations kontaktieren
+                </Link>
+              </div>
+            )}
+
             {/* Activities List */}
             <div>
               <p className="text-xs sm:text-sm font-medium text-gray-700 mb-3">
