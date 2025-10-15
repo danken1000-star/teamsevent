@@ -4,6 +4,14 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
 
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname
+  const host = request.nextUrl.host
+
+  // Force canonical host to avoid cookie domain mismatches
+  if (host === 'teamsevent.ch') {
+    const url = request.nextUrl.clone()
+    url.host = 'www.teamsevent.ch'
+    return NextResponse.redirect(url)
+  }
 
   // Public paths die KEINE Auth benötigen
   const isPublicPath = 

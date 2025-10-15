@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase-browser'
 import EventDetailsStep from './EventDetailsStep'
 import ActivitySelectionStep from './ActivitySelectionStep'
 import ConfirmationStep from './ConfirmationStep'
