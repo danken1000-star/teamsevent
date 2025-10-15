@@ -15,14 +15,16 @@ export async function POST(request: NextRequest) {
 
     const supabase = createClient()
 
-    // ACTION 1: Code senden
+    // ACTION 1: Code senden (6-stelliger Email Code, KEIN Magic Link!)
     if (action === 'send') {
-      console.log('Sending OTP to:', email)
+      console.log('Sending OTP CODE (not magic link) to:', email)
       
+      // WICHTIG: KEIN emailRedirectTo = Email CODE statt Magic Link!
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          shouldCreateUser: true, // Erstellt User automatisch
+          shouldCreateUser: true,
+          // KEIN emailRedirectTo hier! Das würde Magic Link senden
         },
       })
 

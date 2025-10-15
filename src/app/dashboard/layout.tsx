@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Toaster } from 'sonner'
+import LogoutButton from '@/components/LogoutButton'
 
 export default async function DashboardLayout({
   children,
@@ -14,13 +15,6 @@ export default async function DashboardLayout({
   } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect('/auth/login')
-  }
-
-  const handleSignOut = async () => {
-    'use server'
-    const supabase = createClient()
-    await supabase.auth.signOut()
     redirect('/auth/login')
   }
 
@@ -58,14 +52,7 @@ export default async function DashboardLayout({
               <span className="text-xs sm:text-sm text-gray-600 truncate max-w-[120px] sm:max-w-none">
                 {user.email}
               </span>
-              <form action={handleSignOut}>
-                <button
-                  type="submit"
-                  className="text-xs sm:text-sm text-gray-600 hover:text-gray-900 whitespace-nowrap"
-                >
-                  Abmelden
-                </button>
-              </form>
+              <LogoutButton />
             </div>
           </div>
 
