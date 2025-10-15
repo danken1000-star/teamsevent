@@ -1,22 +1,38 @@
 import Link from 'next/link'
 
 export default async function PublicVotePage({ params }: { params: { id: string } }) {
+  console.log('VotePage - Event ID:', params.id)
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.teamsevent.ch'
+  const apiUrl = `${baseUrl}/api/vote/${params.id}`
+  console.log('VotePage - Fetching from:', apiUrl)
+
   let event: any = null
   let activities: any[] = []
 
   try {
-    const res = await fetch(`/api/vote/${params.id}`, {
+    const res = await fetch(apiUrl, {
       cache: 'no-store',
       next: { revalidate: 0 },
+      headers: { 'Content-Type': 'application/json' }
     })
 
-    if (res.ok) {
-      const json = await res.json()
-      event = json.event
-      activities = json.activities || []
+    console.log('VotePage - Response status:', res.status)
+
+    if (!res.ok) {
+      console.error('VotePage - Response not OK:', res.statusText)
+      throw new Error(`HTTP error! status: ${res.status}`)
     }
-  } catch (_) {
-    // Server-render safe fallback
+
+    const json = await res.json()
+    console.log('VotePage - Data received:', {
+      hasEvent: !!json.event,
+      eventTitle: json.event?.title,
+      activitiesCount: json.activities?.length || 0
+    })
+    event = json.event
+    activities = json.activities || []
+  } catch (error) {
+    console.error('VotePage - Fetch error:', error)
     event = null
     activities = []
   }
