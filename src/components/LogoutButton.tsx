@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase-browser'
+import { createClient } from '@supabase/supabase-js'
 import { useState } from 'react'
 
 export default function LogoutButton() {
@@ -12,25 +12,39 @@ export default function LogoutButton() {
     setLoading(true)
     
     try {
-      const supabase = createClient()
+      // Direkter Supabase Client (nicht über Wrapper)
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      )
       
-      // Supabase Logout
-      const { error } = await supabase.auth.signOut()
+      // Supabase Logout mit expliziter Scope
+      const { error } = await supabase.auth.signOut({ scope: 'local' })
       
       if (error) {
         console.error('Logout error:', error)
-        setLoading(false)
-        return
       }
 
-      console.log('Logout successful, redirecting...')
+      console.log('Logout successful, clearing storage and redirecting...')
       
-      // Hard refresh zur Login-Seite (löscht alle Client-State)
+      // Alle lokalen Storage Items löschen
+      localStorage.clear()
+      sessionStorage.clear()
+      
+      // Cookies manuell löschen (zusätzlich zu Supabase signOut)
+      document.cookie.split(";").forEach((c) => {
+        document.cookie = c
+          .replace(/^ +/, "")
+          .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+      })
+      
+      // Hard refresh zur Login-Seite
       window.location.href = '/auth/login'
       
     } catch (err) {
       console.error('Logout exception:', err)
-      setLoading(false)
+      // Trotzdem zur Login-Seite (Force Logout)
+      window.location.href = '/auth/login'
     }
   }
 
