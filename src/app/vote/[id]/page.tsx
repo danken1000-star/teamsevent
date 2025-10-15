@@ -1,36 +1,19 @@
-import { createClient } from '@/lib/supabase'
 import Link from 'next/link'
 
 export default async function PublicVotePage({ params }: { params: { id: string } }) {
-  const supabase = createClient()
+  // Hole Event + Activities über API, damit Service-Role (RLS-bypass) greifen kann
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'https://www.teamsevent.ch'}/api/vote/${params.id}`, {
+    // Force dynamic on Edge/CDN
+    cache: 'no-store',
+    next: { revalidate: 0 },
+  })
 
-  // Lade Event + Activities ohne Auth (setzt RLS voraus)
-  const { data: event } = await supabase
-    .from('events')
-    .select('*')
-    .eq('id', params.id)
-    .single()
-
-  // Robust: lade zuerst nur die Activity-IDs aus der Junction
-  const { data: junction } = await supabase
-    .from('event_activities')
-    .select('activity_id, order_index')
-    .eq('event_id', params.id)
-    .order('order_index', { ascending: true })
-
+  let event: any = null
   let activities: any[] = []
-  if (junction && junction.length > 0) {
-    const activityIds = junction.map((j: any) => j.activity_id)
-    const { data: acts } = await supabase
-      .from('activities')
-      .select('id, name, description, category, price_per_person, duration_hours')
-      .in('id', activityIds)
-
-    // In ursprüngliche Reihenfolge bringen
-    const idToActivity = new Map<string, any>((acts || []).map(a => [a.id, a]))
-    activities = junction
-      .map((j: any) => idToActivity.get(j.activity_id))
-      .filter(Boolean)
+  if (res.ok) {
+    const json = await res.json()
+    event = json.event
+    activities = json.activities || []
   }
 
   return (
