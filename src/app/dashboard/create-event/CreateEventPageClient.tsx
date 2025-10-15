@@ -45,58 +45,7 @@ export default function CreateEventPageClient() {
           router.push('/auth/login')
           return
         }
-
-        // 2) User Daten laden
-        const { data: userData, error: userError } = await supabase
-          .from('users')
-          .select('active_key_id, plan_type')
-          .eq('id', user.id)
-          .single()
-
-        if (userError) {
-          console.error('User fetch error:', userError)
-          // Nicht blockieren im MVP
-        }
-
-        // 3) Auto Key Creation falls nötig (MVP)
-        if (!userData?.active_key_id) {
-          try {
-            const autoKeyCode = `AUTO-${Date.now()}`
-            const expiresAt = new Date()
-            expiresAt.setFullYear(expiresAt.getFullYear() + 1)
-
-            const { data: newKey, error: keyError } = await supabase
-              .from('product_keys')
-              .insert({
-                key_code: autoKeyCode,
-                status: 'active',
-                used_by: user.id,
-                used_at: new Date().toISOString(),
-                plan_type: 'mvp',
-                max_events: 10,
-                expires_at: expiresAt.toISOString(),
-                events_created: 0,
-              })
-              .select()
-              .single()
-
-            if (keyError) throw keyError
-
-            const { error: updateError } = await supabase
-              .from('users')
-              .update({
-                active_key_id: newKey.id,
-                plan_type: 'mvp',
-              })
-              .eq('id', user.id)
-
-            if (updateError) throw updateError
-          } catch (err) {
-            console.error('Failed to create automatic key (MVP):', err)
-            // Nicht blockieren im MVP
-          }
-        }
-
+        // Product-Key Logik temporär deaktiviert (MVP-Unblock)
         setReady(true)
       } catch (error) {
         console.error('Error in checkAuthAndKey:', error)
