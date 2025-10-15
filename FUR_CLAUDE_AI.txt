@@ -1,0 +1,67 @@
+🆘 HILFE GEBRAUCHT - Vercel deployed alte Version!
+
+PROBLEM:
+========
+Ich habe mit Cursor AI OTP Code Authentication implementiert (statt Magic Link).
+LOKAL funktioniert alles perfekt (npm run build ✅).
+Aber auf VERCEL läuft noch die ALTE Magic Link Version!
+
+SYMPTOME:
+=========
+1. Login/Register Pages zeigen noch Magic Link Input (nicht OTP Code)
+2. Es werden Magic Links gesendet (nicht 6-stellige Codes)
+3. Logout funktioniert nicht (Session bleibt bestehen)
+
+GIT STATUS:
+===========
+✅ Alle OTP Dateien sind committed und gepusht:
+   - c6a5590: OTP implementation
+   - c62b04b: Logout fix
+   - 9fba21b: Cache invalidation
+   
+✅ Git zeigt: "nothing to commit, working tree clean"
+✅ GitHub hat alle neuen Dateien (geprüft mit git show)
+
+VERCEL STATUS:
+==============
+❌ Deployed Version ist ALT
+❌ Zeigt noch Magic Link Pages
+❌ OTP Route existiert nicht (/api/auth/otp)
+
+FRAGEN:
+=======
+1. Warum deployed Vercel nicht die neuen Dateien?
+2. Gibt es einen Build Error auf Vercel (lokal läuft's)?
+3. Wie kann ich Vercel Cache clearen?
+4. Muss ich etwas in Vercel Settings ändern?
+
+DATEIEN DIE GEÄNDERT WURDEN:
+=============================
+✅ src/app/auth/login/page.tsx - OTP Code Input
+✅ src/app/auth/register/page.tsx - OTP Code Input  
+✅ src/app/api/auth/otp/route.ts - NEU (Code senden & verifizieren)
+✅ src/components/LogoutButton.tsx - NEU (Client-Side Logout)
+✅ src/app/dashboard/layout.tsx - Verwendet neuen LogoutButton
+
+LOKAL GETESTET:
+===============
+✅ npm run build - Erfolgreich
+✅ Keine TypeScript Errors
+✅ Alle Linter Errors behoben
+
+VERCEL LINK:
+============
+https://teamsevent.ch
+
+BITTE HILF MIR:
+===============
+Die OTP Implementation ist vollständig, aber Vercel zeigt die alte Version!
+Wie kann ich das fixen?
+
+VERMUTUNG:
+==========
+- Vercel Caching?
+- Build Error auf Vercel?
+- Environment Variables fehlen?
+- Deployment nicht getriggert?
+
