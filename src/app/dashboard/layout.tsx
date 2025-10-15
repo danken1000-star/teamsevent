@@ -14,14 +14,14 @@ export default async function DashboardLayout({
   } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect('/login')
+    redirect('/auth/login')
   }
 
   const handleSignOut = async () => {
     'use server'
     const supabase = createClient()
     await supabase.auth.signOut()
-    redirect('/login')
+    redirect('/auth/login')
   }
 
   return (

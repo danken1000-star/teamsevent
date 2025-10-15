@@ -18,37 +18,47 @@ export default async function Home() {
     .select('*', { count: 'exact', head: true })
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Modern Navigation */}
-      <nav className="fixed top-0 w-full bg-white/80 backdrop-blur-lg border-b border-gray-100 z-50">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
-            {/* Logo */}
-            <Link href="/" className="flex items-center group">
-              <span className="text-3xl font-bold text-red-600 group-hover:text-red-700 transition-colors">
-                TeamEvent
-              </span>
-              <span className="text-3xl font-bold text-gray-900">.ch</span>
-            </Link>
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
+      {/* Navigation Header */}
+      <nav className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            <div className="flex items-center">
+              {/* Logo */}
+              <Link href="/" className="flex items-center">
+                <span className="text-2xl font-bold text-red-600">TeamsEvent</span>
+                <span className="text-2xl font-bold text-gray-900">.ch</span>
+              </Link>
+              
+              {/* Navigation Links */}
+              <div className="ml-10 flex items-center space-x-4">
+                <Link 
+                  href="/locations" 
+                  className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+                >
+                  🏢 Locations
+                </Link>
+              </div>
+            </div>
 
-            {/* Right Side */}
-            <div className="flex items-center gap-6">
+            {/* Auth Buttons */}
+            <div className="flex items-center space-x-4">
               {user ? (
                 <>
-                  <span className="text-sm text-gray-600 hidden sm:block">{user.email}</span>
+                  <span className="text-sm text-gray-600">{user.email}</span>
                   <Link
                     href="/dashboard"
-                    className="px-6 py-3 rounded-xl text-sm font-semibold bg-gradient-to-r from-red-600 to-red-700 text-white hover:from-red-700 hover:to-red-800 transition-all shadow-lg hover:shadow-xl"
+                    className="px-4 py-2 rounded-md text-sm font-medium bg-red-600 text-white hover:bg-red-700"
                   >
-                    Dashboard →
+                    📊 Dashboard
                   </Link>
                 </>
               ) : (
                 <Link
                   href="/auth/login"
-                  className="px-6 py-3 rounded-xl text-sm font-semibold bg-gradient-to-r from-red-600 to-red-700 text-white hover:from-red-700 hover:to-red-800 transition-all shadow-lg hover:shadow-xl"
+                  className="px-4 py-2 rounded-md text-sm font-medium bg-red-600 text-white hover:bg-red-700"
                 >
-                  Jetzt starten →
+                  Jetzt starten
                 </Link>
               )}
             </div>
@@ -56,189 +66,122 @@ export default async function Home() {
         </div>
       </nav>
 
-      {/* Hero Section - Modern & Bold */}
-      <div className="pt-32 pb-20 px-6 lg:px-8">
-        <div className="max-w-5xl mx-auto text-center">
+      {/* Hero Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div className="text-center">
+          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+            <span className="text-red-600">Teams</span>Event.ch
+          </h1>
+          <p className="text-2xl md:text-3xl text-gray-700 mb-4 font-semibold">
+            Von 15 Stunden zu 30 Minuten
+          </p>
+          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+            Die erste Schweizer Software für mühelose Mitarbeiter-Events.
+            Automatisierte Event-Planung spart Ihnen CHF 3&apos;000 pro Event.
+          </p>
+
           {/* Status Badge */}
-          <div className="inline-flex items-center gap-3 px-4 py-2 bg-green-50 border border-green-200 rounded-full mb-8">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            <span className="text-sm font-medium text-green-700">
-              {eventCount || 0} Events · {locationCount || 0} Locations · Live in der Schweiz
+          <div className="inline-flex items-center gap-4 px-6 py-3 bg-green-50 border border-green-200 rounded-full mb-12">
+            <span className="text-green-700 font-medium">
+              ✅ {eventCount || 0} Events
+            </span>
+            <span className="text-gray-400">|</span>
+            <span className="text-green-700 font-medium">
+              🏢 {locationCount || 0} Locations
+            </span>
+            <span className="text-gray-400">|</span>
+            <span className="text-green-700 font-medium">
+              🚀 Live
             </span>
           </div>
 
-          {/* Main Headline */}
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight">
-            Team-Events in
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-700 mt-2">
-              30 Minuten
-            </span>
-          </h1>
-
-          {/* Subheadline */}
-          <p className="text-xl sm:text-2xl text-gray-600 mb-4 max-w-3xl mx-auto leading-relaxed">
-            statt 15 Stunden Planung
-          </p>
-
-          <p className="text-lg text-gray-500 mb-12 max-w-2xl mx-auto">
-            Die erste Schweizer Software für automatisierte Event-Planung.
-            Sparen Sie CHF 3'000 pro Event durch intelligente Automatisierung.
-          </p>
-
-          {/* Primary CTA */}
+          {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
             <Link
               href={user ? "/dashboard" : "/auth/login"}
-              className="group px-10 py-5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-2xl font-bold hover:from-red-700 hover:to-red-800 transition-all shadow-2xl hover:shadow-red-200 hover:scale-105 text-lg flex items-center gap-3"
+              className="px-8 py-4 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors shadow-lg text-lg"
             >
-              {user ? "Zum Dashboard" : "Kostenlos starten"}
-              <span className="group-hover:translate-x-1 transition-transform">→</span>
+              {user ? "Zum Dashboard" : "Jetzt starten"}
             </Link>
             <Link
               href="/locations"
-              className="px-10 py-5 bg-white text-gray-700 rounded-2xl font-semibold hover:bg-gray-50 transition-all shadow-lg border border-gray-200 text-lg"
+              className="px-8 py-4 bg-white text-red-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg border-2 border-red-600 text-lg"
             >
-              {locationCount || 15} Locations entdecken
+              📍 {locationCount || 15} Event-Locations entdecken
             </Link>
           </div>
 
-          {/* Social Proof / Trust Bar */}
-          <div className="flex flex-wrap justify-center items-center gap-8 text-sm text-gray-500">
-            <div className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              <span>100% Schweizer Lösung</span>
+          {/* Features Grid */}
+          <div className="grid md:grid-cols-3 gap-8 mt-20">
+            <div className="p-6 bg-white rounded-lg shadow-md">
+              <div className="text-4xl mb-4">⚡</div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                30 Minuten statt 15 Stunden
+              </h3>
+              <p className="text-gray-600">
+                Automatisierte Event-Planung spart massive Zeit bei der Organisation
+              </p>
             </div>
-            <div className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              <span>DSGVO Konform</span>
+
+            <div className="p-6 bg-white rounded-lg shadow-md">
+              <div className="text-4xl mb-4">💰</div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                CHF 3&apos;000 Ersparnis
+              </h3>
+              <p className="text-gray-600">
+                ROI bereits beim ersten Event durch Zeitersparnis vs. CHF 150/Monat
+              </p>
             </div>
-            <div className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              <span>Keine Kreditkarte nötig</span>
+
+            <div className="p-6 bg-white rounded-lg shadow-md">
+              <div className="text-4xl mb-4">🇨🇭</div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                100% Schweizer Lösung
+              </h3>
+              <p className="text-gray-600">
+                Lokale Locations, Swiss Compliance, Mehrsprachig (DE/FR/IT/EN)
+              </p>
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* Value Proposition - 3 Column Cards */}
-      <div className="py-20 px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Warum TeamEvent.ch?
+          {/* How it works */}
+          <div className="mt-20">
+            <h2 className="text-3xl font-bold text-gray-900 mb-12">
+              So funktioniert&apos;s
             </h2>
-            <p className="text-xl text-gray-600">
-              Die intelligente Lösung für HR & Office Manager
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Card 1 */}
-            <div className="group p-8 bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all hover:-translate-y-2 border border-gray-100">
-              <div className="w-16 h-16 bg-gradient-to-br from-red-100 to-red-200 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <span className="text-3xl">⚡</span>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                30 Min statt 15h
-              </h3>
-              <p className="text-gray-600 text-lg leading-relaxed">
-                Automatisierte Event-Planung spart Ihnen massive Zeit. Von der Idee zum fertigen Event in unter 30 Minuten.
-              </p>
-            </div>
-
-            {/* Card 2 */}
-            <div className="group p-8 bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all hover:-translate-y-2 border border-gray-100">
-              <div className="w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <span className="text-3xl">💰</span>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                CHF 3'000 gespart
-              </h3>
-              <p className="text-gray-600 text-lg leading-relaxed">
-                ROI bereits beim ersten Event. Sparen Sie 15 Stunden Arbeitszeit zu CHF 200/h = CHF 3'000 vs. CHF 150/Monat.
-              </p>
-            </div>
-
-            {/* Card 3 */}
-            <div className="group p-8 bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all hover:-translate-y-2 border border-gray-100">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <span className="text-3xl">🇨🇭</span>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                Swiss Quality
-              </h3>
-              <p className="text-gray-600 text-lg leading-relaxed">
-                Geprüfte Schweizer Locations, DSGVO-konform, mehrsprachig (DE/FR/IT/EN). Made in Switzerland.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* How it Works - Simplified */}
-      <div className="py-20 px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              So einfach geht's
-            </h2>
-            <p className="text-xl text-gray-600">
-              In 4 Schritten zum perfekten Team-Event
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-4 gap-8">
-            {[
-              { num: "1", title: "Event-Details", desc: "Budget & Teilnehmer eingeben" },
-              { num: "2", title: "Location wählen", desc: "Automatische Vorschläge erhalten" },
-              { num: "3", title: "Team einladen", desc: "Abstimmung per Link teilen" },
-              { num: "4", title: "Fertig!", desc: "Event ist geplant & gebucht" }
-            ].map((step) => (
-              <div key={step.num} className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-red-600 to-red-700 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-6 shadow-lg">
-                  {step.num}
+            <div className="grid md:grid-cols-4 gap-6">
+              <div className="text-center">
+                <div className="w-12 h-12 bg-red-600 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
+                  1
                 </div>
-                <h4 className="text-xl font-bold text-gray-900 mb-3">{step.title}</h4>
-                <p className="text-gray-600">{step.desc}</p>
+                <h4 className="font-semibold text-gray-900 mb-2">Budget & Teilnehmer</h4>
+                <p className="text-sm text-gray-600">Geben Sie Ihr Budget und die Anzahl Teilnehmer ein</p>
               </div>
-            ))}
+              <div className="text-center">
+                <div className="w-12 h-12 bg-red-600 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
+                  2
+                </div>
+                <h4 className="font-semibold text-gray-900 mb-2">Automatisches Matching</h4>
+                <p className="text-sm text-gray-600">Wir finden die perfekte Location basierend auf Ihren Kriterien</p>
+              </div>
+              <div className="text-center">
+                <div className="w-12 h-12 bg-red-600 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
+                  3
+                </div>
+                <h4 className="font-semibold text-gray-900 mb-2">Team Abstimmung</h4>
+                <p className="text-sm text-gray-600">Ihr Team stimmt über Datum und Location ab</p>
+              </div>
+              <div className="text-center">
+                <div className="w-12 h-12 bg-red-600 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
+                  4
+                </div>
+                <h4 className="font-semibold text-gray-900 mb-2">Fertig!</h4>
+                <p className="text-sm text-gray-600">Event ist geplant und Ihr Team wird informiert</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-
-      {/* Final CTA Section */}
-      <div className="py-20 px-6 lg:px-8 bg-gradient-to-br from-red-600 to-red-700">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6">
-            Bereit für Ihr nächstes Team-Event?
-          </h2>
-          <p className="text-xl text-red-100 mb-10">
-            Starten Sie kostenlos - keine Kreditkarte erforderlich
-          </p>
-          <Link
-            href={user ? "/dashboard" : "/auth/login"}
-            className="inline-flex items-center gap-3 px-10 py-5 bg-white text-red-600 rounded-2xl font-bold hover:bg-gray-50 transition-all shadow-2xl hover:scale-105 text-lg"
-          >
-            {user ? "Zum Dashboard" : "Jetzt kostenlos starten"}
-            <span>→</span>
-          </Link>
-        </div>
-      </div>
-
-      {/* Footer */}
-      <footer className="py-12 px-6 lg:px-8 bg-gray-900 text-gray-400">
-        <div className="max-w-7xl mx-auto text-center">
-          <p className="text-sm">
-            © 2025 TeamEvent.ch - Made with ❤️ in Switzerland
-          </p>
-        </div>
-      </footer>
     </div>
   )
 }

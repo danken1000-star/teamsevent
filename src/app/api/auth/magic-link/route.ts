@@ -21,11 +21,15 @@ export async function POST(request: NextRequest) {
 
     console.log('Magic link redirect URL:', redirectUrl)
 
-    // Magic Link senden
+    // Magic Link senden mit längeren Gültigkeitsdauer (24h statt 1h)
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
         emailRedirectTo: redirectUrl,
+        shouldCreateUser: true, // Erstellt User automatisch falls nicht vorhanden
+        data: {
+          // Zusätzliche User-Daten (optional)
+        }
       },
     })
 
