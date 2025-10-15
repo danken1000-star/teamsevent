@@ -31,29 +31,8 @@ export default async function DashboardPage() {
     .order('created_at', { ascending: false })
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Top Navigation */}
-      <nav className="bg-white border-b border-gray-200 mb-8">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex justify-between items-center">
-            <Link href="/" className="text-2xl font-bold">
-              <span className="text-red-600">TeamEvent</span>
-              <span className="text-black">.ch</span>
-            </Link>
-            
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-600 hidden sm:block">{user.email}</span>
-              <form action="/auth/logout" method="post">
-                <button className="text-sm text-gray-600 hover:text-black">
-                  Abmelden
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      <div className="max-w-7xl mx-auto px-6 pb-12">
+    <div>
+      <div className="max-w-7xl mx-auto">
         {/* Header with Big CTA */}
         <div className="mb-8 text-center">
           <h1 className="text-4xl font-bold text-black mb-2">Dashboard</h1>
