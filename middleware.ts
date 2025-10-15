@@ -10,7 +10,9 @@ export async function middleware(request: NextRequest) {
     path === '/' ||
     path === '/locations' ||
     path.startsWith('/auth/') ||
-    path.startsWith('/vote/')
+    path.startsWith('/vote/') ||
+    // Allow client-side auth/key handling for the event wizard (MVP)
+    path.startsWith('/dashboard/create-event')
 
   // Public paths durchlassen
   if (isPublicPath) {
