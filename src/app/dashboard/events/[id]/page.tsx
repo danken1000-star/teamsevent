@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase'
 import { redirect } from 'next/navigation'
 import InviteTeamMembers from './InviteTeamMembers'
-import VotingResults from './VotingResults'
 import Link from 'next/link'
 import EventCreatedToast from './EventCreatedToast'
 import CopyLinkButton from './CopyLinkButton'
@@ -207,45 +206,6 @@ export default async function EventDetailPage({
               </div>
             )}
 
-            {/* Vote Statistics */}
-            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-              <h3 className="text-lg font-semibold mb-4">Team-Abstimmung</h3>
-              <div className="flex items-center gap-4">
-                <div className="flex-1">
-                  <div className="text-3xl font-bold text-red-600">{voteCount}</div>
-                  <div className="text-sm text-gray-600">Stimmen abgegeben</div>
-                </div>
-                <div className="flex-1">
-                  <div className="text-3xl font-bold text-gray-700">{memberCount}</div>
-                  <div className="text-sm text-gray-600">Team-Mitglieder</div>
-                </div>
-                <div className="flex-1">
-                  <div className="text-3xl font-bold text-green-600">
-                    {memberCount > 0 ? Math.round((voteCount / memberCount) * 100) : 0}%
-                  </div>
-                  <div className="text-sm text-gray-600">Beteiligung</div>
-                </div>
-              </div>
-
-              {/* Liste der Votes */}
-              {votes && votes.length > 0 && (
-                <div className="mt-6 pt-6 border-t">
-                  <h4 className="font-medium mb-3">Abgegebene Stimmen:</h4>
-                  <ul className="space-y-2">
-                    {votes.map((vote) => {
-                      const member = teamMembers?.find(m => m.id === vote.member_id)
-                      return (
-                        <li key={vote.id} className="flex items-center gap-2 text-sm">
-                          <span className="text-green-600">✓</span>
-                          <span>{member?.name || 'Unbekannt'}</span>
-                          <span className="text-gray-500">({member?.email})</span>
-                        </li>
-                      )
-                    })}
-                  </ul>
-                </div>
-              )}
-            </div>
 
             {/* Activities List */}
             <div>
@@ -346,17 +306,62 @@ export default async function EventDetailPage({
           <InviteTeamMembers eventId={params.id} />
         </div>
 
-        {/* Voting Results */}
-        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-          <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">
-            Abstimmungs-Ergebnisse
-          </h2>
+        {/* Voting Results - UPDATED */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-lg font-semibold mb-4">Abstimmungs-Ergebnisse</h2>
           
-          <VotingResults 
-            eventId={params.id}
-            votes={votes || []}
-            teamMembers={teamMembers || []}
-          />
+          <div className="mb-6">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm text-gray-600">Abstimmungs-Fortschritt</span>
+              <span className="text-lg font-bold text-red-600">
+                {voteCount} / {memberCount}
+              </span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-3">
+              <div
+                className="bg-red-600 h-3 rounded-full transition-all"
+                style={{
+                  width: `${memberCount > 0 ? (voteCount / memberCount) * 100 : 0}%`,
+                }}
+              />
+            </div>
+            <div className="text-center mt-2">
+              <span className="text-2xl font-bold text-green-600">
+                {memberCount > 0 ? Math.round((voteCount / memberCount) * 100) : 0}%
+              </span>
+              <span className="text-sm text-gray-600 ml-2">Beteiligung</span>
+            </div>
+          </div>
+
+          {voteCount > 0 ? (
+            <div className="space-y-3">
+              <h4 className="font-medium text-sm text-gray-700">Abgegebene Stimmen:</h4>
+              {votes?.map((vote) => {
+                const member = teamMembers?.find((m) => m.id === vote.member_id);
+                return (
+                  <div
+                    key={vote.id}
+                    className="flex items-center gap-2 p-3 bg-green-50 rounded-lg"
+                  >
+                    <span className="text-green-600 text-lg">✓</span>
+                    <div className="flex-1">
+                      <div className="font-medium text-sm">
+                        {member?.name || 'Unbekannt'}
+                      </div>
+                      <div className="text-xs text-gray-500">{member?.email}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-gray-500 mb-2">Noch keine Abstimmungen vorhanden</p>
+              <p className="text-sm text-gray-400">
+                Warten Sie bis Team-Mitglieder abgestimmt haben
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>
