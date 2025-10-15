@@ -53,7 +53,6 @@ export async function POST(request: Request) {
           event_id,
           email,
           name,
-          status: 'confirmed',
         })
         .select()
         .single()
