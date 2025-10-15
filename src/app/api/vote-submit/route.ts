@@ -4,7 +4,9 @@ import { NextResponse } from 'next/server'
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { event_id, name, email } = body
+    const { event_id, name, email, selected_date } = body
+
+    console.log('Vote submit received:', { event_id, name, email })
 
     if (!event_id || !name || !email) {
       return NextResponse.json(
@@ -13,40 +15,42 @@ export async function POST(request: Request) {
       )
     }
 
-    // Service-Role Client für Admin-Zugriff
+    // Create service role client for admin access
     const supabase = createClient(
       process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY!
     )
 
-    // 1. Check if event exists
+    // 1. Verify event exists
     const { data: event, error: eventError } = await supabase
       .from('events')
-      .select('id')
+      .select('id, event_date')
       .eq('id', event_id)
       .single()
 
     if (eventError || !event) {
+      console.error('Event not found:', eventError)
       return NextResponse.json(
         { error: 'Event not found' },
         { status: 404 }
       )
     }
 
-    // 2. Check if member already exists
+    // 2. Check if member exists
     const { data: existingMember } = await supabase
       .from('team_members')
       .select('id')
       .eq('event_id', event_id)
       .eq('email', email)
-      .single()
+      .maybeSingle()
 
     let memberId
 
     if (existingMember) {
       memberId = existingMember.id
+      console.log('Using existing member:', memberId)
     } else {
-      // 3. Create team member
+      // 3. Create new team member
       const { data: newMember, error: memberError } = await supabase
         .from('team_members')
         .insert({
@@ -58,7 +62,7 @@ export async function POST(request: Request) {
         .single()
 
       if (memberError) {
-        console.error('Member creation error:', memberError)
+        console.error('Failed to create member:', memberError)
         return NextResponse.json(
           { error: 'Failed to create team member', details: memberError.message },
           { status: 500 }
@@ -66,32 +70,58 @@ export async function POST(request: Request) {
       }
 
       memberId = newMember.id
+      console.log('Created new member:', memberId)
     }
 
-    // 4. Create vote (simplified - just record participation)
-    const { error: voteError } = await supabase
+    // 4. Check if vote already exists
+    const { data: existingVote } = await supabase
       .from('votes')
-      .insert({
-        event_id,
-        team_member_id: memberId,
-        vote_type: 'participation',
-        vote_value: 'yes'
+      .select('id')
+      .eq('event_id', event_id)
+      .eq('member_id', memberId)
+      .maybeSingle()
+
+    if (existingVote) {
+      console.log('Vote already exists:', existingVote.id)
+      return NextResponse.json({
+        success: true,
+        member_id: memberId,
+        vote_id: existingVote.id,
+        message: 'Vote already recorded',
       })
+    }
+
+    // 5. Create vote
+    const voteData: any = {
+      event_id,
+      member_id: memberId,
+    }
+
+    // Add date if provided (optional - für Multi-Date Events später)
+    if (selected_date) {
+      voteData.date_id = selected_date
+    }
+
+    const { data: vote, error: voteError } = await supabase
+      .from('votes')
+      .insert(voteData)
+      .select()
+      .single()
 
     if (voteError) {
-      console.error('Vote creation error:', voteError)
-      // Don't fail if vote already exists
-      if (!voteError.message.includes('duplicate')) {
-        return NextResponse.json(
-          { error: 'Failed to record vote', details: voteError.message },
-          { status: 500 }
-        )
-      }
+      console.error('Failed to create vote:', voteError)
+      return NextResponse.json(
+        { error: 'Failed to create vote', details: voteError.message },
+        { status: 500 }
+      )
     }
+
+    console.log('Vote created successfully:', vote.id)
 
     return NextResponse.json({
       success: true,
       member_id: memberId,
+      vote_id: vote.id,
     })
 
   } catch (error: any) {

@@ -74,6 +74,10 @@ export default async function EventDetailPage({
     .select('*')
     .eq('event_id', params.id)
 
+  // Calculate vote statistics
+  const voteCount = votes?.length || 0
+  const memberCount = teamMembers?.length || 0
+
   // Extract activities from junction
   const activities = eventActivities?.map(ea => ea.activities).filter(Boolean) || []
 
@@ -202,6 +206,46 @@ export default async function EventDetailPage({
                 </Link>
               </div>
             )}
+
+            {/* Vote Statistics */}
+            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+              <h3 className="text-lg font-semibold mb-4">Team-Abstimmung</h3>
+              <div className="flex items-center gap-4">
+                <div className="flex-1">
+                  <div className="text-3xl font-bold text-red-600">{voteCount}</div>
+                  <div className="text-sm text-gray-600">Stimmen abgegeben</div>
+                </div>
+                <div className="flex-1">
+                  <div className="text-3xl font-bold text-gray-700">{memberCount}</div>
+                  <div className="text-sm text-gray-600">Team-Mitglieder</div>
+                </div>
+                <div className="flex-1">
+                  <div className="text-3xl font-bold text-green-600">
+                    {memberCount > 0 ? Math.round((voteCount / memberCount) * 100) : 0}%
+                  </div>
+                  <div className="text-sm text-gray-600">Beteiligung</div>
+                </div>
+              </div>
+
+              {/* Liste der Votes */}
+              {votes && votes.length > 0 && (
+                <div className="mt-6 pt-6 border-t">
+                  <h4 className="font-medium mb-3">Abgegebene Stimmen:</h4>
+                  <ul className="space-y-2">
+                    {votes.map((vote) => {
+                      const member = teamMembers?.find(m => m.id === vote.member_id)
+                      return (
+                        <li key={vote.id} className="flex items-center gap-2 text-sm">
+                          <span className="text-green-600">✓</span>
+                          <span>{member?.name || 'Unbekannt'}</span>
+                          <span className="text-gray-500">({member?.email})</span>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </div>
+              )}
+            </div>
 
             {/* Activities List */}
             <div>
