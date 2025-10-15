@@ -1,83 +1,219 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useParams } from 'next/navigation'
 import Link from 'next/link'
 
-export default async function PublicVotePage({ params }: { params: { id: string } }) {
-  console.log('VotePage - Event ID:', params.id)
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.teamsevent.ch'
-  const apiUrl = `${baseUrl}/api/vote/${params.id}`
-  console.log('VotePage - Fetching from:', apiUrl)
+export default function PublicVotePage() {
+  const params = useParams()
+  const [event, setEvent] = useState<any>(null)
+  const [activities, setActivities] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  
+  // Vote form state
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [voteSuccess, setVoteSuccess] = useState(false)
 
-  let event: any = null
-  let activities: any[] = []
+  useEffect(() => {
+    loadEventData()
+  }, [params.id])
 
-  try {
-    const res = await fetch(apiUrl, {
-      cache: 'no-store',
-      next: { revalidate: 0 },
-      headers: { 'Content-Type': 'application/json' }
-    })
+  const loadEventData = async () => {
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.teamsevent.ch'
+      const apiUrl = `${baseUrl}/api/vote/${params.id}`
+      
+      const response = await fetch(apiUrl, {
+        cache: 'no-store',
+        headers: { 'Content-Type': 'application/json' }
+      })
 
-    console.log('VotePage - Response status:', res.status)
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
 
-    if (!res.ok) {
-      console.error('VotePage - Response not OK:', res.statusText)
-      throw new Error(`HTTP error! status: ${res.status}`)
+      const data = await response.json()
+      setEvent(data.event)
+      setActivities(data.activities || [])
+    } catch (error) {
+      console.error('Error loading event:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleVoteSubmit = async () => {
+    if (!name || !email) {
+      alert('Bitte Name und Email eingeben')
+      return
     }
 
-    const json = await res.json()
-    console.log('VotePage - Data received:', {
-      hasEvent: !!json.event,
-      eventTitle: json.event?.title,
-      activitiesCount: json.activities?.length || 0
-    })
-    event = json.event
-    activities = json.activities || []
-  } catch (error) {
-    console.error('VotePage - Fetch error:', error)
-    event = null
-    activities = []
+    setSubmitting(true)
+
+    try {
+      // Create team member first
+      const memberResponse = await fetch('/api/team-members', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event_id: params.id,
+          email: email,
+          name: name,
+          status: 'pending'
+        })
+      })
+
+      if (!memberResponse.ok) {
+        throw new Error('Failed to create team member')
+      }
+
+      const member = await memberResponse.json()
+
+      // Submit vote
+      const voteResponse = await fetch(`/api/events/${params.id}/vote`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          team_member_id: member.id,
+          vote_type: 'participation',
+          vote_value: 'yes'
+        })
+      })
+
+      if (!voteResponse.ok) {
+        throw new Error('Failed to submit vote')
+      }
+
+      setVoteSuccess(true)
+    } catch (error) {
+      console.error('Vote error:', error)
+      alert('Fehler beim Speichern. Bitte versuchen Sie es erneut.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 py-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Lädt Event...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!event) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 py-8">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Event nicht gefunden</h1>
+          <p className="text-gray-600 mb-4">Der Abstimmungs-Link ist ungültig oder das Event existiert nicht mehr.</p>
+          <Link href="/" className="text-red-600 hover:underline">Zurück zum Start</Link>
+        </div>
+      </div>
+    )
   }
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Team-Voting</h1>
-        {event ? (
-          <p className="text-gray-600 mt-1">Event: {event.title}</p>
-        ) : (
-          <p className="text-gray-600 mt-1">Event nicht gefunden.</p>
-        )}
+        <p className="text-gray-600 mt-1">Event: {event.title}</p>
       </div>
 
+      {/* Event Info */}
+      <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <p className="text-gray-600">Budget</p>
+            <p className="font-semibold">CHF {event.budget?.toLocaleString('de-CH')}</p>
+          </div>
+          <div>
+            <p className="text-gray-600">Teilnehmer</p>
+            <p className="font-semibold">{event.participant_count} Personen</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Activities */}
       {activities.length > 0 ? (
-        <div className="space-y-3">
-          {activities.map((a: any, idx: number) => (
-            <div key={a.id} className="bg-white border rounded-lg p-4">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="font-semibold text-gray-900">{idx + 1}. {a.name}</p>
-                  <p className="text-sm text-gray-600 mt-1">{a.description}</p>
+        <div className="bg-white rounded-lg shadow p-6 mb-6">
+          <h2 className="text-lg font-bold text-gray-900 mb-4">Ausgewählte Activities</h2>
+          <div className="space-y-3">
+            {activities.map((a: any, idx: number) => (
+              <div key={a.id} className="border rounded-lg p-4">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="font-semibold text-gray-900">{idx + 1}. {a.name}</p>
+                    <p className="text-sm text-gray-600 mt-1">{a.description}</p>
+                  </div>
+                  <p className="text-sm text-gray-700 whitespace-nowrap ml-4">
+                    CHF {a.price_per_person}
+                  </p>
                 </div>
-                <p className="text-sm text-gray-700 whitespace-nowrap ml-4">
-                  CHF {a.price_per_person}
-                </p>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       ) : (
-        <div className="bg-yellow-50 border border-yellow-200 text-yellow-900 rounded p-4">
+        <div className="bg-yellow-50 border border-yellow-200 text-yellow-900 rounded-lg p-4 mb-6">
           Noch keine Activities vorhanden.
         </div>
       )}
 
-      <div className="mt-8 text-sm text-gray-600">
-        <p>
-          Dies ist eine öffentliche Voting-Vorschau. Der eigentliche Abstimmungsfluss kann hier erweitert werden.
-        </p>
-        <p className="mt-2">
-          Zurück zum{' '}
-          <Link href="/" className="text-red-600 hover:underline">Start</Link>.
-        </p>
+      {/* Vote Form */}
+      {!voteSuccess ? (
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-lg font-bold text-gray-900 mb-4">Teilnahme bestätigen</h2>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Name *</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                placeholder="Ihr Name"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Email *</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                placeholder="ihre.email@beispiel.ch"
+              />
+            </div>
+
+            <button
+              onClick={handleVoteSubmit}
+              disabled={submitting || !name || !email}
+              className="w-full bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {submitting ? 'Wird gespeichert...' : 'Teilnahme bestätigen'}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="bg-green-50 border-2 border-green-500 p-6 rounded-lg text-center">
+          <div className="text-4xl mb-4">✅</div>
+          <h3 className="text-xl font-bold text-green-700 mb-2">Teilnahme bestätigt!</h3>
+          <p className="text-gray-600">Vielen Dank für Ihre Teilnahme am Event.</p>
+        </div>
+      )}
+
+      <div className="mt-8 text-sm text-gray-600 text-center">
+        <Link href="/" className="text-red-600 hover:underline">Zurück zum Start</Link>
       </div>
     </div>
   )
