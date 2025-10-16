@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import SimpleFeedback from '@/components/SimpleFeedback'
 
 interface ContactLocationsFormProps {
   event: any
@@ -9,6 +10,7 @@ interface ContactLocationsFormProps {
   totalCost: number
   totalDuration: number
   teamMembers: any[]
+  eventId: string
 }
 
 export default function ContactLocationsForm({
@@ -17,6 +19,7 @@ export default function ContactLocationsForm({
   totalCost,
   totalDuration,
   teamMembers,
+  eventId,
 }: ContactLocationsFormProps) {
   const [message, setMessage] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -98,22 +101,32 @@ Organisiert über TeamEvent.ch`
 
   if (success) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-8 text-center">
-        <div className="text-6xl mb-4">✅</div>
-        <h2 className="text-2xl font-bold text-green-600 mb-3">
-          Anfrage erfolgreich versendet!
-        </h2>
-        <p className="text-gray-600 mb-6">
-          Ihr Event wurde über <strong>TeamEvent.ch</strong> organisiert.
-          <br />
-          Die Locations werden sich in Kürze bei Ihnen melden.
-        </p>
-        <button
-          onClick={() => router.push('/dashboard')}
-          className="bg-red-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-700"
-        >
-          Zurück zum Dashboard
-        </button>
+      <div className="space-y-8">
+        {/* Success Message */}
+        <div className="bg-white rounded-lg shadow-md p-8 text-center">
+          <div className="text-6xl mb-4">✅</div>
+          <h2 className="text-2xl font-bold text-green-600 mb-3">
+            Anfrage erfolgreich versendet!
+          </h2>
+          <p className="text-gray-600 mb-6">
+            Ihr Event wurde über <strong>TeamEvent.ch</strong> organisiert.
+            <br />
+            Die Locations werden sich in Kürze bei Ihnen melden.
+          </p>
+        </div>
+
+        {/* Feedback Component */}
+        <SimpleFeedback eventId={eventId} />
+
+        {/* Back to Dashboard Button */}
+        <div className="text-center">
+          <button
+            onClick={() => router.push('/dashboard')}
+            className="bg-red-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-700"
+          >
+            Zurück zum Dashboard
+          </button>
+        </div>
       </div>
     )
   }

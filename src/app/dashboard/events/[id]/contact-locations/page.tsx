@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase'
 import { redirect } from 'next/navigation'
 import ContactLocationsForm from './ContactLocationsForm'
+import SimpleFeedback from '@/components/SimpleFeedback'
 
 export default async function ContactLocationsPage({
   params,
@@ -133,6 +134,7 @@ export default async function ContactLocationsPage({
           totalCost={totalCost}
           totalDuration={totalDuration}
           teamMembers={teamMembers || []}
+          eventId={params.id}
         />
       </div>
     </div>

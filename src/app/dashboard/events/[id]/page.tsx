@@ -89,6 +89,9 @@ export default async function EventDetailPage({
   const voteCount = votes?.length || 0
   const memberCount = teamMembers?.length || 0
 
+  // Compute which team members have voted (by team_member_id)
+  const votedMemberIds = new Set((votes || []).map((v: any) => v.team_member_id))
+
   // Extract activities from junction
   const activities = eventActivities?.map(ea => ea.activities).filter(Boolean) || []
 
@@ -301,7 +304,7 @@ export default async function EventDetailPage({
                     </p>
                     <p className="text-xs text-gray-500 truncate">{member.email}</p>
                   </div>
-                  {member.voted_at ? (
+                  {votedMemberIds.has(member.id) ? (
                     <span className="text-xs text-green-600 font-medium whitespace-nowrap">✓ Abgestimmt</span>
                   ) : (
                     <span className="text-xs text-gray-400 whitespace-nowrap">Ausstehend</span>

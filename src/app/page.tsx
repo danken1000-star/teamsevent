@@ -51,12 +51,12 @@ export default async function Home() {
         </h1>
 
         <p className="text-2xl text-gray-600 mb-4">
-          Statt 15 Stunden Planung
+          Statt Stunden an Planung
         </p>
 
         <p className="text-xl text-gray-500 mb-12 max-w-2xl mx-auto">
-          Die erste Schweizer Software für automatisierte Event-Planung.
-          Sparen Sie CHF 3'000 pro Event.
+          Die erste Schweizer Software für automatisierte Event-Planung –
+          sparen Sie Zeit, Geld und Nerven.
         </p>
 
         {/* Big CTA Button */}
@@ -193,7 +193,7 @@ export default async function Home() {
       <footer className="bg-black py-12">
         <div className="max-w-7xl mx-auto px-6 text-center">
           <p className="text-white text-sm">
-            © 2025 TeamEvent.ch - Made with ❤️ in Switzerland
+            © 2025 teamsEvent.ch - Made with ❤️ in Switzerland
           </p>
         </div>
       </footer>
