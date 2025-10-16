@@ -85,7 +85,7 @@ export async function POST(request: Request) {
       .from('votes')
       .select('id')
       .eq('event_id', event_id)
-      .eq('member_id', memberId)
+      .eq('team_member_id', memberId)
       .maybeSingle()
 
     if (existingVote) {
@@ -102,7 +102,7 @@ export async function POST(request: Request) {
     console.log('5. Creating vote...')
     const voteData: any = {
       event_id,
-      member_id: memberId,
+      team_member_id: memberId,
     }
 
     // Add date if provided (optional - für Multi-Date Events später)
@@ -141,7 +141,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      member_id: memberId,
       vote_id: vote.id,
     })
 
