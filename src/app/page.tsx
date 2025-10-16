@@ -110,7 +110,7 @@ export default async function Home() {
                 CHF 3'000 gespart
               </h3>
               <p className="text-gray-600 text-lg">
-                ROI bereits beim ersten Event. 15 Stunden × CHF 200/h = CHF 3'000 gespart vs. CHF 150/Monat.
+                Bei 4 Events pro Jahr sparen Sie 60 Stunden Organisationszeit. Das entspricht CHF 3'000+ an Arbeitszeit - für nur CHF 150/Monat.
               </p>
             </div>
 
