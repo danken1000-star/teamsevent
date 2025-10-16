@@ -103,6 +103,8 @@ export async function POST(request: Request) {
     const voteData: any = {
       event_id,
       team_member_id: memberId,
+      vote_type: 'attendance',
+      vote_value: 'confirmed',
     }
 
     // Add date if provided (optional - für Multi-Date Events später)
