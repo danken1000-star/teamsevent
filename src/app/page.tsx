@@ -88,7 +88,7 @@ export default async function Home() {
       <div className="bg-gray-50 py-24">
         <div className="max-w-6xl mx-auto px-6">
           <h2 className="text-4xl font-bold text-center text-black mb-16">
-            Warum TeamEvent.ch?
+            Warum TeamsEvent.ch?
           </h2>
 
           <div className="grid md:grid-cols-3 gap-8">
