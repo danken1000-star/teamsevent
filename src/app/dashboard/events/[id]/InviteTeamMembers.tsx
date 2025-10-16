@@ -63,7 +63,7 @@ export default function InviteTeamMembers({ eventId }: InviteTeamMembersProps) {
             id="name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm text-gray-900 placeholder-gray-500 font-medium"
             placeholder="Max Muster"
           />
         </div>
@@ -78,7 +78,7 @@ export default function InviteTeamMembers({ eventId }: InviteTeamMembersProps) {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm text-gray-900 placeholder-gray-500 font-medium"
             placeholder="max@firma.ch"
           />
         </div>

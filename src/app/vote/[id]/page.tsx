@@ -162,7 +162,7 @@ export default function PublicVotePage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-red-500 focus:border-transparent text-gray-900 placeholder-gray-500 font-medium"
                 placeholder="Ihr Name"
               />
             </div>
@@ -174,7 +174,7 @@ export default function PublicVotePage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-red-500 focus:border-transparent text-gray-900 placeholder-gray-500 font-medium"
                 placeholder="ihre.email@beispiel.ch"
               />
             </div>

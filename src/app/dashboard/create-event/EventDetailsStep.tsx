@@ -74,7 +74,7 @@ export default function EventDetailsStep({
             value={eventData.title}
             onChange={(e) => setEventData({ ...eventData, title: e.target.value })}
             placeholder="z.B. Team-Ausflug Sommer 2025"
-            className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+            className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-gray-900 placeholder-gray-500 font-medium"
           />
         </div>
 
@@ -116,7 +116,7 @@ export default function EventDetailsStep({
             max="100"
             value={eventData.participant_count}
             onChange={(e) => setEventData({ ...eventData, participant_count: parseInt(e.target.value) })}
-            className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+            className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-gray-900 placeholder-gray-500 font-medium"
           />
           <p className="mt-1 text-xs sm:text-sm text-gray-500">
             Minimum 3 Personen
@@ -167,7 +167,7 @@ export default function EventDetailsStep({
             type="date"
             value={eventData.event_date}
             onChange={(e) => setEventData({ ...eventData, event_date: e.target.value })}
-            className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+            className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-gray-900 placeholder-gray-500 font-medium"
           />
           <p className="mt-1 text-xs sm:text-sm text-gray-500">
             Du kannst das Datum auch später mit deinem Team abstimmen

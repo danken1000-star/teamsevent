@@ -91,7 +91,7 @@ Organisiert über TeamEvent.ch`
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             rows={16}
-            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-transparent font-mono text-sm"
+            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-red-500 focus:border-transparent font-mono text-sm text-gray-900 placeholder-gray-500"
             required
           />
           <p className="text-xs text-gray-500 mt-2">
