@@ -21,7 +21,7 @@ export default async function Home() {
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
             <Link href="/" className="text-2xl font-bold">
-              <span className="text-red-600">TeamEvent</span>
+              <span className="text-red-600">TeamsEvent</span>
               <span className="text-black">.ch</span>
             </Link>
             
@@ -96,7 +96,7 @@ export default async function Home() {
             <div className="bg-white p-10 rounded-2xl border-2 border-gray-200 hover:border-red-600 transition-colors">
               <div className="text-5xl mb-6">⚡</div>
               <h3 className="text-2xl font-bold text-black mb-4">
-                30 Min statt 15h
+                30 Min statt Stunden
               </h3>
               <p className="text-gray-600 text-lg">
                 Automatisierte Event-Planung spart massive Zeit. Von der Idee zum fertigen Event in unter 30 Minuten.
@@ -193,7 +193,7 @@ export default async function Home() {
       <footer className="bg-black py-12">
         <div className="max-w-7xl mx-auto px-6 text-center">
           <p className="text-white text-sm">
-            © 2025 teamsEvent.ch - Made with ❤️ in Switzerland
+            © 2025 TeamsEvent.ch - Made with ❤️ in Switzerland
           </p>
         </div>
       </footer>
