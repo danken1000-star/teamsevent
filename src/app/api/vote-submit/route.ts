@@ -120,21 +120,17 @@ export async function POST(request: Request) {
 
     if (voteError) {
       console.error('Vote creation failed:', voteError)
-      // Log deeper error information if available
-      // @ts-expect-error Supabase error may include code/hint/details depending on driver
-      console.error('Vote error code:', voteError.code)
-      // @ts-expect-error Supabase error may include details
-      console.error('Vote error details:', voteError.details)
-      // @ts-expect-error Supabase error may include hint
-      console.error('Vote error hint:', voteError.hint)
+      // Log deeper error information if available (driver-dependent fields)
+      const ve: any = voteError as any
+      if (ve?.code) console.error('Vote error code:', ve.code)
+      if (ve?.details) console.error('Vote error details:', ve.details)
+      if (ve?.hint) console.error('Vote error hint:', ve.hint)
       return NextResponse.json(
         { 
           error: 'Failed to create vote', 
           details: voteError.message,
-          // @ts-expect-error include code if present
-          code: voteError.code,
-          // @ts-expect-error include hint if present
-          hint: voteError.hint
+          code: ve?.code,
+          hint: ve?.hint
         },
         { status: 500 }
       )
