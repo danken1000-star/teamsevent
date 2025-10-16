@@ -111,11 +111,21 @@ export default function PublicVotePage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Team-Voting</h1>
         <p className="text-gray-600 mt-1">Event: {event.title}</p>
+        {event.event_date && (
+          <p className="text-gray-600 mt-1">
+            📅 {new Date(event.event_date).toLocaleDateString('de-CH', {
+              weekday: 'long',
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric'
+            })}
+          </p>
+        )}
       </div>
 
       {/* Event Info */}
       <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <div className="grid grid-cols-2 gap-4 text-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
           <div>
             <p className="text-gray-600">Budget</p>
             <p className="font-semibold">CHF {event.budget?.toLocaleString('de-CH')}</p>
@@ -124,6 +134,19 @@ export default function PublicVotePage() {
             <p className="text-gray-600">Teilnehmer</p>
             <p className="font-semibold">{event.participant_count} Personen</p>
           </div>
+          {event.event_date && (
+            <div>
+              <p className="text-gray-600">Datum</p>
+              <p className="font-semibold">
+                {new Date(event.event_date).toLocaleDateString('de-CH', {
+                  weekday: 'long',
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric'
+                })}
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
