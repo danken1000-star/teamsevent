@@ -4,10 +4,10 @@ import { NextResponse } from 'next/server'
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { event_id, name, email, selected_date } = body
+    const { event_id, name, email, selected_date, dietary_preference, dietary_notes } = body
 
     console.log('=== VOTE SUBMIT START ===')
-    console.log('Received data:', { event_id, name, email })
+    console.log('Received data:', { event_id, name, email, dietary_preference, dietary_notes })
 
     if (!event_id || !name || !email) {
       console.error('Missing fields:', { event_id, name, email })
@@ -63,6 +63,8 @@ export async function POST(request: Request) {
           event_id,
           email,
           name,
+          dietary_preference: dietary_preference || null,
+          dietary_notes: dietary_notes || null,
         })
         .select()
         .single()

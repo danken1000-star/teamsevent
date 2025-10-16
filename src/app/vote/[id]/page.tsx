@@ -13,6 +13,8 @@ export default function PublicVotePage() {
   // Vote form state
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
+  const [dietaryPreference, setDietaryPreference] = useState('')
+  const [dietaryNotes, setDietaryNotes] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [voteSuccess, setVoteSuccess] = useState(false)
 
@@ -60,6 +62,8 @@ export default function PublicVotePage() {
           event_id: params.id,
           name,
           email,
+          dietary_preference: dietaryPreference,
+          dietary_notes: dietaryNotes,
         }),
       })
 
@@ -178,6 +182,37 @@ export default function PublicVotePage() {
                 placeholder="ihre.email@beispiel.ch"
               />
             </div>
+
+            {/* Ernährungspräferenzen */}
+            <div>
+              <label className="block text-sm font-medium mb-2">Ernährungspräferenz (Optional)</label>
+              <select
+                value={dietaryPreference}
+                onChange={(e) => setDietaryPreference(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-red-500 focus:border-transparent text-gray-900 font-medium"
+              >
+                <option value="">Bitte wählen...</option>
+                <option value="omnivor">🍖 Omnivor (Alles)</option>
+                <option value="vegetarisch">🥗 Vegetarisch</option>
+                <option value="vegan">🌱 Vegan</option>
+                <option value="kein_schweinefleisch">🐷 Kein Schweinefleisch</option>
+                <option value="sonstiges">⚠️ Sonstiges</option>
+              </select>
+            </div>
+
+            {/* Zusätzliche Ernährungsnotizen */}
+            {dietaryPreference === 'sonstiges' && (
+              <div>
+                <label className="block text-sm font-medium mb-2">Bitte beschreiben Sie Ihre Ernährungspräferenz</label>
+                <textarea
+                  value={dietaryNotes}
+                  onChange={(e) => setDietaryNotes(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-red-500 focus:border-transparent text-gray-900 placeholder-gray-500 font-medium"
+                  placeholder="z.B. Nussallergie, Glutenunverträglichkeit, etc."
+                  rows={3}
+                />
+              </div>
+            )}
 
             <button
               onClick={handleVoteSubmit}

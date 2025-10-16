@@ -67,6 +67,18 @@ export default async function EventDetailPage({
     .eq('event_id', params.id)
     .order('created_at', { ascending: true })
 
+  // Group dietary preferences for overview
+  const dietaryGroups: { [key: string]: any[] } = {}
+  teamMembers?.forEach(member => {
+    if (member.dietary_preference) {
+      const pref = member.dietary_preference
+      if (!dietaryGroups[pref]) {
+        dietaryGroups[pref] = []
+      }
+      dietaryGroups[pref].push(member)
+    }
+  })
+
   // Votes laden
   const { data: votes } = await supabase
     .from('votes')
@@ -364,6 +376,53 @@ export default async function EventDetailPage({
           )}
         </div>
       </div>
+
+      {/* Ernährungsübersicht */}
+      {Object.keys(dietaryGroups).length > 0 && (
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6 mt-4 sm:mt-6">
+          <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">
+            🍽️ Ernährungspräferenzen
+          </h2>
+          
+          <div className="space-y-3">
+            {Object.entries(dietaryGroups).map(([preference, members]) => {
+              const prefLabel = {
+                'omnivor': '🍖 Omnivor (Alles)',
+                'vegetarisch': '🥗 Vegetarisch',
+                'vegan': '🌱 Vegan',
+                'kein_schweinefleisch': '🐷 Kein Schweinefleisch',
+                'sonstiges': '⚠️ Sonstiges'
+              }[preference] || preference
+
+              return (
+                <div key={preference} className="border border-gray-200 rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-medium text-sm text-gray-900">{prefLabel}</span>
+                    <span className="text-xs text-gray-500">{members.length} Person{members.length !== 1 ? 'en' : ''}</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {members.map((member) => (
+                      <span key={member.id} className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                        {member.name || member.email}
+                      </span>
+                    ))}
+                  </div>
+                  {preference === 'sonstiges' && members.some(m => m.dietary_notes) && (
+                    <div className="mt-2 pt-2 border-t border-gray-100">
+                      <p className="text-xs text-gray-600 mb-1">Zusätzliche Notizen:</p>
+                      {members.filter(m => m.dietary_notes).map((member) => (
+                        <div key={member.id} className="text-xs text-gray-700 mb-1">
+                          <strong>{member.name || member.email}:</strong> {member.dietary_notes}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

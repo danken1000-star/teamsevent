@@ -8,6 +8,7 @@ interface ContactLocationsFormProps {
   activities: any[]
   totalCost: number
   totalDuration: number
+  teamMembers: any[]
 }
 
 export default function ContactLocationsForm({
@@ -15,6 +16,7 @@ export default function ContactLocationsForm({
   activities,
   totalCost,
   totalDuration,
+  teamMembers,
 }: ContactLocationsFormProps) {
   const [message, setMessage] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -23,6 +25,44 @@ export default function ContactLocationsForm({
 
   // Pre-fill message template
   useEffect(() => {
+    // Group dietary preferences
+    const dietaryGroups: { [key: string]: string[] } = {}
+    teamMembers.forEach(member => {
+      if (member.dietary_preference) {
+        const pref = member.dietary_preference
+        if (!dietaryGroups[pref]) {
+          dietaryGroups[pref] = []
+        }
+        dietaryGroups[pref].push(member.name || member.email)
+      }
+    })
+
+    // Format dietary information
+    let dietaryInfo = ''
+    if (Object.keys(dietaryGroups).length > 0) {
+      dietaryInfo = '\n\nErnährungspräferenzen:\n'
+      Object.entries(dietaryGroups).forEach(([preference, names]) => {
+        const prefLabel = {
+          'omnivor': '🍖 Omnivor (Alles)',
+          'vegetarisch': '🥗 Vegetarisch',
+          'vegan': '🌱 Vegan',
+          'kein_schweinefleisch': '🐷 Kein Schweinefleisch',
+          'sonstiges': '⚠️ Sonstiges'
+        }[preference] || preference
+
+        dietaryInfo += `- ${prefLabel}: ${names.join(', ')}\n`
+      })
+
+      // Add special notes for "sonstiges"
+      const sonstigesMembers = teamMembers.filter(m => m.dietary_preference === 'sonstiges' && m.dietary_notes)
+      if (sonstigesMembers.length > 0) {
+        dietaryInfo += '\nZusätzliche Ernährungsnotizen:\n'
+        sonstigesMembers.forEach(member => {
+          dietaryInfo += `- ${member.name || member.email}: ${member.dietary_notes}\n`
+        })
+      }
+    }
+
     const defaultMessage = `Guten Tag,
 
 wir möchten folgendes Event bei Ihnen buchen:
@@ -35,7 +75,7 @@ Gewählte Activities:
 ${activities.map((a) => `- ${a.name} (CHF ${(a.price_per_person * event.participant_count).toLocaleString('de-CH')})`).join('\n')}
 
 Gesamtkosten: CHF ${totalCost.toLocaleString('de-CH')}
-Dauer: ca. ${totalDuration} Stunden
+Dauer: ca. ${totalDuration} Stunden${dietaryInfo}
 
 Bitte senden Sie uns eine Bestätigung und weitere Details zur Buchung.
 
@@ -43,7 +83,7 @@ Mit freundlichen Grüssen
 Organisiert über TeamEvent.ch`
 
     setMessage(defaultMessage)
-  }, [event, activities, totalCost, totalDuration])
+  }, [event, activities, totalCost, totalDuration, teamMembers])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

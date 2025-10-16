@@ -46,6 +46,13 @@ export default async function ContactLocationsPage({
     activities = activitiesData || []
   }
 
+  // Load team members with dietary preferences
+  const { data: teamMembers } = await supabase
+    .from('team_members')
+    .select('name, email, dietary_preference, dietary_notes')
+    .eq('event_id', params.id)
+    .not('dietary_preference', 'is', null)
+
   // Calculate totals
   const totalCost = activities.reduce(
     (sum, a) => sum + (a.price_per_person || 0) * (event.participant_count || 0),
@@ -125,6 +132,7 @@ export default async function ContactLocationsPage({
           activities={activities}
           totalCost={totalCost}
           totalDuration={totalDuration}
+          teamMembers={teamMembers || []}
         />
       </div>
     </div>
