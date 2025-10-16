@@ -337,7 +337,7 @@ export default async function EventDetailPage({
             <div className="space-y-3">
               <h4 className="font-medium text-sm text-gray-700">Abgegebene Stimmen:</h4>
               {votes?.map((vote) => {
-                const member = teamMembers?.find((m) => m.id === vote.member_id);
+                const member = teamMembers?.find((m) => m.id === vote.team_member_id);
                 return (
                   <div
                     key={vote.id}
