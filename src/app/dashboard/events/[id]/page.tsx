@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase'
 import { redirect } from 'next/navigation'
 import InviteTeamMembersBulk from './InviteTeamMembersBulk'
+import EditableEventTitle from './EditableEventTitle'
 import Link from 'next/link'
 import EventCreatedToast from './EventCreatedToast'
 import FinalizeEventButton from './FinalizeEventButton'
@@ -120,9 +121,11 @@ export default async function EventDetailPage({
       <div className="bg-white rounded-lg shadow p-4 sm:p-6 mb-4 sm:mb-6">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-4">
           <div className="flex-1 min-w-0">
-            <h1 className="text-xl sm:text-3xl font-bold text-gray-900 mb-2 break-words">
-              {event.title}
-            </h1>
+            <EditableEventTitle 
+              eventId={params.id}
+              title={event.title}
+              isFinalized={event.status === 'finalized'}
+            />
             
             {/* Event-Typ Badge */}
             {event.event_type && (
