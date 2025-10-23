@@ -356,7 +356,7 @@ export default async function EventDetailPage({
                     <span className="text-green-600 text-lg">✓</span>
                     <div className="flex-1">
                       <div className="font-medium text-sm">
-                        {member?.name || 'Unbekannt'}
+                        {member?.name || 'Teilnehmende'}
                       </div>
                       <div className="text-xs text-gray-500">{member?.email}</div>
                     </div>
