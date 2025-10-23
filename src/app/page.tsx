@@ -46,17 +46,16 @@ export default async function Home() {
 
         {/* Main Headline */}
         <h1 className="text-6xl md:text-7xl font-bold text-black mb-8 leading-tight">
-          Team-Events in<br />
+          Perfekte Team-Events in<br />
           <span className="text-red-600">30 Minuten</span>
         </h1>
 
         <p className="text-2xl text-gray-600 mb-4">
-          Statt Stunden an Planung
+          Die erste Schweizer Software für automatisierte Event-Planung – von der Idee zum fertigen Event in Rekordzeit.
         </p>
 
         <p className="text-xl text-gray-500 mb-12 max-w-2xl mx-auto">
-          Die erste Schweizer Software für automatisierte Event-Planung –
-          sparen Sie Zeit, Geld und Nerven.
+          Stellen Sie Ihr perfektes Teamevent in kürzester Zeit zusammen. Ohne endlose Recherche, ohne komplizierte Koordination. Einfach, schnell, professionell.
         </p>
 
         {/* Big CTA Button */}
@@ -65,7 +64,7 @@ export default async function Home() {
             href={user ? "/dashboard" : "/auth/login"}
             className="px-12 py-5 bg-red-600 text-white text-lg font-bold rounded-xl hover:bg-red-700 transition-colors shadow-lg"
           >
-            {user ? "Zum Dashboard →" : "Kostenlos starten →"}
+            {user ? "Zum Dashboard →" : "🚀 Jetzt Event planen (gratis starten) →"}
           </Link>
           
           <Link
@@ -78,9 +77,9 @@ export default async function Home() {
 
         {/* Trust Badges - Simple */}
         <div className="flex flex-wrap justify-center gap-8 text-sm text-gray-600">
-          <span>✓ 100% Schweizer Lösung</span>
-          <span>✓ DSGVO Konform</span>
-          <span>✓ Keine Kreditkarte nötig</span>
+          <span>✓ Made in Switzerland</span>
+          <span>✓ DSGVO-konform</span>
+          <span>✓ Geprüfte Locations</span>
         </div>
       </div>
 
@@ -96,32 +95,32 @@ export default async function Home() {
             <div className="bg-white p-10 rounded-2xl border-2 border-gray-200 hover:border-red-600 transition-colors">
               <div className="text-5xl mb-6">⚡</div>
               <h3 className="text-2xl font-bold text-black mb-4">
-                30 Min statt Stunden
+                Blitzschnell organisiert
               </h3>
               <p className="text-gray-600 text-lg">
-                Automatisierte Event-Planung spart massive Zeit. Von der Idee zum fertigen Event in unter 30 Minuten.
+                Von der Idee zum Event in unter 30 Minuten. Schluss mit stundenlanger Recherche. Unsere KI findet automatisch die perfekten Locations und Aktivitäten für Ihr Team.
               </p>
             </div>
 
             {/* Card 2 */}
             <div className="bg-white p-10 rounded-2xl border-2 border-gray-200 hover:border-red-600 transition-colors">
-              <div className="text-5xl mb-6">💰</div>
+              <div className="text-5xl mb-6">🎯</div>
               <h3 className="text-2xl font-bold text-black mb-4">
-                CHF 3'000 gespart
+                Perfekt auf Ihr Team abgestimmt
               </h3>
               <p className="text-gray-600 text-lg">
-                Bei 4 Events pro Jahr sparen Sie 60 Stunden Organisationszeit. Das entspricht CHF 3'000+ an Arbeitszeit - für nur CHF 150/Monat.
+                Individuelle Vorschläge basierend auf Ihren Präferenzen. Budget, Teamgröße, Interessen – wir matchen automatisch die besten Optionen für Ihren Anlass.
               </p>
             </div>
 
             {/* Card 3 */}
             <div className="bg-white p-10 rounded-2xl border-2 border-gray-200 hover:border-red-600 transition-colors">
-              <div className="text-5xl mb-6">🇨🇭</div>
+              <div className="text-5xl mb-6">👥</div>
               <h3 className="text-2xl font-bold text-black mb-4">
-                Swiss Quality
+                Demokratisch & einfach
               </h3>
               <p className="text-gray-600 text-lg">
-                Geprüfte Schweizer Locations, DSGVO-konform, mehrsprachig. Made in Switzerland.
+                Ihr Team entscheidet mit – ohne Anmeldung. Teilen Sie einfach einen Link. Ihr Team stimmt ab. Fertig. Keine komplizierten Tools, keine Registrierung nötig.
               </p>
             </div>
           </div>
@@ -138,34 +137,34 @@ export default async function Home() {
           <div className="grid md:grid-cols-4 gap-12">
             <div className="text-center">
               <div className="w-20 h-20 bg-red-600 text-white rounded-full flex items-center justify-center text-3xl font-bold mx-auto mb-6">
-                1
+                📝
               </div>
-              <h4 className="text-xl font-bold text-black mb-3">Event-Details</h4>
-              <p className="text-gray-600">Budget & Teilnehmer eingeben</p>
+              <h4 className="text-xl font-bold text-black mb-3">Anforderungen definieren</h4>
+              <p className="text-gray-600">Budget, Teilnehmerzahl und Präferenzen eingeben – fertig in 2 Minuten.</p>
             </div>
 
             <div className="text-center">
               <div className="w-20 h-20 bg-red-600 text-white rounded-full flex items-center justify-center text-3xl font-bold mx-auto mb-6">
-                2
+                🎯
               </div>
-              <h4 className="text-xl font-bold text-black mb-3">Location wählen</h4>
-              <p className="text-gray-600">Automatische Vorschläge erhalten</p>
+              <h4 className="text-xl font-bold text-black mb-3">Smarte Vorschläge erhalten</h4>
+              <p className="text-gray-600">Automatisch kuratierte Vorschläge von geprüften Schweizer Locations und Aktivitäten.</p>
             </div>
 
             <div className="text-center">
               <div className="w-20 h-20 bg-red-600 text-white rounded-full flex items-center justify-center text-3xl font-bold mx-auto mb-6">
-                3
+                🗳️
               </div>
-              <h4 className="text-xl font-bold text-black mb-3">Team einladen</h4>
-              <p className="text-gray-600">Abstimmung per Link teilen</p>
+              <h4 className="text-xl font-bold text-black mb-3">Team einbeziehen</h4>
+              <p className="text-gray-600">Link teilen, Team abstimmen lassen – demokratisch und transparent.</p>
             </div>
 
             <div className="text-center">
               <div className="w-20 h-20 bg-red-600 text-white rounded-full flex items-center justify-center text-3xl font-bold mx-auto mb-6">
-                4
+                🎉
               </div>
               <h4 className="text-xl font-bold text-black mb-3">Fertig!</h4>
-              <p className="text-gray-600">Event ist geplant & gebucht</p>
+              <p className="text-gray-600">Event ist geplant, alle sind informiert. Jetzt nur noch geniessen.</p>
             </div>
           </div>
         </div>
@@ -175,17 +174,22 @@ export default async function Home() {
       <div className="bg-red-600 py-24">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <h2 className="text-5xl font-bold text-white mb-6">
-            Bereit für Ihr nächstes Team-Event?
+            Bereit für Ihr nächstes unvergessliches Teamevent?
           </h2>
           <p className="text-xl text-red-100 mb-10">
-            Starten Sie kostenlos - keine Kreditkarte erforderlich
+            Starten Sie jetzt kostenlos – keine Kreditkarte erforderlich.
           </p>
           <Link
             href={user ? "/dashboard" : "/auth/login"}
             className="inline-block px-12 py-5 bg-white text-red-600 text-lg font-bold rounded-xl hover:bg-gray-100 transition-colors shadow-xl"
           >
-            {user ? "Zum Dashboard →" : "Jetzt kostenlos starten →"}
+            {user ? "Zum Dashboard →" : "🎯 Jetzt Event planen"}
           </Link>
+          <div className="mt-6 flex flex-wrap justify-center gap-6 text-sm text-red-100">
+            <span>✓ Kostenlos starten</span>
+            <span>✓ Keine Verpflichtung</span>
+            <span>✓ In 2 Minuten einsatzbereit</span>
+          </div>
         </div>
       </div>
 
