@@ -27,19 +27,30 @@ export default function ParticipatePage() {
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.teamsevent.ch'
       const apiUrl = `${baseUrl}/api/events/${params.id}/public`
       
+      console.log('Loading event from:', apiUrl)
+      
       const response = await fetch(apiUrl, {
         cache: 'no-store',
         headers: { 'Content-Type': 'application/json' }
       })
+
+      console.log('Response status:', response.status)
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
 
       const data = await response.json()
+      console.log('Event data received:', data)
+      
+      if (!data.event) {
+        throw new Error('No event data received')
+      }
+      
       setEvent(data.event)
     } catch (error) {
       console.error('Error loading event:', error)
+      setEvent(null) // Explicitly set to null to show error state
     } finally {
       setLoading(false)
     }
@@ -100,6 +111,7 @@ export default function ParticipatePage() {
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Event nicht gefunden</h1>
           <p className="text-gray-600 mb-4">Der Teilnahme-Link ist ungültig oder das Event existiert nicht mehr.</p>
+          <p className="text-sm text-gray-500 mb-4">Event ID: {params.id}</p>
           <Link href="/" className="text-red-600 hover:underline">Zurück zum Start</Link>
         </div>
       </div>
