@@ -175,7 +175,7 @@ export default function InviteTeamMembersBulk({ eventId }: InviteTeamMembersBulk
           <textarea
             value={emailText}
             onChange={(e) => handleTextChange(e.target.value)}
-            placeholder="max@firma.ch&#10;Anna Muster anna@firma.ch&#10;test@example.com&#10;&#10;Oder aus Excel kopieren:&#10;max@firma.ch, anna@firma.ch, test@example.com&#10;&#10;💡 Tipp: Hover über das ?-Zeichen für mehr Formate"
+            placeholder="max@firma.ch&#10;Anna Muster anna@firma.ch&#10;test@example.com&#10;&#10;Oder aus Excel kopieren:&#10;max@firma.ch, anna@firma.ch, test@example.com"
             className="w-full px-3 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm text-gray-900 placeholder-gray-500 font-medium resize-none"
             rows={8}
             required
