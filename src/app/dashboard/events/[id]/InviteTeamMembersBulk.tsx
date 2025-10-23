@@ -137,15 +137,35 @@ export default function InviteTeamMembersBulk({ eventId }: InviteTeamMembersBulk
     <div>
       <form onSubmit={handleInvite} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Team-Mitglieder einladen
-          </label>
-          <p className="text-xs text-gray-500 mb-3">
-            Füge E-Mail-Adressen ein - aus Excel, Liste oder einzeln. Unterstützt:
-            <br />• Einzelne E-Mails: <code className="bg-gray-100 px-1 rounded">max@firma.ch</code>
-            <br />• Mit Namen: <code className="bg-gray-100 px-1 rounded">Max Muster max@firma.ch</code>
-            <br />• Excel-Format: <code className="bg-gray-100 px-1 rounded">max@firma.ch, anna@firma.ch</code>
-          </p>
+          <div className="flex items-center gap-2 mb-2">
+            <label className="block text-sm font-medium text-gray-700">
+              Team-Mitglieder einladen
+            </label>
+            <div className="relative group">
+              <button
+                type="button"
+                className="w-4 h-4 bg-gray-400 hover:bg-gray-600 text-white rounded-full flex items-center justify-center text-xs font-bold transition-colors"
+                title="Hilfe anzeigen"
+              >
+                ?
+              </button>
+              
+              {/* Hover Info Box */}
+              <div className="absolute left-0 top-6 w-80 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                <div className="text-xs text-gray-600 space-y-2">
+                  <p className="font-medium text-gray-800">E-Mail-Formate unterstützt:</p>
+                  <div className="space-y-1">
+                    <div>• <strong>Einzelne E-Mails:</strong> <code className="bg-gray-100 px-1 rounded text-xs">max@firma.ch</code></div>
+                    <div>• <strong>Mit Namen:</strong> <code className="bg-gray-100 px-1 rounded text-xs">Max Muster max@firma.ch</code></div>
+                    <div>• <strong>Excel-Format:</strong> <code className="bg-gray-100 px-1 rounded text-xs">max@firma.ch, anna@firma.ch</code></div>
+                  </div>
+                  <p className="text-gray-500 mt-2">Aus Excel kopieren und hier einfügen - funktioniert automatisch!</p>
+                </div>
+                {/* Arrow */}
+                <div className="absolute -top-1 left-4 w-2 h-2 bg-white border-l border-t border-gray-200 transform rotate-45"></div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div>
@@ -155,7 +175,7 @@ export default function InviteTeamMembersBulk({ eventId }: InviteTeamMembersBulk
           <textarea
             value={emailText}
             onChange={(e) => handleTextChange(e.target.value)}
-            placeholder="max@firma.ch&#10;Anna Muster anna@firma.ch&#10;test@example.com&#10;&#10;Oder aus Excel kopieren:&#10;max@firma.ch, anna@firma.ch, test@example.com"
+            placeholder="max@firma.ch&#10;Anna Muster anna@firma.ch&#10;test@example.com&#10;&#10;Oder aus Excel kopieren:&#10;max@firma.ch, anna@firma.ch, test@example.com&#10;&#10;💡 Tipp: Hover über das ?-Zeichen für mehr Formate"
             className="w-full px-3 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm text-gray-900 placeholder-gray-500 font-medium resize-none"
             rows={8}
             required
