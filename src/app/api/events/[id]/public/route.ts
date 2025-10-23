@@ -8,19 +8,10 @@ export async function GET(
   try {
     const supabase = createClient()
 
-    // Get event with location
+    // Get event
     const { data: event, error: eventError } = await supabase
       .from('events')
-      .select(`
-        *,
-        locations (
-          id,
-          name,
-          city,
-          category,
-          price_per_person
-        )
-      `)
+      .select('*')
       .eq('id', params.id)
       .single()
 
