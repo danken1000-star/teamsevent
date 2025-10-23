@@ -24,10 +24,11 @@ export default function ParticipatePage() {
 
   const loadEventData = async () => {
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.teamsevent.ch'
-      const apiUrl = `${baseUrl}/api/events/${params.id}/public`
+      // Use relative URL to avoid CORS issues
+      const apiUrl = `/api/events/${params.id}/public`
       
       console.log('Loading event from:', apiUrl)
+      console.log('Event ID:', params.id)
       
       const response = await fetch(apiUrl, {
         cache: 'no-store',
@@ -35,8 +36,11 @@ export default function ParticipatePage() {
       })
 
       console.log('Response status:', response.status)
+      console.log('Response headers:', response.headers)
 
       if (!response.ok) {
+        const errorText = await response.text()
+        console.error('Error response:', errorText)
         throw new Error(`HTTP error! status: ${response.status}`)
       }
 
