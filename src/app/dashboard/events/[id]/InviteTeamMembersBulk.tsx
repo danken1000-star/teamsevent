@@ -138,7 +138,7 @@ export default function InviteTeamMembersBulk({ eventId }: InviteTeamMembersBulk
       <form onSubmit={handleInvite} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Team-Mitglieder einladen (Bulk)
+            Team-Mitglieder einladen
           </label>
           <p className="text-xs text-gray-500 mb-3">
             Füge E-Mail-Adressen ein - aus Excel, Liste oder einzeln. Unterstützt:

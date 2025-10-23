@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase'
 import { redirect } from 'next/navigation'
-import InviteTeamMembersTabs from './InviteTeamMembersTabs'
+import InviteTeamMembersBulk from './InviteTeamMembersBulk'
 import Link from 'next/link'
 import EventCreatedToast from './EventCreatedToast'
 import FinalizeEventButton from './FinalizeEventButton'
@@ -313,7 +313,7 @@ export default async function EventDetailPage({
             </p>
           )}
 
-          <InviteTeamMembersTabs eventId={params.id} />
+          <InviteTeamMembersBulk eventId={params.id} />
         </div>
 
         {/* Voting Results - UPDATED */}
