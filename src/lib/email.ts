@@ -76,21 +76,34 @@ function getEmailTemplate(name: string, eventTitle: string, participationUrl: st
               </p>
 
               <!-- CTA Button -->
-              <table role="presentation" style="margin: 0 auto;">
+              <table role="presentation" style="margin: 0 auto; width: 100%; max-width: 300px;">
                 <tr>
-                  <td style="border-radius: 8px; background-color: #dc2626;">
-                    <a href="${participationUrl}" 
-                       style="display: inline-block; padding: 16px 32px; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; border-radius: 8px;">
-                      🎉 Teilnahme bestätigen
-                    </a>
+                  <td style="text-align: center;">
+                    <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                      <tr>
+                        <td style="background-color: #dc2626; border-radius: 8px; text-align: center; padding: 0;">
+                          <a href="${participationUrl}" 
+                             style="display: block; padding: 16px 32px; color: #ffffff !important; text-decoration: none !important; font-size: 16px; font-weight: 600; font-family: Arial, sans-serif; border-radius: 8px; background-color: #dc2626; mso-padding-alt: 0;">
+                            <span style="color: #ffffff !important; text-decoration: none !important;">🎉 Teilnahme bestätigen</span>
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
                   </td>
                 </tr>
               </table>
 
               <p style="margin: 30px 0 0; color: #6b7280; font-size: 14px; line-height: 1.6;">
                 Oder kopiere diesen Link in deinen Browser:<br>
-                <a href="${participationUrl}" style="color: #dc2626; word-break: break-all;">${participationUrl}</a>
+                <a href="${participationUrl}" style="color: #dc2626 !important; text-decoration: underline !important; word-break: break-all; font-family: Arial, sans-serif;">${participationUrl}</a>
               </p>
+              
+              <!-- Outlook Fallback -->
+              <!--[if mso]>
+              <div style="text-align: center; margin: 20px 0;">
+                <a href="${participationUrl}" style="background-color: #dc2626; color: #ffffff; text-decoration: none; padding: 16px 32px; font-size: 16px; font-weight: 600; display: inline-block; border-radius: 8px; font-family: Arial, sans-serif;">🎉 Teilnahme bestätigen</a>
+              </div>
+              <![endif]-->
             </td>
           </tr>
 
