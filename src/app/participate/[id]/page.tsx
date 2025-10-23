@@ -24,19 +24,30 @@ export default function ParticipatePage() {
 
   const loadEventData = async () => {
     try {
-      // Use relative URL to avoid CORS issues
+      // Try multiple approaches to get the event data
       const apiUrl = `/api/events/${params.id}/public`
       
       console.log('Loading event from:', apiUrl)
       console.log('Event ID:', params.id)
       
-      const response = await fetch(apiUrl, {
+      // First try with relative URL
+      let response = await fetch(apiUrl, {
         cache: 'no-store',
         headers: { 'Content-Type': 'application/json' }
       })
 
       console.log('Response status:', response.status)
-      console.log('Response headers:', response.headers)
+
+      // If relative URL fails, try absolute URL
+      if (!response.ok) {
+        console.log('Relative URL failed, trying absolute URL...')
+        const absoluteUrl = `https://www.teamsevent.ch/api/events/${params.id}/public`
+        response = await fetch(absoluteUrl, {
+          cache: 'no-store',
+          headers: { 'Content-Type': 'application/json' }
+        })
+        console.log('Absolute URL response status:', response.status)
+      }
 
       if (!response.ok) {
         const errorText = await response.text()

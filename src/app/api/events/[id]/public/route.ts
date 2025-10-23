@@ -6,6 +6,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
+    console.log('API: Fetching event with ID:', params.id)
     const supabase = createClient()
 
     // Get event
@@ -15,18 +16,22 @@ export async function GET(
       .eq('id', params.id)
       .single()
 
+    console.log('API: Event query result:', { event, eventError })
+
     if (eventError || !event) {
+      console.log('API: Event not found, error:', eventError)
       return NextResponse.json(
         { error: 'Event nicht gefunden' },
         { status: 404 }
       )
     }
 
+    console.log('API: Returning event:', event.title)
     return NextResponse.json({
       event
     })
   } catch (error) {
-    console.error('Error fetching event:', error)
+    console.error('API: Error fetching event:', error)
     return NextResponse.json(
       { error: 'Ein Fehler ist aufgetreten' },
       { status: 500 }
