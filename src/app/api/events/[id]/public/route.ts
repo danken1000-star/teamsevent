@@ -31,16 +31,30 @@ export async function GET(
       )
     }
 
-    // Count votes for this event
-    const { count: voteCount } = await supabase
-      .from('votes')
-      .select('*', { count: 'exact', head: true })
+    // Load activities for this event
+    const { data: eventActivities } = await supabase
+      .from('event_activities')
+      .select(`
+        *,
+        activities (
+          id,
+          name,
+          description,
+          category,
+          price_per_person,
+          duration_hours,
+          tags
+        )
+      `)
       .eq('event_id', params.id)
-      .eq('vote_type', 'date')
+      .order('order_index', { ascending: true })
+
+    // Extract activities from junction
+    const activities = eventActivities?.map(ea => ea.activities).filter(Boolean) || []
 
     return NextResponse.json({
       event,
-      voteCount: voteCount || 0
+      activities
     })
   } catch (error) {
     console.error('Error fetching event:', error)
