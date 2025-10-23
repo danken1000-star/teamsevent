@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server'
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { event_id, name, email, dietary_preference, dietary_notes } = body
+    const { event_id, name, email, dietary_preference, dietary_notes, participation_type = 'confirmed' } = body
 
     console.log('=== PARTICIPATION SUBMIT START ===')
     console.log('Received data:', { event_id, name, email, dietary_preference, dietary_notes })
@@ -106,7 +106,7 @@ export async function POST(request: Request) {
       event_id,
       team_member_id: memberId,
       vote_type: 'attendance',
-      vote_value: 'confirmed',
+      vote_value: participation_type, // 'confirmed' or 'declined'
     }
 
     console.log('Participation data:', participationData)

@@ -16,6 +16,7 @@ export default function ParticipatePage() {
   const [dietaryNotes, setDietaryNotes] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [participationSuccess, setParticipationSuccess] = useState(false)
+  const [declineMode, setDeclineMode] = useState(false)
 
   useEffect(() => {
     loadEventData()
@@ -62,6 +63,7 @@ export default function ParticipatePage() {
           email,
           dietary_preference: dietaryPreference,
           dietary_notes: dietaryNotes,
+          participation_type: declineMode ? 'declined' : 'confirmed'
         }),
       })
 
@@ -152,7 +154,30 @@ export default function ParticipatePage() {
       {/* Participation Form */}
       {!participationSuccess ? (
         <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Teilnahme bestätigen</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-gray-900">
+              {declineMode ? 'Absage mitteilen' : 'Teilnahme bestätigen'}
+            </h2>
+            <button
+              onClick={() => setDeclineMode(!declineMode)}
+              className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                declineMode 
+                  ? 'bg-red-100 text-red-700 hover:bg-red-200' 
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              {declineMode ? '✓ Absage' : '❌ Absagen'}
+            </button>
+          </div>
+          
+          {declineMode && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+              <p className="text-sm text-red-800">
+                <strong>Absage:</strong> Du kannst an diesem Datum nicht teilnehmen? 
+                Das ist völlig in Ordnung! Bitte gib deine Kontaktdaten an, damit wir Bescheid wissen.
+              </p>
+            </div>
+          )}
           
           <div className="space-y-4">
             <div>
@@ -213,17 +238,34 @@ export default function ParticipatePage() {
             <button
               onClick={handleParticipationSubmit}
               disabled={submitting || !name || !email}
-              className="w-full bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className={`w-full py-3 rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed ${
+                declineMode 
+                  ? 'bg-red-600 text-white hover:bg-red-700' 
+                  : 'bg-green-600 text-white hover:bg-green-700'
+              }`}
             >
-              {submitting ? 'Wird gespeichert...' : 'Teilnahme bestätigen'}
+              {submitting ? 'Wird gespeichert...' : (declineMode ? 'Absage senden' : 'Teilnahme bestätigen')}
             </button>
           </div>
         </div>
       ) : (
-        <div className="bg-green-50 border-2 border-green-500 p-6 rounded-lg text-center">
-          <div className="text-4xl mb-4">✅</div>
-          <h3 className="text-xl font-bold text-green-700 mb-2">Teilnahme bestätigt!</h3>
-          <p className="text-gray-600">Vielen Dank für Ihre Teilnahme am Event.</p>
+        <div className={`border-2 p-6 rounded-lg text-center ${
+          declineMode 
+            ? 'bg-red-50 border-red-500' 
+            : 'bg-green-50 border-green-500'
+        }`}>
+          <div className="text-4xl mb-4">{declineMode ? '❌' : '✅'}</div>
+          <h3 className={`text-xl font-bold mb-2 ${
+            declineMode ? 'text-red-700' : 'text-green-700'
+          }`}>
+            {declineMode ? 'Absage erhalten!' : 'Teilnahme bestätigt!'}
+          </h3>
+          <p className="text-gray-600">
+            {declineMode 
+              ? 'Vielen Dank für die Rückmeldung. Wir haben deine Absage notiert.' 
+              : 'Vielen Dank für Ihre Teilnahme am Event.'
+            }
+          </p>
         </div>
       )}
 

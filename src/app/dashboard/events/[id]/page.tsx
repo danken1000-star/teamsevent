@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase'
 import { redirect } from 'next/navigation'
 import InviteTeamMembersBulk from './InviteTeamMembersBulk'
 import EditableEventTitle from './EditableEventTitle'
+import SendReminderButton from './SendReminderButton'
 import Link from 'next/link'
 import EventCreatedToast from './EventCreatedToast'
 import FinalizeEventButton from './FinalizeEventButton'
@@ -86,11 +87,14 @@ export default async function EventDetailPage({
     .eq('event_id', params.id)
 
   // Calculate vote statistics
-  const voteCount = votes?.length || 0
+  const confirmedVotes = votes?.filter((v: any) => v.vote_value === 'confirmed') || []
+  const declinedVotes = votes?.filter((v: any) => v.vote_value === 'declined') || []
+  const totalResponses = confirmedVotes.length + declinedVotes.length
   const memberCount = teamMembers?.length || 0
 
-  // Compute which team members have voted (by team_member_id)
-  const votedMemberIds = new Set((votes || []).map((v: any) => v.team_member_id))
+  // Compute which team members have responded (by team_member_id)
+  const respondedMemberIds = new Set((votes || []).map((v: any) => v.team_member_id))
+  const pendingMembers = teamMembers?.filter(member => !respondedMemberIds.has(member.id)) || []
 
   // Extract activities from junction
   const activities = eventActivities?.map(ea => ea.activities).filter(Boolean) || []
@@ -302,8 +306,15 @@ export default async function EventDetailPage({
                     </p>
                     <p className="text-xs text-gray-500 truncate">{member.email}</p>
                   </div>
-                  {votedMemberIds.has(member.id) ? (
-                    <span className="text-xs text-green-600 font-medium whitespace-nowrap">✓ Teilnahme bestätigt</span>
+                  {respondedMemberIds.has(member.id) ? (
+                    (() => {
+                      const vote = votes?.find((v: any) => v.team_member_id === member.id)
+                      return vote?.vote_value === 'confirmed' ? (
+                        <span className="text-xs text-green-600 font-medium whitespace-nowrap">✓ Teilnahme bestätigt</span>
+                      ) : (
+                        <span className="text-xs text-red-600 font-medium whitespace-nowrap">❌ Abgesagt</span>
+                      )
+                    })()
                   ) : (
                     <span className="text-xs text-gray-400 whitespace-nowrap">Ausstehend</span>
                   )}
@@ -317,6 +328,7 @@ export default async function EventDetailPage({
           )}
 
           <InviteTeamMembersBulk eventId={params.id} />
+          <SendReminderButton eventId={params.id} pendingMembers={pendingMembers} />
         </div>
 
         {/* Voting Results - UPDATED */}
@@ -325,43 +337,65 @@ export default async function EventDetailPage({
           
           <div className="mb-6">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm text-gray-600">Teilnahme-Fortschritt</span>
-              <span className="text-lg font-bold text-red-600">
-                {voteCount} / {memberCount}
+              <span className="text-sm text-gray-600">Rückmeldungen</span>
+              <span className="text-lg font-bold text-blue-600">
+                {totalResponses} / {memberCount}
               </span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-3">
               <div
-                className="bg-red-600 h-3 rounded-full transition-all"
+                className="bg-blue-600 h-3 rounded-full transition-all"
                 style={{
-                  width: `${memberCount > 0 ? (voteCount / memberCount) * 100 : 0}%`,
+                  width: `${memberCount > 0 ? (totalResponses / memberCount) * 100 : 0}%`,
                 }}
               />
             </div>
             <div className="text-center mt-2">
-              <span className="text-2xl font-bold text-green-600">
-                {memberCount > 0 ? Math.round((voteCount / memberCount) * 100) : 0}%
+              <span className="text-2xl font-bold text-blue-600">
+                {memberCount > 0 ? Math.round((totalResponses / memberCount) * 100) : 0}%
               </span>
-              <span className="text-sm text-gray-600 ml-2">Beteiligung</span>
+              <span className="text-sm text-gray-600 ml-2">Rückmeldungen</span>
+            </div>
+            
+            {/* Response breakdown */}
+            <div className="grid grid-cols-2 gap-4 mt-4 text-sm">
+              <div className="text-center">
+                <div className="text-green-600 font-bold text-lg">{confirmedVotes.length}</div>
+                <div className="text-gray-600">Zusagen</div>
+              </div>
+              <div className="text-center">
+                <div className="text-red-600 font-bold text-lg">{declinedVotes.length}</div>
+                <div className="text-gray-600">Absagen</div>
+              </div>
             </div>
           </div>
 
-          {voteCount > 0 ? (
+          {totalResponses > 0 ? (
             <div className="space-y-3">
-              <h4 className="font-medium text-sm text-gray-700">Teilnahme bestätigt:</h4>
+              <h4 className="font-medium text-sm text-gray-700">Rückmeldungen:</h4>
               {votes?.map((vote) => {
                 const member = teamMembers?.find((m) => m.id === vote.team_member_id);
+                const isConfirmed = vote.vote_value === 'confirmed';
                 return (
                   <div
                     key={vote.id}
-                    className="flex items-center gap-2 p-3 bg-green-50 rounded-lg"
+                    className={`flex items-center gap-2 p-3 rounded-lg ${
+                      isConfirmed ? 'bg-green-50' : 'bg-red-50'
+                    }`}
                   >
-                    <span className="text-green-600 text-lg">✓</span>
+                    <span className={`text-lg ${isConfirmed ? 'text-green-600' : 'text-red-600'}`}>
+                      {isConfirmed ? '✓' : '❌'}
+                    </span>
                     <div className="flex-1">
                       <div className="font-medium text-sm">
                         {member?.name || 'Teilnehmende'}
                       </div>
                       <div className="text-xs text-gray-500">{member?.email}</div>
+                    </div>
+                    <div className={`text-xs font-medium ${
+                      isConfirmed ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                      {isConfirmed ? 'Zusage' : 'Absage'}
                     </div>
                   </div>
                 );
@@ -369,9 +403,9 @@ export default async function EventDetailPage({
             </div>
           ) : (
             <div className="text-center py-8">
-              <p className="text-gray-500 mb-2">Noch keine Teilnahme-Bestätigungen vorhanden</p>
+              <p className="text-gray-500 mb-2">Noch keine Rückmeldungen vorhanden</p>
               <p className="text-sm text-gray-400">
-                Warten Sie bis Team-Mitglieder ihre Teilnahme bestätigt haben
+                Warten Sie bis Team-Mitglieder geantwortet haben
               </p>
             </div>
           )}
