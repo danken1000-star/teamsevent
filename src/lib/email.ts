@@ -15,8 +15,8 @@ export async function sendVotingInvitation({
   memberId: string;
   eventTitle: string;
 }) {
-  // Simple anonymous voting URL (no memberId needed)
-  const votingUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://www.teamsevent.ch'}/vote/${eventId}`;
+  // Simple anonymous participation URL (no memberId needed)
+  const participationUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://www.teamsevent.ch'}/participate/${eventId}`;
   
   const displayName = name || email.split('@')[0];
 
@@ -24,8 +24,8 @@ export async function sendVotingInvitation({
     const result = await resend.emails.send({
       from: 'TeamEvent <noreply@teamsevent.ch>', // ✅ Verifizierte Domain
       to: email,
-      subject: `🗳️ Abstimmung für "${eventTitle}"`,
-      html: getEmailTemplate(displayName, eventTitle, votingUrl),
+      subject: `🎉 Teilnahme für "${eventTitle}"`,
+      html: getEmailTemplate(displayName, eventTitle, participationUrl),
     });
 
     console.log('Email sent successfully:', result);
@@ -36,14 +36,14 @@ export async function sendVotingInvitation({
   }
 }
 
-function getEmailTemplate(name: string, eventTitle: string, votingUrl: string) {
+function getEmailTemplate(name: string, eventTitle: string, participationUrl: string) {
   return `
 <!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Abstimmung für ${eventTitle}</title>
+  <title>Teilnahme für ${eventTitle}</title>
 </head>
 <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6;">
   <table role="presentation" style="width: 100%; border-collapse: collapse;">
@@ -68,20 +68,20 @@ function getEmailTemplate(name: string, eventTitle: string, votingUrl: string) {
               </h2>
               
               <p style="margin: 0 0 20px; color: #4b5563; font-size: 16px; line-height: 1.6;">
-                Du wurdest eingeladen, für das Event <strong style="color: #111827;">"${eventTitle}"</strong> abzustimmen.
+                Du wurdest eingeladen, an dem Event <strong style="color: #111827;">"${eventTitle}"</strong> teilzunehmen.
               </p>
 
               <p style="margin: 0 0 30px; color: #4b5563; font-size: 16px; line-height: 1.6;">
-                Bitte wähle dein bevorzugtes Datum aus den vorgeschlagenen Optionen.
+                Bitte bestätige deine Teilnahme und gib deine Ernährungspräferenzen an.
               </p>
 
               <!-- CTA Button -->
               <table role="presentation" style="margin: 0 auto;">
                 <tr>
                   <td style="border-radius: 8px; background-color: #dc2626;">
-                    <a href="${votingUrl}" 
+                    <a href="${participationUrl}" 
                        style="display: inline-block; padding: 16px 32px; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; border-radius: 8px;">
-                      🗳️ Jetzt abstimmen
+                      🎉 Teilnahme bestätigen
                     </a>
                   </td>
                 </tr>
@@ -89,7 +89,7 @@ function getEmailTemplate(name: string, eventTitle: string, votingUrl: string) {
 
               <p style="margin: 30px 0 0; color: #6b7280; font-size: 14px; line-height: 1.6;">
                 Oder kopiere diesen Link in deinen Browser:<br>
-                <a href="${votingUrl}" style="color: #dc2626; word-break: break-all;">${votingUrl}</a>
+                <a href="${participationUrl}" style="color: #dc2626; word-break: break-all;">${participationUrl}</a>
               </p>
             </td>
           </tr>

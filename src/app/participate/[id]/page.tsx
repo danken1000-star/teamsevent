@@ -4,19 +4,19 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 
-export default function PublicVotePage() {
+export default function ParticipatePage() {
   const params = useParams()
   const [event, setEvent] = useState<any>(null)
   const [activities, setActivities] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   
-  // Vote form state
+  // Participation form state
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [dietaryPreference, setDietaryPreference] = useState('')
   const [dietaryNotes, setDietaryNotes] = useState('')
   const [submitting, setSubmitting] = useState(false)
-  const [voteSuccess, setVoteSuccess] = useState(false)
+  const [participationSuccess, setParticipationSuccess] = useState(false)
 
   useEffect(() => {
     loadEventData()
@@ -25,7 +25,7 @@ export default function PublicVotePage() {
   const loadEventData = async () => {
     try {
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.teamsevent.ch'
-      const apiUrl = `${baseUrl}/api/vote/${params.id}`
+      const apiUrl = `${baseUrl}/api/events/${params.id}/public`
       
       const response = await fetch(apiUrl, {
         cache: 'no-store',
@@ -46,7 +46,7 @@ export default function PublicVotePage() {
     }
   }
 
-  const handleVoteSubmit = async () => {
+  const handleParticipationSubmit = async () => {
     if (!name || !email) {
       alert('Bitte Name und Email eingeben')
       return
@@ -55,7 +55,7 @@ export default function PublicVotePage() {
     setSubmitting(true)
 
     try {
-      const response = await fetch('/api/vote-submit', {
+      const response = await fetch('/api/participate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -70,14 +70,14 @@ export default function PublicVotePage() {
       const data = await response.json()
 
       if (!response.ok) {
-        console.error('Vote error:', data)
-        throw new Error(data.error || 'Failed to submit vote')
+        console.error('Participation error:', data)
+        throw new Error(data.error || 'Failed to confirm participation')
       }
 
-      setVoteSuccess(true)
+      setParticipationSuccess(true)
     } catch (error: any) {
-      console.error('Vote submit error:', error)
-      alert(`Fehler beim Vote: ${error.message}`)
+      console.error('Participation submit error:', error)
+      alert(`Fehler bei der Teilnahme-Bestätigung: ${error.message}`)
     } finally {
       setSubmitting(false)
     }
@@ -99,7 +99,7 @@ export default function PublicVotePage() {
       <div className="max-w-3xl mx-auto px-4 py-8">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Event nicht gefunden</h1>
-          <p className="text-gray-600 mb-4">Der Abstimmungs-Link ist ungültig oder das Event existiert nicht mehr.</p>
+          <p className="text-gray-600 mb-4">Der Teilnahme-Link ist ungültig oder das Event existiert nicht mehr.</p>
           <Link href="/" className="text-red-600 hover:underline">Zurück zum Start</Link>
         </div>
       </div>
@@ -109,7 +109,7 @@ export default function PublicVotePage() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Team-Voting</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Teilnahme bestätigen</h1>
         <p className="text-gray-600 mt-1">Event: {event.title}</p>
         {event.event_date && (
           <p className="text-gray-600 mt-1">
@@ -176,8 +176,8 @@ export default function PublicVotePage() {
         </div>
       )}
 
-      {/* Vote Form */}
-      {!voteSuccess ? (
+      {/* Participation Form */}
+      {!participationSuccess ? (
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-lg font-bold text-gray-900 mb-4">Teilnahme bestätigen</h2>
           
@@ -238,7 +238,7 @@ export default function PublicVotePage() {
             )}
 
             <button
-              onClick={handleVoteSubmit}
+              onClick={handleParticipationSubmit}
               disabled={submitting || !name || !email}
               className="w-full bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >

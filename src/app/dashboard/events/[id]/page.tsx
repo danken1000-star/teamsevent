@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation'
 import InviteTeamMembers from './InviteTeamMembers'
 import Link from 'next/link'
 import EventCreatedToast from './EventCreatedToast'
-import CopyLinkButton from './CopyLinkButton'
 import FinalizeEventButton from './FinalizeEventButton'
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -134,10 +133,6 @@ export default async function EventDetailPage({
               </div>
             )}
             
-            {/* Copy Vote Link Button */}
-            <div className="mb-3">
-              <CopyLinkButton eventId={params.id} />
-            </div>
             
             <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600">
               <span>💰 CHF {event.budget?.toLocaleString('de-CH')}</span>
@@ -305,7 +300,7 @@ export default async function EventDetailPage({
                     <p className="text-xs text-gray-500 truncate">{member.email}</p>
                   </div>
                   {votedMemberIds.has(member.id) ? (
-                    <span className="text-xs text-green-600 font-medium whitespace-nowrap">✓ Abgestimmt</span>
+                    <span className="text-xs text-green-600 font-medium whitespace-nowrap">✓ Teilnahme bestätigt</span>
                   ) : (
                     <span className="text-xs text-gray-400 whitespace-nowrap">Ausstehend</span>
                   )}
@@ -323,11 +318,11 @@ export default async function EventDetailPage({
 
         {/* Voting Results - UPDATED */}
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-lg font-semibold mb-4">Abstimmungs-Ergebnisse</h2>
+          <h2 className="text-lg font-semibold mb-4">Teilnahme</h2>
           
           <div className="mb-6">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm text-gray-600">Abstimmungs-Fortschritt</span>
+              <span className="text-sm text-gray-600">Teilnahme-Fortschritt</span>
               <span className="text-lg font-bold text-red-600">
                 {voteCount} / {memberCount}
               </span>
@@ -350,7 +345,7 @@ export default async function EventDetailPage({
 
           {voteCount > 0 ? (
             <div className="space-y-3">
-              <h4 className="font-medium text-sm text-gray-700">Abgegebene Stimmen:</h4>
+              <h4 className="font-medium text-sm text-gray-700">Teilnahme bestätigt:</h4>
               {votes?.map((vote) => {
                 const member = teamMembers?.find((m) => m.id === vote.team_member_id);
                 return (
@@ -371,9 +366,9 @@ export default async function EventDetailPage({
             </div>
           ) : (
             <div className="text-center py-8">
-              <p className="text-gray-500 mb-2">Noch keine Abstimmungen vorhanden</p>
+              <p className="text-gray-500 mb-2">Noch keine Teilnahme-Bestätigungen vorhanden</p>
               <p className="text-sm text-gray-400">
-                Warten Sie bis Team-Mitglieder abgestimmt haben
+                Warten Sie bis Team-Mitglieder ihre Teilnahme bestätigt haben
               </p>
             </div>
           )}

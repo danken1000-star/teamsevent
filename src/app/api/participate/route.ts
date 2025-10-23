@@ -4,9 +4,9 @@ import { NextResponse } from 'next/server'
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { event_id, name, email, selected_date, dietary_preference, dietary_notes } = body
+    const { event_id, name, email, dietary_preference, dietary_notes } = body
 
-    console.log('=== VOTE SUBMIT START ===')
+    console.log('=== PARTICIPATION SUBMIT START ===')
     console.log('Received data:', { event_id, name, email, dietary_preference, dietary_notes })
 
     if (!event_id || !name || !email) {
@@ -81,75 +81,70 @@ export async function POST(request: Request) {
       console.log('Created new member:', memberId)
     }
 
-    // 4. Check if vote already exists
-    console.log('4. Checking if vote exists...')
-    const { data: existingVote } = await supabase
+    // 4. Check if participation already exists
+    console.log('4. Checking if participation exists...')
+    const { data: existingParticipation } = await supabase
       .from('votes')
       .select('id')
       .eq('event_id', event_id)
       .eq('team_member_id', memberId)
       .maybeSingle()
 
-    if (existingVote) {
-      console.log('Vote already exists:', existingVote.id)
+    if (existingParticipation) {
+      console.log('Participation already exists:', existingParticipation.id)
       return NextResponse.json({
         success: true,
         member_id: memberId,
-        vote_id: existingVote.id,
-        message: 'Vote already recorded',
+        participation_id: existingParticipation.id,
+        message: 'Participation already confirmed',
       })
     }
 
-    // 5. Create vote
-    console.log('5. Creating vote...')
-    const voteData: any = {
+    // 5. Create participation confirmation
+    console.log('5. Creating participation confirmation...')
+    const participationData: any = {
       event_id,
       team_member_id: memberId,
       vote_type: 'attendance',
       vote_value: 'confirmed',
     }
 
-    // Add date if provided (optional - für Multi-Date Events später)
-    if (selected_date) {
-      voteData.date_id = selected_date
-    }
+    console.log('Participation data:', participationData)
 
-    console.log('Vote data:', voteData)
-
-    const { data: vote, error: voteError } = await supabase
+    const { data: participation, error: participationError } = await supabase
       .from('votes')
-      .insert(voteData)
+      .insert(participationData)
       .select()
       .single()
 
-    if (voteError) {
-      console.error('Vote creation failed:', voteError)
+    if (participationError) {
+      console.error('Participation creation failed:', participationError)
       // Log deeper error information if available (driver-dependent fields)
-      const ve: any = voteError as any
-      if (ve?.code) console.error('Vote error code:', ve.code)
-      if (ve?.details) console.error('Vote error details:', ve.details)
-      if (ve?.hint) console.error('Vote error hint:', ve.hint)
+      const pe: any = participationError as any
+      if (pe?.code) console.error('Participation error code:', pe.code)
+      if (pe?.details) console.error('Participation error details:', pe.details)
+      if (pe?.hint) console.error('Participation error hint:', pe.hint)
       return NextResponse.json(
         { 
-          error: 'Failed to create vote', 
-          details: voteError.message,
-          code: ve?.code,
-          hint: ve?.hint
+          error: 'Failed to create participation', 
+          details: participationError.message,
+          code: pe?.code,
+          hint: pe?.hint
         },
         { status: 500 }
       )
     }
 
-    console.log('Vote created successfully:', vote.id)
-    console.log('=== VOTE SUBMIT SUCCESS ===')
+    console.log('Participation created successfully:', participation.id)
+    console.log('=== PARTICIPATION SUBMIT SUCCESS ===')
 
     return NextResponse.json({
       success: true,
-      vote_id: vote.id,
+      participation_id: participation.id,
     })
 
   } catch (error: any) {
-    console.error('=== VOTE SUBMIT ERROR ===')
+    console.error('=== PARTICIPATION SUBMIT ERROR ===')
     console.error('Unexpected error:', error)
     console.error('Error stack:', error.stack)
     return NextResponse.json(
