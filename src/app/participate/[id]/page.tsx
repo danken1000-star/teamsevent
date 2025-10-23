@@ -7,7 +7,6 @@ import Link from 'next/link'
 export default function ParticipatePage() {
   const params = useParams()
   const [event, setEvent] = useState<any>(null)
-  const [activities, setActivities] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   
   // Participation form state
@@ -38,7 +37,6 @@ export default function ParticipatePage() {
 
       const data = await response.json()
       setEvent(data.event)
-      setActivities(data.activities || [])
     } catch (error) {
       console.error('Error loading event:', error)
     } finally {
@@ -150,31 +148,6 @@ export default function ParticipatePage() {
         </div>
       </div>
 
-      {/* Activities */}
-      {activities.length > 0 ? (
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Ausgewählte Activities</h2>
-          <div className="space-y-3">
-            {activities.map((a: any, idx: number) => (
-              <div key={a.id} className="border rounded-lg p-4">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="font-semibold text-gray-900">{idx + 1}. {a.name}</p>
-                    <p className="text-sm text-gray-600 mt-1">{a.description}</p>
-                  </div>
-                  <p className="text-sm text-gray-700 whitespace-nowrap ml-4">
-                    CHF {a.price_per_person}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : (
-        <div className="bg-yellow-50 border border-yellow-200 text-yellow-900 rounded-lg p-4 mb-6">
-          Noch keine Activities vorhanden.
-        </div>
-      )}
 
       {/* Participation Form */}
       {!participationSuccess ? (

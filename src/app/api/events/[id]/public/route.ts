@@ -31,30 +31,8 @@ export async function GET(
       )
     }
 
-    // Load activities for this event
-    const { data: eventActivities } = await supabase
-      .from('event_activities')
-      .select(`
-        *,
-        activities (
-          id,
-          name,
-          description,
-          category,
-          price_per_person,
-          duration_hours,
-          tags
-        )
-      `)
-      .eq('event_id', params.id)
-      .order('order_index', { ascending: true })
-
-    // Extract activities from junction
-    const activities = eventActivities?.map(ea => ea.activities).filter(Boolean) || []
-
     return NextResponse.json({
-      event,
-      activities
+      event
     })
   } catch (error) {
     console.error('Error fetching event:', error)
