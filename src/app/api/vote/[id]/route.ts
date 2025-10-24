@@ -39,45 +39,53 @@ export async function POST(
     // Check if this voter already voted (by email or IP)
     const voterIdentifier = voterEmail || request.ip || 'anonymous'
     
-    const { data: existingVote } = await supabase
+    console.log('Checking for existing vote:', { eventId, voterIdentifier })
+    
+    const { data: existingVote, error: existingVoteError } = await supabase
       .from('votes')
       .select('id, vote_value')
       .eq('event_id', eventId)
       .eq('voter_email', voterIdentifier)
       .single()
+    
+    console.log('Existing vote result:', { existingVote, existingVoteError })
 
     let voteData
-    if (existingVote) {
+    if (existingVote && !existingVoteError) {
       // Update existing vote
+      console.log('Updating existing vote:', existingVote.id)
       const { data, error } = await supabase
         .from('votes')
         .update({
-          vote_value: vote,
-          voter_name: voterName || null,
-          updated_at: new Date().toISOString()
+          vote_value: vote
         })
         .eq('id', existingVote.id)
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('Update vote error:', error)
+        throw error
+      }
       voteData = data
     } else {
-      // Create new vote
+      // Create new vote - simplified for existing table structure
+      console.log('Creating new vote')
       const { data, error } = await supabase
         .from('votes')
         .insert({
           event_id: eventId,
           vote_type: 'event_approval',
           vote_value: vote,
-          voter_name: voterName || null,
-          voter_email: voterIdentifier,
           team_member_id: null // Anonymous voting
         })
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('Insert vote error:', error)
+        throw error
+      }
       voteData = data
     }
 
