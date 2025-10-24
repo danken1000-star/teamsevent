@@ -10,9 +10,12 @@ export default function SimpleVotePage({
   const [event, setEvent] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [selectedVote, setSelectedVote] = useState<'yes' | 'no' | 'abstain' | null>(null)
+  const [voteStats, setVoteStats] = useState({ yes: 0, no: 0, abstain: 0 })
 
   useEffect(() => {
     loadEvent()
+    loadVoteStats()
+    loadExistingVote() // Check if user already voted
   }, [params.id])
 
   const loadEvent = async () => {
@@ -33,9 +36,47 @@ export default function SimpleVotePage({
     }
   }
 
+  // Load existing vote from LocalStorage
+  const loadExistingVote = () => {
+    const storageKey = `vote_${params.id}`
+    const existingVote = localStorage.getItem(storageKey)
+    if (existingVote) {
+      setSelectedVote(existingVote as 'yes' | 'no' | 'abstain')
+    }
+  }
+
+  // Load vote statistics from LocalStorage
+  const loadVoteStats = () => {
+    const statsKey = `vote_stats_${params.id}`
+    const stats = localStorage.getItem(statsKey)
+    if (stats) {
+      setVoteStats(JSON.parse(stats))
+    }
+  }
+
   const handleVote = (vote: 'yes' | 'no' | 'abstain') => {
+    // Save to LocalStorage
+    const storageKey = `vote_${params.id}`
+    const statsKey = `vote_stats_${params.id}`
+    
+    // Update stats
+    const newStats = { ...voteStats }
+    
+    // Remove old vote if exists
+    if (selectedVote) {
+      newStats[selectedVote] = Math.max(0, newStats[selectedVote] - 1)
+    }
+    
+    // Add new vote
+    newStats[vote] = newStats[vote] + 1
+    
+    // Save
+    localStorage.setItem(storageKey, vote)
+    localStorage.setItem(statsKey, JSON.stringify(newStats))
+    
+    // Update state
     setSelectedVote(vote)
-    // Keine Speicherung - nur UI Update!
+    setVoteStats(newStats)
   }
 
   if (loading) {
@@ -87,11 +128,30 @@ export default function SimpleVotePage({
             {selectedVote === 'abstain' && '○ Enthalte mich'}
           </p>
 
+          {/* Show current stats */}
+          <div className="bg-gray-50 rounded-lg p-4 mb-4">
+            <p className="text-sm text-gray-600 mb-2">Aktueller Stand:</p>
+            <div className="flex justify-around text-sm">
+              <div>
+                <div className="text-green-600 font-bold">{voteStats.yes}</div>
+                <div className="text-gray-600">Ja</div>
+              </div>
+              <div>
+                <div className="text-red-600 font-bold">{voteStats.no}</div>
+                <div className="text-gray-600">Nein</div>
+              </div>
+              <div>
+                <div className="text-gray-600 font-bold">{voteStats.abstain}</div>
+                <div className="text-gray-600">Enthalte</div>
+              </div>
+            </div>
+          </div>
+
           <button
             onClick={() => setSelectedVote(null)}
             className="text-blue-600 hover:underline"
           >
-            Zurück zur Abstimmung
+            Stimme ändern
           </button>
         </div>
       </div>

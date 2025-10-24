@@ -8,6 +8,7 @@ import Link from 'next/link'
 import EventCreatedToast from './EventCreatedToast'
 import FinalizeEventButton from './FinalizeEventButton'
 import ActivityDeleteButton from './ActivityDeleteButton'
+import VoteStatsDisplay from './VoteStatsDisplay'
 
 const CATEGORY_LABELS: Record<string, string> = {
   food: '🍔 Essen',
@@ -162,15 +163,20 @@ export default async function EventDetailPage({
               {event.status === 'finalized' ? '✓ Finalisiert' : event.status || 'planning'}
             </span>
             
-            {/* Voting Button - ganz simpel! */}
-            <a
-              href={`/vote/${params.id}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors inline-block text-center text-sm"
-            >
-              Team abstimmen lassen
-            </a>
+            {/* Voting Button mit Stats */}
+            <div className="space-y-2">
+              <a
+                href={`/vote/${params.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors inline-block w-full text-center text-sm"
+              >
+                Team abstimmen lassen
+              </a>
+              
+              {/* Vote Stats anzeigen */}
+              <VoteStatsDisplay eventId={params.id} />
+            </div>
             
             <FinalizeEventButton 
               eventId={params.id} 
@@ -245,7 +251,7 @@ export default async function EventDetailPage({
                 {eventActivities?.map((ea, index) => (
                   <div 
                     key={ea.id}
-                    className="bg-white border-2 border-gray-200 rounded-lg p-3 sm:p-4 hover:border-red-300 transition-colors relative"
+                    className="bg-white border-2 border-gray-200 rounded-lg p-3 sm:p-4 hover:border-red-300 transition-colors relative group"
                   >
                     {/* Delete Button - NUR wenn Event NICHT finalisiert */}
                     <ActivityDeleteButton
@@ -348,8 +354,8 @@ export default async function EventDetailPage({
             </p>
           )}
 
-          {/* Auch am Event teilnehmen - IM GLEICHEN KASTEN! */}
-          <div className="pt-4 border-t border-gray-200">
+          {/* Auch am Event teilnehmen - NUR 1 BOX! */}
+          <div className="pt-4 border-t border-gray-200 mt-4">
             <div className="bg-blue-50 rounded-lg p-4">
               <h3 className="font-medium text-blue-900 mb-2">
                 Auch am Event teilnehmen
@@ -357,6 +363,8 @@ export default async function EventDetailPage({
               <p className="text-sm text-blue-700 mb-3">
                 Teilnahme als Eventplaner bestätigen.
               </p>
+              
+              {/* Direkt der Button, KEINE innere Box mehr! */}
               <JoinAsOrganizerButton 
                 eventId={params.id} 
                 userEmail={user.email || ''} 
