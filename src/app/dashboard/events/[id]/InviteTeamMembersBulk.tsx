@@ -241,10 +241,12 @@ export default function InviteTeamMembersBulk({ eventId }: InviteTeamMembersBulk
 
         <button
           type="submit"
-          disabled={loading || parsedEmails.length === 0}
+          disabled={loading}
           className={`w-full px-4 py-2 rounded-md font-medium text-sm transition-colors ${
-            loading || parsedEmails.length === 0
+            loading
               ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+              : parsedEmails.length === 0
+              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
               : 'bg-red-600 text-white hover:bg-red-700'
           }`}
         >
