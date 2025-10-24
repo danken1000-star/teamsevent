@@ -64,8 +64,8 @@ export default function ParticipatePage() {
             lastError = new Error(`HTTP ${response.status}: ${errorText}`)
           }
         } catch (urlError) {
-          console.log('Error with URL', url, ':', urlError.message)
-          lastError = urlError
+          console.log('Error with URL', url, ':', urlError instanceof Error ? urlError.message : String(urlError))
+          lastError = urlError instanceof Error ? urlError : new Error(String(urlError))
         }
       }
       
