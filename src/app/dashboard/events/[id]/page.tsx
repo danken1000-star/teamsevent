@@ -152,7 +152,7 @@ export default async function EventDetailPage({
             </div>
           </div>
           
-          {/* Status & Finalize Button */}
+          {/* Status & Action Buttons */}
           <div className="flex flex-col gap-2 self-start">
             <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium capitalize text-center ${
               event.status === 'finalized' 
@@ -161,6 +161,16 @@ export default async function EventDetailPage({
             }`}>
               {event.status === 'finalized' ? '✓ Finalisiert' : event.status || 'planning'}
             </span>
+            
+            {/* Voting Button - ganz simpel! */}
+            <a
+              href={`/vote/${params.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors inline-block text-center text-sm"
+            >
+              Team abstimmen lassen
+            </a>
             
             <FinalizeEventButton 
               eventId={params.id} 
