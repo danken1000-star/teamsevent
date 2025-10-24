@@ -72,7 +72,7 @@ export default function JoinAsOrganizerButton({
         <div className="flex items-center gap-2">
           <span className="text-green-600">✓</span>
           <span className="text-sm text-green-800 font-medium">
-            Du nimmst als Organisator teil
+            Du nimmst am Event teil
           </span>
         </div>
       </div>
@@ -83,7 +83,7 @@ export default function JoinAsOrganizerButton({
     return (
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
         <h3 className="text-sm font-medium text-blue-900 mb-3">
-          Als Organisator teilnehmen
+          Auch am Event teilnehmen
         </h3>
         <p className="text-xs text-blue-700 mb-4">
           Bitte vervollständige deine Teilnehmerdaten für die Weiterleitung an die Locations.
@@ -166,10 +166,10 @@ export default function JoinAsOrganizerButton({
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-sm font-medium text-blue-900 mb-1">
-            Als Organisator teilnehmen
+            Auch am Event teilnehmen
           </h3>
           <p className="text-xs text-blue-700">
-            Du kannst dich direkt als Teilnehmer hinzufügen, ohne dich selbst einzuladen.
+            Teilnahme als Eventplaner bestätigen.
           </p>
         </div>
         <button
