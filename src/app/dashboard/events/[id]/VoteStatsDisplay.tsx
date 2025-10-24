@@ -18,13 +18,19 @@ export default function VoteStatsDisplay({ eventId }: VoteStatsDisplayProps) {
 
   const loadStats = async () => {
     try {
+      console.log('VoteStatsDisplay: Loading stats for eventId:', eventId)
       const response = await fetch(`/api/vote/${eventId}`)
+      console.log('VoteStatsDisplay: Response status:', response.status)
+      
       if (response.ok) {
         const data = await response.json()
+        console.log('VoteStatsDisplay: Received data:', data)
         setStats(data.stats)
+      } else {
+        console.error('VoteStatsDisplay: Failed to fetch stats:', response.status, response.statusText)
       }
     } catch (error) {
-      console.error('Error loading vote stats:', error)
+      console.error('VoteStatsDisplay: Error loading vote stats:', error)
     }
   }
 
