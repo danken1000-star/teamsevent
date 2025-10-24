@@ -318,13 +318,13 @@ export default function EventDetailClient({
             <h3 className="text-sm font-medium text-gray-700 mb-3">Team verwalten</h3>
             
             {/* Bulk Invite Button */}
-            <div className="mb-3">
+            <div className="mb-4">
               <InviteTeamMembersBulk eventId={event.id} />
             </div>
 
             {/* Send Reminder - nur wenn Team vorhanden */}
             {teamMembers && teamMembers.length > 0 && (
-              <div>
+              <div className="mb-2">
                 <SendReminderButton eventId={event.id} pendingMembers={pendingMembers} />
               </div>
             )}

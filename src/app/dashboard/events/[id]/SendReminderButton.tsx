@@ -57,11 +57,11 @@ export default function SendReminderButton({ eventId, pendingMembers }: SendRemi
   }
 
   return (
-    <div className="mt-4">
+    <div>
       <button
         onClick={handleSendReminder}
         disabled={loading}
-        className="w-full px-4 py-2 bg-orange-600 text-white rounded-md font-medium hover:bg-orange-700 disabled:opacity-50 text-sm"
+        className="w-full px-4 py-2 bg-orange-600 text-white rounded-md font-medium hover:bg-orange-700 disabled:opacity-50 text-sm transition-colors"
       >
         {loading ? 'Erinnerung wird gesendet...' : `📧 Erinnerung an ${pendingMembers.length} ausstehende Teilnehmer senden`}
       </button>

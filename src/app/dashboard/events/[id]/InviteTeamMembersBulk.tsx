@@ -24,6 +24,8 @@ export default function InviteTeamMembersBulk({ eventId }: InviteTeamMembersBulk
 
   // Parse emails from text input
   const parseEmails = (text: string): EmailInvite[] => {
+    if (!text || text.trim().length === 0) return []
+    
     // Split by common delimiters: newlines, commas, semicolons, spaces
     const lines = text
       .split(/[\n,;]/)
@@ -33,7 +35,7 @@ export default function InviteTeamMembersBulk({ eventId }: InviteTeamMembersBulk
     const emails: EmailInvite[] = []
     
     for (const line of lines) {
-      // Check if line contains email pattern
+      // Check if line contains email pattern - improved regex
       const emailMatch = line.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/i)
       
       if (emailMatch) {
@@ -42,10 +44,13 @@ export default function InviteTeamMembersBulk({ eventId }: InviteTeamMembersBulk
         const namePart = line.replace(emailMatch[0], '').trim()
         const name = namePart.replace(/[<>"]/g, '').trim() // Remove common Excel artifacts
         
-        emails.push({
-          email,
-          name: name || ''
-        })
+        // Avoid duplicates
+        if (!emails.find(e => e.email === email)) {
+          emails.push({
+            email,
+            name: name || ''
+          })
+        }
       }
     }
     
@@ -237,7 +242,11 @@ export default function InviteTeamMembersBulk({ eventId }: InviteTeamMembersBulk
         <button
           type="submit"
           disabled={loading || parsedEmails.length === 0}
-          className="w-full px-4 py-2 bg-red-600 text-white rounded-md font-medium hover:bg-red-700 disabled:opacity-50 text-sm"
+          className={`w-full px-4 py-2 rounded-md font-medium text-sm transition-colors ${
+            loading || parsedEmails.length === 0
+              ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+              : 'bg-red-600 text-white hover:bg-red-700'
+          }`}
         >
           {loading ? 'Wird eingeladen...' : `✉️ ${parsedEmails.length} Team-Mitglieder einladen`}
         </button>
