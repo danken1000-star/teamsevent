@@ -138,9 +138,9 @@ export default function InviteTeamMembersBulk({ eventId }: InviteTeamMembersBulk
       <form onSubmit={handleInvite} className="space-y-4">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Team-Mitglieder einladen
-            </label>
+        <label className="block text-sm font-medium text-gray-700">
+          Teammitglieder einladen
+        </label>
             <div className="relative group">
               <button
                 type="button"

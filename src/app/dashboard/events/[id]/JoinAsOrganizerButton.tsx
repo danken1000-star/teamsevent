@@ -16,10 +16,22 @@ export default function JoinAsOrganizerButton({
 }: JoinAsOrganizerButtonProps) {
   const [isJoining, setIsJoining] = useState(false)
   const [isJoined, setIsJoined] = useState(false)
+  const [showForm, setShowForm] = useState(false)
+  const [formData, setFormData] = useState({
+    name: userName || '',
+    email: userEmail,
+    dietaryPreference: '',
+    dietaryNotes: ''
+  })
   const router = useRouter()
 
   const handleJoinAsOrganizer = async () => {
     if (isJoined) return
+
+    if (!formData.name || !formData.email) {
+      alert('Bitte Name und Email eingeben')
+      return
+    }
 
     setIsJoining(true)
 
@@ -29,10 +41,10 @@ export default function JoinAsOrganizerButton({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           event_id: eventId,
-          name: userName || 'Organisator',
-          email: userEmail,
-          dietary_preference: '',
-          dietary_notes: '',
+          name: formData.name,
+          email: formData.email,
+          dietary_preference: formData.dietaryPreference,
+          dietary_notes: formData.dietaryNotes,
           participation_type: 'confirmed'
         }),
       })
@@ -44,6 +56,7 @@ export default function JoinAsOrganizerButton({
       }
 
       setIsJoined(true)
+      setShowForm(false)
       router.refresh() // Refresh the page to show updated participation
     } catch (error: any) {
       console.error('Error joining as organizer:', error)
@@ -66,6 +79,88 @@ export default function JoinAsOrganizerButton({
     )
   }
 
+  if (showForm) {
+    return (
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+        <h3 className="text-sm font-medium text-blue-900 mb-3">
+          Als Organisator teilnehmen
+        </h3>
+        <p className="text-xs text-blue-700 mb-4">
+          Bitte vervollständige deine Teilnehmerdaten für die Weiterleitung an die Locations.
+        </p>
+        
+        <div className="space-y-3">
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Name *</label>
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) => setFormData({...formData, name: e.target.value})}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Dein Name"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Email *</label>
+            <input
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData({...formData, email: e.target.value})}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="deine.email@beispiel.ch"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Ernährungspräferenz</label>
+            <select
+              value={formData.dietaryPreference}
+              onChange={(e) => setFormData({...formData, dietaryPreference: e.target.value})}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="">Bitte wählen...</option>
+              <option value="omnivor">🍖 Omnivor (Alles)</option>
+              <option value="vegetarisch">🥗 Vegetarisch</option>
+              <option value="vegan">🌱 Vegan</option>
+              <option value="kein_schweinefleisch">🐷 Kein Schweinefleisch</option>
+              <option value="sonstiges">⚠️ Sonstiges</option>
+            </select>
+          </div>
+
+          {formData.dietaryPreference === 'sonstiges' && (
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Bitte beschreiben Sie Ihre Ernährungspräferenz</label>
+              <textarea
+                value={formData.dietaryNotes}
+                onChange={(e) => setFormData({...formData, dietaryNotes: e.target.value})}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="z.B. Nussallergie, Glutenunverträglichkeit, etc."
+                rows={2}
+              />
+            </div>
+          )}
+
+          <div className="flex gap-2 pt-2">
+            <button
+              onClick={handleJoinAsOrganizer}
+              disabled={isJoining || !formData.name || !formData.email}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {isJoining ? 'Wird hinzugefügt...' : 'Teilnahme bestätigen'}
+            </button>
+            <button
+              onClick={() => setShowForm(false)}
+              className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-300 transition-colors"
+            >
+              Abbrechen
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
       <div className="flex items-center justify-between">
@@ -78,11 +173,10 @@ export default function JoinAsOrganizerButton({
           </p>
         </div>
         <button
-          onClick={handleJoinAsOrganizer}
-          disabled={isJoining}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          onClick={() => setShowForm(true)}
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
         >
-          {isJoining ? 'Wird hinzugefügt...' : 'Teilnehmen'}
+          Teilnehmen
         </button>
       </div>
     </div>

@@ -291,7 +291,7 @@ export default async function EventDetailPage({
         {/* Team Members */}
         <div className="bg-white rounded-lg shadow p-4 sm:p-6">
           <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">
-            Team-Mitglieder
+            Team
           </h2>
           
           {teamMembers && teamMembers.length > 0 ? (
@@ -324,7 +324,7 @@ export default async function EventDetailPage({
             </div>
           ) : (
             <p className="text-xs sm:text-sm text-gray-500 mb-4">
-              Noch keine Team-Mitglieder eingeladen
+              Noch keine Teammitglieder eingeladen
             </p>
           )}
 
