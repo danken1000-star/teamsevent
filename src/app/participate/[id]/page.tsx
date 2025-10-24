@@ -8,6 +8,7 @@ export default function ParticipatePage() {
   const params = useParams()
   const [event, setEvent] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [invitedMember, setInvitedMember] = useState<any>(null)
   
   // Participation form state
   const [name, setName] = useState('')
@@ -20,7 +21,29 @@ export default function ParticipatePage() {
 
   useEffect(() => {
     loadEventData()
+    loadInvitedMember()
   }, [params.id])
+
+  const loadInvitedMember = async () => {
+    try {
+      // Check if there's a member parameter in URL
+      const urlParams = new URLSearchParams(window.location.search)
+      const memberId = urlParams.get('member')
+      
+      if (memberId) {
+        const response = await fetch(`/api/events/${params.id}/member/${memberId}`)
+        if (response.ok) {
+          const member = await response.json()
+          setInvitedMember(member)
+          // Pre-fill form with member data
+          setName(member.name || '')
+          setEmail(member.email || '')
+        }
+      }
+    } catch (error) {
+      console.log('Could not load member data:', error)
+    }
+  }
 
   const loadEventData = async () => {
     try {
@@ -204,6 +227,17 @@ export default function ParticipatePage() {
         </div>
       </div>
 
+
+      {/* Invited Member Info */}
+      {invitedMember && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <h3 className="text-sm font-medium text-blue-900 mb-2">Eingeladene Person</h3>
+          <div className="text-sm text-blue-800">
+            <p><strong>Name:</strong> {invitedMember.name || 'Nicht angegeben'}</p>
+            <p><strong>E-Mail:</strong> {invitedMember.email}</p>
+          </div>
+        </div>
+      )}
 
       {/* Participation Form */}
       {!participationSuccess ? (

@@ -26,23 +26,26 @@ export default function InviteTeamMembersBulk({ eventId }: InviteTeamMembersBulk
   const parseEmails = (text: string): EmailInvite[] => {
     if (!text || text.trim().length === 0) return []
     
-    // Split by common delimiters: newlines, commas, semicolons, spaces
+    // Split by common delimiters: newlines, commas, semicolons, tabs
     const lines = text
-      .split(/[\n,;]/)
+      .split(/[\n,;\t]/)
       .map(line => line.trim())
       .filter(line => line.length > 0)
 
     const emails: EmailInvite[] = []
     
     for (const line of lines) {
-      // Check if line contains email pattern - improved regex
+      // More robust email regex
       const emailMatch = line.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/i)
       
       if (emailMatch) {
         const email = emailMatch[1].toLowerCase()
-        // Extract name (everything before the email)
+        // Extract name (everything before the email, clean it up)
         const namePart = line.replace(emailMatch[0], '').trim()
-        const name = namePart.replace(/[<>"]/g, '').trim() // Remove common Excel artifacts
+        const name = namePart
+          .replace(/[<>"]/g, '') // Remove Excel artifacts
+          .replace(/\s+/g, ' ') // Normalize spaces
+          .trim()
         
         // Avoid duplicates
         if (!emails.find(e => e.email === email)) {
@@ -241,12 +244,10 @@ export default function InviteTeamMembersBulk({ eventId }: InviteTeamMembersBulk
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || parsedEmails.length === 0}
           className={`w-full px-4 py-2 rounded-md font-medium text-sm transition-colors ${
-            loading
+            loading || parsedEmails.length === 0
               ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-              : parsedEmails.length === 0
-              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
               : 'bg-red-600 text-white hover:bg-red-700'
           }`}
         >

@@ -15,8 +15,8 @@ export async function sendVotingInvitation({
   memberId: string;
   eventTitle: string;
 }) {
-  // Simple anonymous participation URL (no memberId needed)
-  const participationUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://www.teamsevent.ch'}/participate/${eventId}`;
+  // Participation URL with member ID for pre-filling
+  const participationUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://www.teamsevent.ch'}/participate/${eventId}?member=${memberId}`;
   
   const displayName = name || email.split('@')[0];
 

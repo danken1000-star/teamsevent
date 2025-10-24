@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase-browser'
-import InviteTeamMembers from './InviteTeamMembers'
+import InviteTeamMembersBulk from './InviteTeamMembersBulk'
 import EditableEventTitle from './EditableEventTitle'
 import SendReminderButton from './SendReminderButton'
 import Link from 'next/link'
@@ -317,9 +317,9 @@ export default function EventDetailClient({
           <div className="pt-4 border-t border-gray-200 mt-4">
             <h3 className="text-sm font-medium text-gray-700 mb-3">Team verwalten</h3>
             
-            {/* Team Invite Button */}
+            {/* Bulk Team Invite Button */}
             <div className="mb-4">
-              <InviteTeamMembers eventId={event.id} />
+              <InviteTeamMembersBulk eventId={event.id} />
             </div>
 
             {/* Send Reminder - nur wenn Team vorhanden */}
