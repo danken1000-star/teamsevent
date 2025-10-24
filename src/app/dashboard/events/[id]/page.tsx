@@ -286,58 +286,65 @@ export default async function EventDetailPage({
         )}
       </div>
 
-      {/* Team Members & Voting - Stack on Mobile */}
+      {/* Team Members & Participation - Layout like in the image */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        {/* Team Members */}
-        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-          <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">
-            Team
-          </h2>
-          
-          {teamMembers && teamMembers.length > 0 ? (
-            <div className="space-y-2 mb-4">
-              {teamMembers.map((member) => (
-                <div 
-                  key={member.id}
-                  className="flex justify-between items-center p-2 sm:p-3 bg-gray-50 rounded-lg gap-2"
-                >
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm sm:text-base text-gray-900 truncate">
-                      {member.name || member.email}
-                    </p>
-                    <p className="text-xs text-gray-500 truncate">{member.email}</p>
+        {/* Left Column: Team + Eventplaner Teilnahme */}
+        <div className="space-y-4 sm:gap-6">
+          {/* Team Section */}
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">
+              Team
+            </h2>
+            
+            {teamMembers && teamMembers.length > 0 ? (
+              <div className="space-y-2 mb-4">
+                {teamMembers.map((member) => (
+                  <div 
+                    key={member.id}
+                    className="flex justify-between items-center p-2 sm:p-3 bg-gray-50 rounded-lg gap-2"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm sm:text-base text-gray-900 truncate">
+                        {member.name || member.email}
+                      </p>
+                      <p className="text-xs text-gray-500 truncate">{member.email}</p>
+                    </div>
+                    {respondedMemberIds.has(member.id) ? (
+                      (() => {
+                        const vote = votes?.find((v: any) => v.team_member_id === member.id)
+                        return vote?.vote_value === 'confirmed' ? (
+                          <span className="text-xs text-green-600 font-medium whitespace-nowrap">✓ Teilnahme bestätigt</span>
+                        ) : (
+                          <span className="text-xs text-red-600 font-medium whitespace-nowrap">❌ Abgesagt</span>
+                        )
+                      })()
+                    ) : (
+                      <span className="text-xs text-gray-400 whitespace-nowrap">Ausstehend</span>
+                    )}
                   </div>
-                  {respondedMemberIds.has(member.id) ? (
-                    (() => {
-                      const vote = votes?.find((v: any) => v.team_member_id === member.id)
-                      return vote?.vote_value === 'confirmed' ? (
-                        <span className="text-xs text-green-600 font-medium whitespace-nowrap">✓ Teilnahme bestätigt</span>
-                      ) : (
-                        <span className="text-xs text-red-600 font-medium whitespace-nowrap">❌ Abgesagt</span>
-                      )
-                    })()
-                  ) : (
-                    <span className="text-xs text-gray-400 whitespace-nowrap">Ausstehend</span>
-                  )}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-xs sm:text-sm text-gray-500 mb-4">
-              Noch keine Teammitglieder eingeladen
-            </p>
-          )}
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs sm:text-sm text-gray-500 mb-4">
+                Noch keine Teammitglieder eingeladen
+              </p>
+            )}
 
-          <JoinAsOrganizerButton 
-            eventId={params.id} 
-            userEmail={user.email || ''} 
-            userName={user.user_metadata?.full_name || user.user_metadata?.name}
-          />
-          <InviteTeamMembersBulk eventId={params.id} />
-          <SendReminderButton eventId={params.id} pendingMembers={pendingMembers} />
+            <InviteTeamMembersBulk eventId={params.id} />
+            <SendReminderButton eventId={params.id} pendingMembers={pendingMembers} />
+          </div>
+
+          {/* Eventplaner Teilnahme Section */}
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+            <JoinAsOrganizerButton 
+              eventId={params.id} 
+              userEmail={user.email || ''} 
+              userName={user.user_metadata?.full_name || user.user_metadata?.name}
+            />
+          </div>
         </div>
 
-        {/* Voting Results - UPDATED */}
+        {/* Right Column: Teilnahme Übersicht */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-lg font-semibold mb-4">Teilnahme</h2>
           
