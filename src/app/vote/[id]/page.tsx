@@ -25,24 +25,7 @@ export default function SimpleVotePage({
       const supabase = createClient()
       const { data, error } = await supabase
         .from('events')
-        .select(`
-          id, 
-          title, 
-          event_date, 
-          budget, 
-          participant_count,
-          event_activities (
-            id,
-            activity_id,
-            activity_price,
-            activities (
-              id,
-              name,
-              description,
-              image_url
-            )
-          )
-        `)
+        .select('id, title, event_date, budget, participant_count')
         .eq('id', params.id)
         .single()
 
@@ -209,37 +192,6 @@ export default function SimpleVotePage({
             )}
           </div>
         </div>
-
-        {/* Activities Section - NEW */}
-        {event.event_activities && event.event_activities.length > 0 && (
-          <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-            <h2 className="text-xl font-bold mb-4">Geplante Aktivitäten</h2>
-            <div className="space-y-4">
-              {event.event_activities.map((ea: any) => (
-                <div key={ea.id} className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
-                  {ea.activities?.image_url && (
-                    <img
-                      src={ea.activities.image_url}
-                      alt={ea.activities.name}
-                      className="w-16 h-16 object-cover rounded-md"
-                    />
-                  )}
-                  <div className="flex-1">
-                    <h3 className="font-medium text-gray-800">{ea.activities?.name}</h3>
-                    {ea.activities?.description && (
-                      <p className="text-sm text-gray-600 line-clamp-2">{ea.activities.description}</p>
-                    )}
-                  </div>
-                  {ea.activity_price > 0 && (
-                    <span className="font-semibold text-gray-700">
-                      CHF {ea.activity_price.toLocaleString()}
-                    </span>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Voting Options */}
         <div className="bg-white rounded-lg shadow-lg p-6">
