@@ -36,71 +36,54 @@ export async function POST(
       )
     }
 
-    // Check if this voter already voted (by email or IP)
-    const voterIdentifier = voterEmail || request.ip || 'anonymous'
+    // Simplified voting - just create new vote each time
+    console.log('Creating new vote for event:', eventId, 'vote:', vote)
     
-    console.log('Checking for existing vote:', { eventId, voterIdentifier })
-    
-    const { data: existingVote, error: existingVoteError } = await supabase
+    const { data: voteData, error: insertError } = await supabase
       .from('votes')
-      .select('id, vote_value')
-      .eq('event_id', eventId)
-      .eq('voter_email', voterIdentifier)
+      .insert({
+        event_id: eventId,
+        vote_type: 'event_approval',
+        vote_value: vote,
+        team_member_id: null
+      })
+      .select()
       .single()
-    
-    console.log('Existing vote result:', { existingVote, existingVoteError })
 
-    let voteData
-    if (existingVote && !existingVoteError) {
-      // Update existing vote
-      console.log('Updating existing vote:', existingVote.id)
-      const { data, error } = await supabase
-        .from('votes')
-        .update({
-          vote_value: vote
-        })
-        .eq('id', existingVote.id)
-        .select()
-        .single()
-
-      if (error) {
-        console.error('Update vote error:', error)
-        throw error
-      }
-      voteData = data
-    } else {
-      // Create new vote - simplified for existing table structure
-      console.log('Creating new vote')
-      const { data, error } = await supabase
-        .from('votes')
-        .insert({
-          event_id: eventId,
-          vote_type: 'event_approval',
-          vote_value: vote,
-          team_member_id: null // Anonymous voting
-        })
-        .select()
-        .single()
-
-      if (error) {
-        console.error('Insert vote error:', error)
-        throw error
-      }
-      voteData = data
+    if (insertError) {
+      console.error('Insert vote error:', insertError)
+      return NextResponse.json(
+        { error: 'Failed to record vote: ' + insertError.message },
+        { status: 500 }
+      )
     }
 
+    console.log('Vote created successfully:', voteData)
+
     // Get updated vote statistics
-    const { data: allVotes } = await supabase
+    const { data: allVotes, error: statsError } = await supabase
       .from('votes')
       .select('vote_value')
       .eq('event_id', eventId)
       .eq('vote_type', 'event_approval')
+
+    if (statsError) {
+      console.error('Stats error:', statsError)
+      // Return vote success even if stats fail
+      return NextResponse.json({
+        success: true,
+        vote: voteData,
+        stats: { yes: 0, no: 0, abstain: 0 }
+      })
+    }
 
     const stats = {
       yes: allVotes?.filter(v => v.vote_value === 'yes').length || 0,
       no: allVotes?.filter(v => v.vote_value === 'no').length || 0,
       abstain: allVotes?.filter(v => v.vote_value === 'abstain').length || 0
     }
+
+    console.log('Vote stats:', stats)
 
     return NextResponse.json({
       success: true,
