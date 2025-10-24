@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(
@@ -7,7 +7,12 @@ export async function GET(
 ) {
   try {
     console.log('API: Fetching event with ID:', params.id)
-    const supabase = createClient()
+    
+    // Use service role for public access (bypasses RLS)
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
 
     // Get event
     const { data: event, error: eventError } = await supabase

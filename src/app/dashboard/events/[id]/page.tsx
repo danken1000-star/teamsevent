@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import InviteTeamMembersBulk from './InviteTeamMembersBulk'
 import EditableEventTitle from './EditableEventTitle'
 import SendReminderButton from './SendReminderButton'
+import JoinAsOrganizerButton from './JoinAsOrganizerButton'
 import Link from 'next/link'
 import EventCreatedToast from './EventCreatedToast'
 import FinalizeEventButton from './FinalizeEventButton'
@@ -327,6 +328,11 @@ export default async function EventDetailPage({
             </p>
           )}
 
+          <JoinAsOrganizerButton 
+            eventId={params.id} 
+            userEmail={user.email || ''} 
+            userName={user.user_metadata?.full_name || user.user_metadata?.name}
+          />
           <InviteTeamMembersBulk eventId={params.id} />
           <SendReminderButton eventId={params.id} pendingMembers={pendingMembers} />
         </div>
