@@ -16,11 +16,15 @@ export default function VoteStatsDisplay({ eventId }: VoteStatsDisplayProps) {
     return () => clearInterval(interval)
   }, [eventId])
 
-  const loadStats = () => {
-    const statsKey = `vote_stats_${eventId}`
-    const savedStats = localStorage.getItem(statsKey)
-    if (savedStats) {
-      setStats(JSON.parse(savedStats))
+  const loadStats = async () => {
+    try {
+      const response = await fetch(`/api/vote/${eventId}`)
+      if (response.ok) {
+        const data = await response.json()
+        setStats(data.stats)
+      }
+    } catch (error) {
+      console.error('Error loading vote stats:', error)
     }
   }
 

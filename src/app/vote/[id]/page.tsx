@@ -11,11 +11,13 @@ export default function SimpleVotePage({
   const [loading, setLoading] = useState(true)
   const [selectedVote, setSelectedVote] = useState<'yes' | 'no' | 'abstain' | null>(null)
   const [voteStats, setVoteStats] = useState({ yes: 0, no: 0, abstain: 0 })
+  const [voterName, setVoterName] = useState('')
+  const [voterEmail, setVoterEmail] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
     loadEvent()
     loadVoteStats()
-    loadExistingVote() // Check if user already voted
   }, [params.id])
 
   const loadEvent = async () => {
@@ -36,47 +38,52 @@ export default function SimpleVotePage({
     }
   }
 
-  // Load existing vote from LocalStorage
-  const loadExistingVote = () => {
-    const storageKey = `vote_${params.id}`
-    const existingVote = localStorage.getItem(storageKey)
-    if (existingVote) {
-      setSelectedVote(existingVote as 'yes' | 'no' | 'abstain')
+  // Load vote statistics from API
+  const loadVoteStats = async () => {
+    try {
+      const response = await fetch(`/api/vote/${params.id}`)
+      if (response.ok) {
+        const data = await response.json()
+        setVoteStats(data.stats)
+      }
+    } catch (error) {
+      console.error('Error loading vote stats:', error)
     }
   }
 
-  // Load vote statistics from LocalStorage
-  const loadVoteStats = () => {
-    const statsKey = `vote_stats_${params.id}`
-    const stats = localStorage.getItem(statsKey)
-    if (stats) {
-      setVoteStats(JSON.parse(stats))
+  const handleVote = async (vote: 'yes' | 'no' | 'abstain') => {
+    if (!voterName.trim()) {
+      alert('Bitte geben Sie Ihren Namen ein')
+      return
     }
-  }
 
-  const handleVote = (vote: 'yes' | 'no' | 'abstain') => {
-    // Save to LocalStorage
-    const storageKey = `vote_${params.id}`
-    const statsKey = `vote_stats_${params.id}`
-    
-    // Update stats
-    const newStats = { ...voteStats }
-    
-    // Remove old vote if exists
-    if (selectedVote) {
-      newStats[selectedVote] = Math.max(0, newStats[selectedVote] - 1)
+    setSubmitting(true)
+    try {
+      const response = await fetch(`/api/vote/${params.id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          vote,
+          voterName: voterName.trim(),
+          voterEmail: voterEmail.trim() || null
+        })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Fehler beim Abstimmen')
+      }
+
+      // Update state
+      setSelectedVote(vote)
+      setVoteStats(data.stats)
+    } catch (error) {
+      console.error('Vote error:', error)
+      alert(error instanceof Error ? error.message : 'Fehler beim Abstimmen')
+    } finally {
+      setSubmitting(false)
     }
-    
-    // Add new vote
-    newStats[vote] = newStats[vote] + 1
-    
-    // Save
-    localStorage.setItem(storageKey, vote)
-    localStorage.setItem(statsKey, JSON.stringify(newStats))
-    
-    // Update state
-    setSelectedVote(vote)
-    setVoteStats(newStats)
   }
 
   if (loading) {
@@ -192,11 +199,42 @@ export default function SimpleVotePage({
             Soll dieses Event stattfinden?
           </h2>
           
+          {/* Voter Information */}
+          <div className="mb-6 space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Ihr Name *
+              </label>
+              <input
+                type="text"
+                value={voterName}
+                onChange={(e) => setVoterName(e.target.value)}
+                placeholder="Max Muster"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                E-Mail (optional)
+              </label>
+              <input
+                type="email"
+                value={voterEmail}
+                onChange={(e) => setVoterEmail(e.target.value)}
+                placeholder="max@firma.ch"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+          
           <div className="space-y-4">
             {/* Ja */}
             <button
               onClick={() => handleVote('yes')}
-              className="w-full p-6 border-2 border-green-500 rounded-lg hover:bg-green-50 transition-colors text-left group"
+              disabled={submitting}
+              className="w-full p-6 border-2 border-green-500 rounded-lg hover:bg-green-50 transition-colors text-left group disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -215,7 +253,8 @@ export default function SimpleVotePage({
             {/* Nein */}
             <button
               onClick={() => handleVote('no')}
-              className="w-full p-6 border-2 border-red-500 rounded-lg hover:bg-red-50 transition-colors text-left group"
+              disabled={submitting}
+              className="w-full p-6 border-2 border-red-500 rounded-lg hover:bg-red-50 transition-colors text-left group disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -234,7 +273,8 @@ export default function SimpleVotePage({
             {/* Enthalte mich */}
             <button
               onClick={() => handleVote('abstain')}
-              className="w-full p-6 border-2 border-gray-400 rounded-lg hover:bg-gray-50 transition-colors text-left group"
+              disabled={submitting}
+              className="w-full p-6 border-2 border-gray-400 rounded-lg hover:bg-gray-50 transition-colors text-left group disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
