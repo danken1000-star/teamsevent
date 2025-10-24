@@ -51,14 +51,15 @@ export default function EventDetailClient({
     loadUserEmail()
   }, [])
 
-  // Calculate vote statistics
-  const confirmedVotes = votes?.filter((v: any) => v.vote_value === 'confirmed') || []
-  const declinedVotes = votes?.filter((v: any) => v.vote_value === 'declined') || []
+  // Calculate vote statistics - ONLY attendance votes, NOT event_approval votes
+  const attendanceVotes = votes?.filter((v: any) => v.vote_type === 'attendance') || []
+  const confirmedVotes = attendanceVotes.filter((v: any) => v.vote_value === 'confirmed') || []
+  const declinedVotes = attendanceVotes.filter((v: any) => v.vote_value === 'declined') || []
   const totalResponses = confirmedVotes.length + declinedVotes.length
   const memberCount = teamMembers?.length || 0
 
-  // Compute which team members have responded (by team_member_id)
-  const respondedMemberIds = new Set((votes || []).map((v: any) => v.team_member_id))
+  // Compute which team members have responded (by team_member_id) - ONLY attendance votes
+  const respondedMemberIds = new Set(attendanceVotes.map((v: any) => v.team_member_id))
   const pendingMembers = teamMembers?.filter(member => !respondedMemberIds.has(member.id)) || []
 
   // Extract activities from junction
@@ -267,11 +268,13 @@ export default function EventDetailClient({
                   </div>
                   {respondedMemberIds.has(member.id) ? (
                     (() => {
-                      const vote = votes?.find((v: any) => v.team_member_id === member.id)
-                      return vote?.vote_value === 'confirmed' ? (
+                      const attendanceVote = attendanceVotes.find((v: any) => v.team_member_id === member.id)
+                      return attendanceVote?.vote_value === 'confirmed' ? (
                         <span className="text-xs text-green-600 font-medium whitespace-nowrap">✓ Teilnahme bestätigt</span>
-                      ) : (
+                      ) : attendanceVote?.vote_value === 'declined' ? (
                         <span className="text-xs text-red-600 font-medium whitespace-nowrap">❌ Abgesagt</span>
+                      ) : (
+                        <span className="text-xs text-gray-400 whitespace-nowrap">Ausstehend</span>
                       )
                     })()
                   ) : (
@@ -383,10 +386,10 @@ export default function EventDetailClient({
             <div className="space-y-2">
               <h3 className="font-medium text-gray-700 mb-3">Details</h3>
               {teamMembers.map((member) => {
-                const vote = votes?.find((v: any) => v.team_member_id === member.id)
-                const hasVoted = vote !== undefined
-                const isConfirmed = hasVoted && vote.vote_value === 'confirmed'
-                const isDeclined = hasVoted && vote.vote_value === 'declined'
+                const attendanceVote = attendanceVotes.find((v: any) => v.team_member_id === member.id)
+                const hasVoted = attendanceVote !== undefined
+                const isConfirmed = hasVoted && attendanceVote.vote_value === 'confirmed'
+                const isDeclined = hasVoted && attendanceVote.vote_value === 'declined'
 
                 return (
                   <div 
