@@ -46,8 +46,8 @@ export default async function Home() {
 
         {/* Main Headline */}
         <h1 className="text-6xl md:text-7xl font-bold text-black mb-8 leading-tight">
-          Perfekte Team-Events in<br />
-          <span className="text-red-600">30 Minuten</span>
+          Team-Events in<br />
+          <span className="text-red-600">30 Minuten organisiert</span>
         </h1>
 
         <p className="text-2xl text-gray-600 mb-4">
@@ -55,7 +55,7 @@ export default async function Home() {
         </p>
 
         <p className="text-xl text-gray-500 mb-12 max-w-2xl mx-auto">
-          Stellen Sie Ihr perfektes Teamevent in kürzester Zeit zusammen. Ohne endlose Recherche, ohne komplizierte Koordination. Einfach, schnell, professionell.
+          Organisieren Sie Ihr Teamevent in kürzester Zeit. Ohne endlose Recherche, ohne komplizierte Koordination. Einfach, schnell, zuverlässig.
         </p>
 
         {/* Big CTA Button */}
@@ -86,19 +86,22 @@ export default async function Home() {
       {/* Value Props - Big Cards */}
       <div className="bg-gray-50 py-24">
         <div className="max-w-6xl mx-auto px-6">
-          <h2 className="text-4xl font-bold text-center text-black mb-16">
-            Warum TeamsEvent.ch?
+          <h2 className="text-4xl font-bold text-center text-black mb-4">
+            🏛️ Unsere 3 Säulen für erfolgreiche Team-Events
           </h2>
+          <p className="text-lg text-gray-600 text-center mb-16">
+            Ein bewährtes Prinzip für effiziente Event-Planung.
+          </p>
 
           <div className="grid md:grid-cols-3 gap-8">
             {/* Card 1 */}
             <div className="bg-white p-10 rounded-2xl border-2 border-gray-200 hover:border-red-600 transition-colors">
               <div className="text-5xl mb-6">⚡</div>
               <h3 className="text-2xl font-bold text-black mb-4">
-                Blitzschnell organisiert
+                1. Säule: Blitzschnell organisiert
               </h3>
               <p className="text-gray-600 text-lg">
-                Von der Idee zum Event in unter 30 Minuten. Schluss mit stundenlanger Recherche. Unsere KI findet automatisch die perfekten Locations und Aktivitäten für Ihr Team.
+                Von der Idee zum Event in unter 30 Minuten. Schluss mit stundenlanger Recherche. Wir finden automatisch passende Locations und Aktivitäten für Ihr Team.
               </p>
             </div>
 
@@ -106,10 +109,10 @@ export default async function Home() {
             <div className="bg-white p-10 rounded-2xl border-2 border-gray-200 hover:border-red-600 transition-colors">
               <div className="text-5xl mb-6">🎯</div>
               <h3 className="text-2xl font-bold text-black mb-4">
-                Perfekt auf Ihr Team abgestimmt
+                2. Säule: Individuell auf Ihr Team abgestimmt
               </h3>
               <p className="text-gray-600 text-lg">
-                Individuelle Vorschläge basierend auf Ihren Präferenzen. Budget, Teamgröße, Interessen – wir matchen automatisch die besten Optionen für Ihren Anlass.
+                Vorschläge basierend auf Ihren Anforderungen. Budget, Teamgrösse, Interessen – wir matchen die geeigneten Optionen für Ihren Anlass.
               </p>
             </div>
 
@@ -117,10 +120,10 @@ export default async function Home() {
             <div className="bg-white p-10 rounded-2xl border-2 border-gray-200 hover:border-red-600 transition-colors">
               <div className="text-5xl mb-6">👥</div>
               <h3 className="text-2xl font-bold text-black mb-4">
-                Demokratisch & einfach
+                3. Säule: Demokratisch & transparent
               </h3>
               <p className="text-gray-600 text-lg">
-                Ihr Team entscheidet mit – ohne Anmeldung. Teilen Sie einfach einen Link. Ihr Team stimmt ab. Fertig. Keine komplizierten Tools, keine Registrierung nötig.
+                Ihr Team entscheidet mit – ohne Anmeldung. Link teilen, Team abstimmen lassen, fertig. Keine komplizierten Tools, keine Registrierung nötig.
               </p>
             </div>
           </div>
@@ -147,7 +150,7 @@ export default async function Home() {
               <div className="w-20 h-20 bg-red-600 text-white rounded-full flex items-center justify-center text-3xl font-bold mx-auto mb-6">
                 🎯
               </div>
-              <h4 className="text-xl font-bold text-black mb-3">Smarte Vorschläge erhalten</h4>
+              <h4 className="text-xl font-bold text-black mb-3">Vorschläge erhalten</h4>
               <p className="text-gray-600">Automatisch kuratierte Vorschläge von geprüften Schweizer Locations und Aktivitäten.</p>
             </div>
 
@@ -174,7 +177,7 @@ export default async function Home() {
       <div className="bg-red-600 py-24">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <h2 className="text-5xl font-bold text-white mb-6">
-            Bereit für Ihr nächstes unvergessliches Teamevent?
+            Bereit für Ihr nächstes Teamevent?
           </h2>
           <p className="text-xl text-red-100 mb-10">
             Starten Sie jetzt kostenlos – keine Kreditkarte erforderlich.
@@ -183,7 +186,7 @@ export default async function Home() {
             href={user ? "/dashboard" : "/auth/login"}
             className="inline-block px-12 py-5 bg-white text-red-600 text-lg font-bold rounded-xl hover:bg-gray-100 transition-colors shadow-xl"
           >
-            {user ? "Zum Dashboard →" : "🎯 Jetzt Event planen"}
+            {user ? "Zum Dashboard →" : "Jetzt Event planen"}
           </Link>
           <div className="mt-6 flex flex-wrap justify-center gap-6 text-sm text-red-100">
             <span>✓ Kostenlos starten</span>
