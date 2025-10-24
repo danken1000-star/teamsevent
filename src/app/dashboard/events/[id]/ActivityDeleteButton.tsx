@@ -51,13 +51,8 @@ export default function ActivityDeleteButton({
       console.log('ActivityDeleteButton: Success, refreshing page...')
       toast.success('Activity entfernt!')
       
-      // Force page refresh
+      // Force page refresh - revalidatePath should handle cache invalidation
       router.refresh()
-      
-      // Additional fallback: reload after a short delay
-      setTimeout(() => {
-        window.location.reload()
-      }, 1000)
       
     } catch (error) {
       console.error('ActivityDeleteButton: Error deleting activity:', error)
