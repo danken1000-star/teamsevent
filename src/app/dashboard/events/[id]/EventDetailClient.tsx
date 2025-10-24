@@ -94,7 +94,7 @@ export default function EventDetailClient({
 
       {/* Header */}
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
           <div className="flex-1 min-w-0">
             <EditableEventTitle 
               eventId={event.id} 
@@ -116,8 +116,10 @@ export default function EventDetailClient({
             </div>
           </div>
           
-          <div className="flex flex-col sm:flex-row gap-2">
-            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+          {/* Action Buttons - Vertikal angeordnet */}
+          <div className="flex flex-col gap-3 w-full lg:w-80">
+            {/* Planning Badge */}
+            <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-sm font-medium ${
               event.status === 'finalized' 
                 ? 'bg-green-100 text-green-800'
                 : 'bg-blue-100 text-blue-800'
@@ -125,31 +127,32 @@ export default function EventDetailClient({
               {event.status === 'finalized' ? '✓ Finalisiert' : event.status || 'planning'}
             </span>
             
-            {/* Voting Button mit Stats */}
-            <div className="space-y-2">
-              <a
-                href={`/vote/${event.id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors inline-block w-full text-center text-sm"
-              >
-                Team abstimmen lassen
-              </a>
-              
-              {/* Vote Stats anzeigen */}
-              <VoteStatsDisplay eventId={event.id} />
-            </div>
+            {/* Team abstimmen Button */}
+            <a
+              href={`/vote/${event.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-center text-sm font-medium"
+            >
+              Team abstimmen lassen
+            </a>
             
-            <FinalizeEventButton 
-              eventId={event.id} 
-              currentStatus={event.status || 'planning'} 
-            />
+            {/* Vote Stats anzeigen */}
+            <VoteStatsDisplay eventId={event.id} />
+            
+            {/* Finalize Button */}
+            <div className="w-full">
+              <FinalizeEventButton 
+                eventId={event.id} 
+                currentStatus={event.status || 'planning'} 
+              />
+            </div>
           </div>
         </div>
       </div>
 
       {/* Activities Section */}
-      <div className="mt-6 bg-white rounded-lg shadow-md p-6">
+      <div className="mt-6 mb-6 bg-white rounded-lg shadow-md p-6">
         <h2 className="text-xl font-bold mb-4">Activities</h2>
         
         {/* Activities List */}
@@ -241,7 +244,7 @@ export default function EventDetailClient({
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left Column: Team Section */}
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">
@@ -414,7 +417,7 @@ export default function EventDetailClient({
 
       {/* Dietary Preferences Section */}
       {Object.keys(dietaryGroups).length > 0 && (
-        <div className="mt-6 bg-white rounded-lg shadow-md p-6">
+        <div className="mt-6 mb-6 bg-white rounded-lg shadow-md p-6">
           <h2 className="text-xl font-bold mb-4">Ernährungspräferenzen</h2>
           <div className="space-y-3">
             {Object.entries(dietaryGroups).map(([preference, members]) => (
