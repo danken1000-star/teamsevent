@@ -7,6 +7,7 @@ import JoinAsOrganizerButton from './JoinAsOrganizerButton'
 import Link from 'next/link'
 import EventCreatedToast from './EventCreatedToast'
 import FinalizeEventButton from './FinalizeEventButton'
+import ActivityDeleteButton from './ActivityDeleteButton'
 
 const CATEGORY_LABELS: Record<string, string> = {
   food: '🍔 Essen',
@@ -231,30 +232,38 @@ export default async function EventDetailPage({
                 🎯 Gewählte Activities ({activities.length})
               </p>
               <div className="space-y-3">
-                {activities.map((activity, index) => (
+                {eventActivities?.map((ea, index) => (
                   <div 
-                    key={activity.id}
-                    className="bg-white border-2 border-gray-200 rounded-lg p-3 sm:p-4 hover:border-red-300 transition-colors"
+                    key={ea.id}
+                    className="bg-white border-2 border-gray-200 rounded-lg p-3 sm:p-4 hover:border-red-300 transition-colors relative"
                   >
-                    <div className="flex justify-between items-start gap-3">
+                    {/* Delete Button - NUR wenn Event NICHT finalisiert */}
+                    <ActivityDeleteButton
+                      eventId={params.id}
+                      eventActivityId={ea.id}
+                      activityName={ea.activities.name}
+                      isVisible={event.status !== 'finalized'}
+                    />
+
+                    <div className="flex justify-between items-start gap-3 pr-8">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2">
                           <span className="text-base sm:text-lg font-bold text-gray-900">
-                            {index + 1}. {activity.name}
+                            {index + 1}. {ea.activities.name}
                           </span>
                           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            {CATEGORY_LABELS[activity.category] || activity.category}
+                            {CATEGORY_LABELS[ea.activities.category] || ea.activities.category}
                           </span>
                         </div>
                         <p className="text-xs sm:text-sm text-gray-600 mb-2">
-                          {activity.description}
+                          {ea.activities.description}
                         </p>
                         <div className="flex flex-wrap gap-3 text-xs text-gray-500">
-                          <span>⏱️ {activity.duration_hours}h</span>
+                          <span>⏱️ {ea.activities.duration_hours}h</span>
                           <span>👥 {event.participant_count} Personen</span>
-                          {activity.tags && activity.tags.length > 0 && (
+                          {ea.activities.tags && ea.activities.tags.length > 0 && (
                             <span className="flex gap-1">
-                              {activity.tags.slice(0, 3).map((tag: string) => (
+                              {ea.activities.tags.slice(0, 3).map((tag: string) => (
                                 <span key={tag} className="px-2 py-0.5 bg-gray-100 rounded-full">
                                   {tag}
                                 </span>
@@ -265,10 +274,10 @@ export default async function EventDetailPage({
                       </div>
                       <div className="text-right">
                         <p className="font-bold text-base sm:text-lg text-gray-900">
-                          CHF {(activity.price_per_person * event.participant_count).toLocaleString('de-CH')}
+                          CHF {(ea.activities.price_per_person * event.participant_count).toLocaleString('de-CH')}
                         </p>
                         <p className="text-xs text-gray-600">
-                          CHF {activity.price_per_person} / Person
+                          CHF {ea.activities.price_per_person} / Person
                         </p>
                       </div>
                     </div>
@@ -288,138 +297,161 @@ export default async function EventDetailPage({
 
       {/* Team Members & Participation - Layout like in the image */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        {/* Left Column: Team + Eventplaner Teilnahme */}
-        <div className="space-y-4 sm:gap-6">
-          {/* Team Section */}
-          <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-            <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">
-              Team
-            </h2>
-            
-            {teamMembers && teamMembers.length > 0 ? (
-              <div className="space-y-2 mb-4">
-                {teamMembers.map((member) => (
-                  <div 
-                    key={member.id}
-                    className="flex justify-between items-center p-2 sm:p-3 bg-gray-50 rounded-lg gap-2"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm sm:text-base text-gray-900 truncate">
-                        {member.name || member.email}
-                      </p>
-                      <p className="text-xs text-gray-500 truncate">{member.email}</p>
-                    </div>
-                    {respondedMemberIds.has(member.id) ? (
-                      (() => {
-                        const vote = votes?.find((v: any) => v.team_member_id === member.id)
-                        return vote?.vote_value === 'confirmed' ? (
-                          <span className="text-xs text-green-600 font-medium whitespace-nowrap">✓ Teilnahme bestätigt</span>
-                        ) : (
-                          <span className="text-xs text-red-600 font-medium whitespace-nowrap">❌ Abgesagt</span>
-                        )
-                      })()
-                    ) : (
-                      <span className="text-xs text-gray-400 whitespace-nowrap">Ausstehend</span>
-                    )}
+        {/* Left Column: Team Section */}
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+          <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">
+            Team
+          </h2>
+          
+          {/* Team-Mitglieder Liste */}
+          {teamMembers && teamMembers.length > 0 ? (
+            <div className="space-y-2 mb-4">
+              {teamMembers.map((member) => (
+                <div 
+                  key={member.id}
+                  className="flex justify-between items-center p-2 sm:p-3 bg-gray-50 rounded-lg gap-2"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm sm:text-base text-gray-900 truncate">
+                      {member.name || member.email}
+                    </p>
+                    <p className="text-xs text-gray-500 truncate">{member.email}</p>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-xs sm:text-sm text-gray-500 mb-4">
-                Noch keine Teammitglieder eingeladen
+                  {respondedMemberIds.has(member.id) ? (
+                    (() => {
+                      const vote = votes?.find((v: any) => v.team_member_id === member.id)
+                      return vote?.vote_value === 'confirmed' ? (
+                        <span className="text-xs text-green-600 font-medium whitespace-nowrap">✓ Teilnahme bestätigt</span>
+                      ) : (
+                        <span className="text-xs text-red-600 font-medium whitespace-nowrap">❌ Abgesagt</span>
+                      )
+                    })()
+                  ) : (
+                    <span className="text-xs text-gray-400 whitespace-nowrap">Ausstehend</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs sm:text-sm text-gray-500 mb-4">
+              Noch keine Teammitglieder eingeladen
+            </p>
+          )}
+
+          {/* Auch am Event teilnehmen - IM GLEICHEN KASTEN! */}
+          <div className="pt-4 border-t border-gray-200">
+            <div className="bg-blue-50 rounded-lg p-4">
+              <h3 className="font-medium text-blue-900 mb-2">
+                Auch am Event teilnehmen
+              </h3>
+              <p className="text-sm text-blue-700 mb-3">
+                Teilnahme als Eventplaner bestätigen.
               </p>
-            )}
+              <JoinAsOrganizerButton 
+                eventId={params.id} 
+                userEmail={user.email || ''} 
+                userName={user.user_metadata?.full_name || user.user_metadata?.name}
+              />
+            </div>
+          </div>
 
+          {/* Bulk Invite Button */}
+          <div className="mt-4">
             <InviteTeamMembersBulk eventId={params.id} />
-            <SendReminderButton eventId={params.id} pendingMembers={pendingMembers} />
           </div>
 
-          {/* Eventplaner Teilnahme Section */}
-          <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-            <JoinAsOrganizerButton 
-              eventId={params.id} 
-              userEmail={user.email || ''} 
-              userName={user.user_metadata?.full_name || user.user_metadata?.name}
-            />
-          </div>
+          {/* Send Reminder - nur wenn Team vorhanden */}
+          {teamMembers && teamMembers.length > 0 && (
+            <div className="mt-2">
+              <SendReminderButton eventId={params.id} pendingMembers={pendingMembers} />
+            </div>
+          )}
         </div>
 
         {/* Right Column: Teilnahme Übersicht */}
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-lg font-semibold mb-4">Teilnahme</h2>
-          
-          <div className="mb-6">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-sm text-gray-600">Rückmeldungen</span>
-              <span className="text-lg font-bold text-blue-600">
+          <h2 className="text-xl font-bold mb-4">Teilnahme</h2>
+
+          {/* Rückmeldungen Counter */}
+          <div className="mb-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-gray-600">Rückmeldungen</span>
+              <span className="text-2xl font-bold">
                 {totalResponses} / {memberCount}
               </span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-3">
-              <div
-                className="bg-blue-600 h-3 rounded-full transition-all"
-                style={{
-                  width: `${memberCount > 0 ? (totalResponses / memberCount) * 100 : 0}%`,
+            
+            {/* Progress Bar */}
+            <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+              <div 
+                className="bg-blue-600 h-full transition-all duration-300"
+                style={{ 
+                  width: `${memberCount > 0 
+                    ? ((totalResponses) / memberCount * 100) 
+                    : 0}%` 
                 }}
               />
             </div>
-            <div className="text-center mt-2">
-              <span className="text-2xl font-bold text-blue-600">
-                {memberCount > 0 ? Math.round((totalResponses / memberCount) * 100) : 0}%
-              </span>
-              <span className="text-sm text-gray-600 ml-2">Rückmeldungen</span>
-            </div>
-            
-            {/* Response breakdown */}
-            <div className="grid grid-cols-2 gap-4 mt-4 text-sm">
-              <div className="text-center">
-                <div className="text-green-600 font-bold text-lg">{confirmedVotes.length}</div>
-                <div className="text-gray-600">Zusagen</div>
-              </div>
-              <div className="text-center">
-                <div className="text-red-600 font-bold text-lg">{declinedVotes.length}</div>
-                <div className="text-gray-600">Absagen</div>
-              </div>
+            <div className="text-right text-sm text-gray-600 mt-1">
+              {memberCount > 0 
+                ? Math.round((totalResponses) / memberCount * 100)
+                : 0}% Rückmeldungen
             </div>
           </div>
 
-          {totalResponses > 0 ? (
-            <div className="space-y-3">
-              <h4 className="font-medium text-sm text-gray-700">Rückmeldungen:</h4>
-              {votes?.map((vote) => {
-                const member = teamMembers?.find((m) => m.id === vote.team_member_id);
-                const isConfirmed = vote.vote_value === 'confirmed';
+          {/* Zusagen / Absagen Stats */}
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="bg-green-50 rounded-lg p-4 text-center">
+              <div className="text-3xl font-bold text-green-600">
+                {confirmedVotes.length}
+              </div>
+              <div className="text-sm text-green-700 mt-1">Zusagen</div>
+            </div>
+            <div className="bg-red-50 rounded-lg p-4 text-center">
+              <div className="text-3xl font-bold text-red-600">
+                {declinedVotes.length}
+              </div>
+              <div className="text-sm text-red-700 mt-1">Absagen</div>
+            </div>
+          </div>
+
+          {/* Detaillierte Teilnahme-Liste */}
+          {teamMembers && teamMembers.length > 0 && (
+            <div className="space-y-2">
+              <h3 className="font-medium text-gray-700 mb-3">Details</h3>
+              {teamMembers.map((member) => {
+                const vote = votes?.find((v: any) => v.team_member_id === member.id)
+                const hasVoted = vote !== undefined
+                const isConfirmed = hasVoted && vote.vote_value === 'confirmed'
+                const isDeclined = hasVoted && vote.vote_value === 'declined'
+
                 return (
-                  <div
-                    key={vote.id}
-                    className={`flex items-center gap-2 p-3 rounded-lg ${
-                      isConfirmed ? 'bg-green-50' : 'bg-red-50'
-                    }`}
+                  <div 
+                    key={member.id}
+                    className="flex items-center justify-between p-2 rounded hover:bg-gray-50"
                   >
-                    <span className={`text-lg ${isConfirmed ? 'text-green-600' : 'text-red-600'}`}>
-                      {isConfirmed ? '✓' : '❌'}
+                    <span className="text-sm">{member.name || member.email}</span>
+                    <span className="text-sm">
+                      {isConfirmed && (
+                        <span className="text-green-600 font-medium">✓ Zusage</span>
+                      )}
+                      {isDeclined && (
+                        <span className="text-red-600 font-medium">✗ Absage</span>
+                      )}
+                      {!hasVoted && (
+                        <span className="text-gray-400">○ Ausstehend</span>
+                      )}
                     </span>
-                    <div className="flex-1">
-                      <div className="font-medium text-sm">
-                        {member?.name || 'Teilnehmende'}
-                      </div>
-                      <div className="text-xs text-gray-500">{member?.email}</div>
-                    </div>
-                    <div className={`text-xs font-medium ${
-                      isConfirmed ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      {isConfirmed ? 'Zusage' : 'Absage'}
-                    </div>
                   </div>
-                );
+                )
               })}
             </div>
-          ) : (
-            <div className="text-center py-8">
-              <p className="text-gray-500 mb-2">Noch keine Rückmeldungen vorhanden</p>
-              <p className="text-sm text-gray-400">
-                Warten Sie bis Team-Mitglieder geantwortet haben
-              </p>
+          )}
+
+          {/* Empty State */}
+          {(!teamMembers || teamMembers.length === 0) && (
+            <div className="text-center py-8 text-gray-400">
+              <p>Noch keine Team-Mitglieder eingeladen</p>
             </div>
           )}
         </div>
