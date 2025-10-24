@@ -25,27 +25,42 @@ export default function ActivityDeleteButton({
 
     setIsDeleting(true)
     try {
+      console.log('ActivityDeleteButton: Deleting activity', { eventId, eventActivityId, activityName })
+      
       const response = await fetch(`/api/events/${eventId}/activities/${eventActivityId}`, {
         method: 'DELETE'
       })
 
+      console.log('ActivityDeleteButton: Response status:', response.status)
+
       // Check if response is OK
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+        console.error('ActivityDeleteButton: API error:', errorData)
         throw new Error(errorData.error || 'Failed to delete activity')
       }
 
       // Parse JSON response
       const data = await response.json()
+      console.log('ActivityDeleteButton: API response:', data)
       
       if (!data.success) {
         throw new Error(data.error || 'Failed to delete activity')
       }
 
+      console.log('ActivityDeleteButton: Success, refreshing page...')
       toast.success('Activity entfernt!')
+      
+      // Force page refresh
       router.refresh()
+      
+      // Additional fallback: reload after a short delay
+      setTimeout(() => {
+        window.location.reload()
+      }, 1000)
+      
     } catch (error) {
-      console.error('Error deleting activity:', error)
+      console.error('ActivityDeleteButton: Error deleting activity:', error)
       toast.error(error instanceof Error ? error.message : 'Fehler beim Entfernen der Activity')
     } finally {
       setIsDeleting(false)

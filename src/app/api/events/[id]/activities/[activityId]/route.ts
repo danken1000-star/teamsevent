@@ -9,6 +9,8 @@ export async function DELETE(
     const eventId = params.id
     const activityId = params.activityId
 
+    console.log('DELETE /api/events/[id]/activities/[activityId]: Deleting activity', { eventId, activityId })
+
     // Create Supabase client
     const supabase = createClient()
 
@@ -51,6 +53,7 @@ export async function DELETE(
     }
 
     // Delete from event_activities junction table
+    console.log('DELETE /api/events/[id]/activities/[activityId]: Deleting from event_activities table')
     const { error: deleteError } = await supabase
       .from('event_activities')
       .delete()
@@ -58,13 +61,15 @@ export async function DELETE(
       .eq('activity_id', activityId)
 
     if (deleteError) {
-      console.error('Error deleting activity:', deleteError)
+      console.error('DELETE /api/events/[id]/activities/[activityId]: Error deleting activity:', deleteError)
       return NextResponse.json(
         { error: 'Failed to delete activity' },
         { status: 500 }
       )
     }
 
+    console.log('DELETE /api/events/[id]/activities/[activityId]: Activity deleted successfully')
+    
     // WICHTIG: Return JSON response!
     return NextResponse.json({
       success: true,
