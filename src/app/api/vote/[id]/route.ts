@@ -135,18 +135,30 @@ export async function GET(
     )
 
     // Get vote statistics
-    const { data: allVotes } = await supabase
+    const { data: allVotes, error: votesError } = await supabase
       .from('votes')
-      .select('vote_value, voter_name, voter_email, created_at')
+      .select('vote_value, created_at')
       .eq('event_id', eventId)
       .eq('vote_type', 'event_approval')
       .order('created_at', { ascending: false })
+
+    if (votesError) {
+      console.error('Error fetching votes:', votesError)
+      return NextResponse.json(
+        { error: 'Failed to fetch votes' },
+        { status: 500 }
+      )
+    }
+
+    console.log('GET /api/vote/[id]: Found votes:', allVotes)
 
     const stats = {
       yes: allVotes?.filter(v => v.vote_value === 'yes').length || 0,
       no: allVotes?.filter(v => v.vote_value === 'no').length || 0,
       abstain: allVotes?.filter(v => v.vote_value === 'abstain').length || 0
     }
+
+    console.log('GET /api/vote/[id]: Calculated stats:', stats)
 
     return NextResponse.json({
       stats,
