@@ -26,16 +26,16 @@ export default function InviteTeamMembersBulk({ eventId }: InviteTeamMembersBulk
   const parseEmails = (text: string): EmailInvite[] => {
     if (!text || text.trim().length === 0) return []
     
-    // Split by common delimiters: newlines, commas, semicolons, tabs
+    // Split by common delimiters: newlines, commas, semicolons, tabs, spaces
     const lines = text
-      .split(/[\n,;\t]/)
+      .split(/[\n,;\t\s]+/)
       .map(line => line.trim())
       .filter(line => line.length > 0)
 
     const emails: EmailInvite[] = []
     
     for (const line of lines) {
-      // More robust email regex
+      // More robust email regex - matches emails anywhere in the line
       const emailMatch = line.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/i)
       
       if (emailMatch) {
@@ -183,10 +183,9 @@ export default function InviteTeamMembersBulk({ eventId }: InviteTeamMembersBulk
           <textarea
             value={emailText}
             onChange={(e) => handleTextChange(e.target.value)}
-            placeholder="max@firma.ch&#10;Anna Muster anna@firma.ch&#10;test@example.com&#10;&#10;Oder aus Excel kopieren:&#10;max@firma.ch, anna@firma.ch, test@example.com"
+            placeholder="max@firma.ch&#10;Anna Muster anna@firma.ch&#10;test@example.com&#10;&#10;Oder aus Excel/CSV kopieren:&#10;max@firma.ch, anna@firma.ch, test@example.com&#10;&#10;Unterstützte Formate:&#10;• Zeilen-getrennt: max@firma.ch&#10;• Komma-getrennt: max@firma.ch, anna@firma.ch&#10;• Mit Namen: Max Muster max@firma.ch"
             className="w-full px-3 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm text-gray-900 placeholder-gray-500 font-medium resize-none"
             rows={8}
-            required
           />
           <div className="flex justify-between items-center mt-1">
             <span className="text-xs text-gray-500">
@@ -227,6 +226,15 @@ export default function InviteTeamMembersBulk({ eventId }: InviteTeamMembersBulk
             >
               Vorschau schließen
             </button>
+          </div>
+        )}
+
+        {/* Debug Info */}
+        {process.env.NODE_ENV === 'development' && parsedEmails.length > 0 && (
+          <div className="bg-gray-50 border border-gray-200 rounded-md p-2 text-xs">
+            <strong>Debug:</strong> {parsedEmails.length} E-Mails erkannt
+            <br />
+            <strong>Text:</strong> "{emailText.substring(0, 100)}..."
           </div>
         )}
 
