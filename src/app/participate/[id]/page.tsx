@@ -24,45 +24,56 @@ export default function ParticipatePage() {
 
   const loadEventData = async () => {
     try {
-      // Try multiple approaches to get the event data
-      const apiUrl = `/api/events/${params.id}/public`
+      console.log('Loading event for ID:', params.id)
       
-      console.log('Loading event from:', apiUrl)
-      console.log('Event ID:', params.id)
+      // Try multiple URLs with different approaches
+      const urls = [
+        `/api/events/${params.id}/public`,
+        `https://www.teamsevent.ch/api/events/${params.id}/public`,
+        `https://teamsevent.ch/api/events/${params.id}/public`
+      ]
       
-      // First try with relative URL
-      let response = await fetch(apiUrl, {
-        cache: 'no-store',
-        headers: { 'Content-Type': 'application/json' }
-      })
+      let lastError = null
+      
+      for (const url of urls) {
+        try {
+          console.log('Trying URL:', url)
+          
+          const response = await fetch(url, {
+            method: 'GET',
+            cache: 'no-store',
+            headers: { 
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            }
+          })
 
-      console.log('Response status:', response.status)
+          console.log('Response status for', url, ':', response.status)
 
-      // If relative URL fails, try absolute URL
-      if (!response.ok) {
-        console.log('Relative URL failed, trying absolute URL...')
-        const absoluteUrl = `https://www.teamsevent.ch/api/events/${params.id}/public`
-        response = await fetch(absoluteUrl, {
-          cache: 'no-store',
-          headers: { 'Content-Type': 'application/json' }
-        })
-        console.log('Absolute URL response status:', response.status)
+          if (response.ok) {
+            const data = await response.json()
+            console.log('Event data received from', url, ':', data)
+            
+            if (data.event) {
+              setEvent(data.event)
+              return // Success, exit the function
+            }
+          } else {
+            const errorText = await response.text()
+            console.log('Error response from', url, ':', errorText)
+            lastError = new Error(`HTTP ${response.status}: ${errorText}`)
+          }
+        } catch (urlError) {
+          console.log('Error with URL', url, ':', urlError.message)
+          lastError = urlError
+        }
       }
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        console.error('Error response:', errorText)
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      const data = await response.json()
-      console.log('Event data received:', data)
       
-      if (!data.event) {
-        throw new Error('No event data received')
+      // If all URLs failed, throw the last error
+      if (lastError) {
+        throw lastError
       }
       
-      setEvent(data.event)
     } catch (error) {
       console.error('Error loading event:', error)
       setEvent(null) // Explicitly set to null to show error state
@@ -127,7 +138,23 @@ export default function ParticipatePage() {
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Event nicht gefunden</h1>
           <p className="text-gray-600 mb-4">Der Teilnahme-Link ist ungültig oder das Event existiert nicht mehr.</p>
           <p className="text-sm text-gray-500 mb-4">Event ID: {params.id}</p>
-          <Link href="/" className="text-red-600 hover:underline">Zurück zum Start</Link>
+          <div className="mt-6 space-y-2">
+            <button 
+              onClick={() => {
+                setLoading(true)
+                loadEventData()
+              }}
+              className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+            >
+              🔄 Erneut versuchen
+            </button>
+            <div className="text-xs text-gray-500">
+              Falls das Problem weiterhin besteht, wende dich an den Event-Organisator.
+            </div>
+          </div>
+          <div className="mt-4">
+            <Link href="/" className="text-red-600 hover:underline">Zurück zum Start</Link>
+          </div>
         </div>
       </div>
     )
