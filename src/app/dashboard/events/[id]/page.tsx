@@ -1,14 +1,16 @@
 import { createClient } from '@/lib/supabase'
+import { createClient as createBrowserClient } from '@/lib/supabase-browser'
 import { redirect } from 'next/navigation'
 import InviteTeamMembersBulk from './InviteTeamMembersBulk'
 import EditableEventTitle from './EditableEventTitle'
 import SendReminderButton from './SendReminderButton'
-import JoinAsOrganizerButton from './JoinAsOrganizerButton'
+// import JoinAsOrganizerButton from './JoinAsOrganizerButton' // Nicht mehr benötigt
 import Link from 'next/link'
 import EventCreatedToast from './EventCreatedToast'
 import FinalizeEventButton from './FinalizeEventButton'
 import ActivityDeleteButton from './ActivityDeleteButton'
 import VoteStatsDisplay from './VoteStatsDisplay'
+import OrganizerJoinButton from './OrganizerJoinButton'
 
 const CATEGORY_LABELS: Record<string, string> = {
   food: '🍔 Essen',
@@ -107,6 +109,9 @@ export default async function EventDetailPage({
     (sum, activity) => sum + (activity.price_per_person * event.participant_count),
     0
   )
+
+  // Check if organizer has joined
+  const hasOrganizerJoined = teamMembers?.some(member => member.email === user.email) || false
   const costPerPerson = activities.length > 0 ? totalCost / event.participant_count : 0
   const totalDuration = activities.reduce((sum, activity) => sum + activity.duration_hours, 0)
 
@@ -364,11 +369,10 @@ export default async function EventDetailPage({
                 Teilnahme als Eventplaner bestätigen.
               </p>
               
-              {/* Direkt der Button, KEINE innere Box mehr! */}
-              <JoinAsOrganizerButton 
-                eventId={params.id} 
-                userEmail={user.email || ''} 
-                userName={user.user_metadata?.full_name || user.user_metadata?.name}
+              {/* ✅ BUTTON DIREKT HIER - KEINE WEITERE BOX! */}
+              <OrganizerJoinButton 
+                eventId={params.id}
+                hasJoined={hasOrganizerJoined}
               />
             </div>
           </div>

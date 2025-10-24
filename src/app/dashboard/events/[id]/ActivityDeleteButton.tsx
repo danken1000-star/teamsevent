@@ -29,16 +29,24 @@ export default function ActivityDeleteButton({
         method: 'DELETE'
       })
 
-      if (response.ok) {
-        toast.success('Activity entfernt!')
-        router.refresh()
-      } else {
-        const error = await response.json()
-        toast.error(error.error || 'Fehler beim Entfernen')
+      // Check if response is OK
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+        throw new Error(errorData.error || 'Failed to delete activity')
       }
+
+      // Parse JSON response
+      const data = await response.json()
+      
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to delete activity')
+      }
+
+      toast.success('Activity entfernt!')
+      router.refresh()
     } catch (error) {
       console.error('Error deleting activity:', error)
-      toast.error('Fehler beim Entfernen der Activity')
+      toast.error(error instanceof Error ? error.message : 'Fehler beim Entfernen der Activity')
     } finally {
       setIsDeleting(false)
     }
