@@ -39,13 +39,34 @@ export async function POST(
     // Simplified voting - just create new vote each time
     console.log('Creating new vote for event:', eventId, 'vote:', vote)
     
+    // Create a dummy team member for anonymous voting
+    const { data: dummyMember, error: memberError } = await supabase
+      .from('team_members')
+      .insert({
+        event_id: eventId,
+        name: voterName || 'Anonym',
+        email: voterEmail || `anonymous_${Date.now()}@temp.com`
+      })
+      .select()
+      .single()
+
+    if (memberError) {
+      console.error('Create dummy member error:', memberError)
+      return NextResponse.json(
+        { error: 'Failed to create voter record: ' + memberError.message },
+        { status: 500 }
+      )
+    }
+
+    console.log('Created dummy member:', dummyMember)
+
     const { data: voteData, error: insertError } = await supabase
       .from('votes')
       .insert({
         event_id: eventId,
         vote_type: 'event_approval',
         vote_value: vote,
-        team_member_id: null
+        team_member_id: dummyMember.id
       })
       .select()
       .single()
