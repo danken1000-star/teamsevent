@@ -228,7 +228,7 @@ export default function LocationSelectionStep({
             className={`px-4 py-2 rounded-lg font-medium transition-all border-2 $
               filterCategory.length === 0
                 ? 'bg-red-600 text-white border-red-600'
-                : 'bg-white text-gray-700 border-gray-300 hover:border-red-300'
+                : 'bg-white text-gray-900 border-gray-300 hover:border-red-300'
             }`}
           >
             🔄 Alle
@@ -245,7 +245,7 @@ export default function LocationSelectionStep({
                 className={`px-4 py-2 rounded-lg font-medium transition-all border-2 $
                   isSelected
                     ? 'bg-red-600 text-white border-red-600'
-                    : 'bg-white text-gray-700 border-gray-300 hover:border-red-300'
+                    : 'bg-white text-gray-900 border-gray-300 hover:border-red-300'
                 }`}
               >
                 {categoryEmojis[cat] || '📍'} {cat.charAt(0).toUpperCase() + cat.slice(1)}
