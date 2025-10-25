@@ -77,19 +77,6 @@ export default function EventDetailClient({
   // Check if organizer has joined
   const hasOrganizerJoined = teamMembers?.some(member => member.email === user.email) || false
   const costPerPerson = locations.length > 0 ? totalCost / event.participant_count : 0
-
-  // Group team members by dietary preference
-  const dietaryGroups: Record<string, any[]> = {}
-  teamMembers?.forEach(member => {
-    if (member.dietary_preference) {
-      const pref = member.dietary_preference
-      if (!dietaryGroups[pref]) {
-        dietaryGroups[pref] = []
-      }
-      dietaryGroups[pref].push(member)
-    }
-  })
-
   return (
     <div className="max-w-5xl mx-auto">
       {/* Event Created Toast */}
@@ -403,31 +390,6 @@ export default function EventDetailClient({
         </div>
       </div>
 
-      {/* Dietary Preferences Section */}
-      {Object.keys(dietaryGroups).length > 0 && (
-        <div className="mt-6 mb-6 bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-bold mb-4">Ernährungspräferenzen</h2>
-          <div className="space-y-3">
-            {Object.entries(dietaryGroups).map(([preference, members]) => (
-              <div key={preference} className="flex items-center gap-2">
-                <span className="text-sm font-medium text-gray-700 min-w-0 flex-shrink-0">
-                  {preference === 'vegetarian' && '🥗 Vegetarisch'}
-                  {preference === 'vegan' && '🌱 Vegan'}
-                  {preference === 'gluten_free' && '🌾 Glutenfrei'}
-                  {preference === 'lactose_free' && '🥛 Laktosefrei'}
-                  {preference === 'halal' && '🕌 Halal'}
-                  {preference === 'kosher' && '✡️ Kosher'}
-                  {preference === 'other' && '⚠️ Andere'}
-                  {!['vegetarian', 'vegan', 'gluten_free', 'lactose_free', 'halal', 'kosher', 'other'].includes(preference) && preference}
-                </span>
-                <span className="text-sm text-gray-600">
-                  ({members.length} {members.length === 1 ? 'Person' : 'Personen'})
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Organizer Join Modal */}
       {showOrganizerModal && userEmail && (
