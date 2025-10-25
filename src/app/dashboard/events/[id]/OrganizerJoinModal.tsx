@@ -17,7 +17,7 @@ export default function OrganizerJoinModal({
 }: OrganizerJoinModalProps) {
   const [name, setName] = useState('')
   const [dietaryPreference, setDietaryPreference] = useState('omnivor')
-  const [dietaryNotes, setDietaryNotes] = useState('omnivor')
+  const [dietaryNotes, setDietaryNotes] = useState('')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
@@ -131,13 +131,8 @@ export default function OrganizerJoinModal({
               <option value="omnivor">🍖 Ich esse alles</option>
               <option value="vegetarisch">🥗 Vegetarisch</option>
               <option value="vegan">🌱 Vegan</option>
-              <option value="sonstiges">🌾 Glutenfrei</option>
-              <option value="sonstiges">🥛 Laktosefrei</option>
-              <option value="sonstiges">🕌 Halal</option>
-              <option value="sonstiges">✡️ Kosher</option>
-              <option value="sonstiges">Andere</option>
-            </select>
-          </div>
+              <option value="kein_schweinefleisch">🐷 Kein Schweinefleisch</option>
+              <option value="sonstiges">Sonstiges</option>
 
           {/* Zusätzliche Notizen */}
           <div>
