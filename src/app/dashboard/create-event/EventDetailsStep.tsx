@@ -81,7 +81,7 @@ export default function EventDetailsStep({
         {/* Budget */}
         <div>
           <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
-            Gesamtbudget (CHF) *
+            Gesamtbudget (CHF)
           </label>
           <input
             type="range"
