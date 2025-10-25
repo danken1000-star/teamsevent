@@ -6,18 +6,16 @@ import SimpleFeedback from '@/components/SimpleFeedback'
 
 interface ContactLocationsFormProps {
   event: any
-  activities: any[]
+  locations: any[]
   totalCost: number
-  totalDuration: number
   teamMembers: any[]
   eventId: string
 }
 
 export default function ContactLocationsForm({
   event,
-  activities,
+  locations,
   totalCost,
-  totalDuration,
   teamMembers,
   eventId,
 }: ContactLocationsFormProps) {
@@ -74,11 +72,10 @@ Event: ${event.title}
 ${event.event_date ? `Datum: ${new Date(event.event_date).toLocaleDateString('de-CH')}` : ''}
 Anzahl Personen: ${event.participant_count}
 
-Gewählte Activities:
-${activities.map((a) => `- ${a.name} (CHF ${(a.price_per_person * event.participant_count).toLocaleString('de-CH')})`).join('\n')}
+Gewählte Locations:
+${locations.map((loc) => `- ${loc.name}${loc.start_time ? ` (${loc.start_time} Uhr)` : ''} (CHF ${(loc.price_per_person * event.participant_count).toLocaleString('de-CH')})`).join('\n')}
 
-Gesamtkosten: CHF ${totalCost.toLocaleString('de-CH')}
-Dauer: ca. ${totalDuration} Stunden${dietaryInfo}
+Gesamtkosten: CHF ${totalCost.toLocaleString('de-CH')}${dietaryInfo}
 
 Bitte senden Sie uns eine Bestätigung und weitere Details zur Buchung.
 
@@ -86,7 +83,7 @@ Mit freundlichen Grüssen
 Organisiert über TeamEvent.ch`
 
     setMessage(defaultMessage)
-  }, [event, activities, totalCost, totalDuration, teamMembers])
+  }, [event, locations, totalCost, teamMembers])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

@@ -30,22 +30,21 @@ export default async function ContactLocationsPage({
     redirect('/dashboard')
   }
 
-  // Load activities
-  const { data: eventActivities } = await supabase
-    .from('event_activities')
-    .select('activity_id')
+  // Load locations
+  const { data: eventLocations } = await supabase
+    .from('event_locations')
+    .select(`
+      *,
+      locations (*)
+    `)
     .eq('event_id', params.id)
+    .order('order_index', { ascending: true })
 
-  const activityIds = eventActivities?.map((ea) => ea.activity_id) || []
-
-  let activities = []
-  if (activityIds.length > 0) {
-    const { data: activitiesData } = await supabase
-      .from('activities')
-      .select('*')
-      .in('id', activityIds)
-    activities = activitiesData || []
-  }
+  const locations = eventLocations?.map(el => ({
+    ...el.locations,
+    start_time: el.start_time,
+    order_index: el.order_index
+  })).filter(Boolean) || []
 
   // Load team members with dietary preferences
   const { data: teamMembers } = await supabase
@@ -55,11 +54,10 @@ export default async function ContactLocationsPage({
     .not('dietary_preference', 'is', null)
 
   // Calculate totals
-  const totalCost = activities.reduce(
-    (sum, a) => sum + (a.price_per_person || 0) * (event.participant_count || 0),
+  const totalCost = locations.reduce(
+    (sum, loc) => sum + (loc.price_per_person || 0) * (event.participant_count || 0),
     0
   )
-  const totalDuration = activities.reduce((sum, a) => sum + (a.duration_hours || 0), 0)
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -105,21 +103,20 @@ export default async function ContactLocationsPage({
               <span className="text-gray-600">Gesamtkosten:</span>
               <span className="font-semibold text-green-600">CHF {totalCost.toLocaleString('de-CH')}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Dauer:</span>
-              <span className="font-semibold">~{totalDuration}h</span>
-            </div>
           </div>
 
-          {/* Activities */}
+          {/* Locations */}
           <div className="mt-6 pt-6 border-t">
-            <h3 className="font-semibold mb-3">Gewählte Activities:</h3>
+            <h3 className="font-semibold mb-3">Gewählte Locations:</h3>
             <ul className="space-y-2">
-              {activities.map((activity) => (
-                <li key={activity.id} className="flex justify-between text-sm">
-                  <span>• {activity.name}</span>
+              {locations.map((location) => (
+                <li key={location.id} className="flex justify-between text-sm">
+                  <span>
+                    • {location.name}
+                    {location.start_time && <span className="text-gray-500 ml-2">({location.start_time} Uhr)</span>}
+                  </span>
                   <span className="text-gray-600">
-                    CHF {(activity.price_per_person * event.participant_count).toLocaleString('de-CH')}
+                    CHF {(location.price_per_person * event.participant_count).toLocaleString('de-CH')}
                   </span>
                 </li>
               ))}
@@ -130,9 +127,8 @@ export default async function ContactLocationsPage({
         {/* Contact Form */}
         <ContactLocationsForm
           event={event}
-          activities={activities}
+          locations={locations}
           totalCost={totalCost}
-          totalDuration={totalDuration}
           teamMembers={teamMembers || []}
           eventId={params.id}
         />
