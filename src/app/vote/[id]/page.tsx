@@ -23,6 +23,27 @@ export default function SimpleVotePage({
 
   const loadEvent = async () => {
     try {
+      // Try to load from public API first (works without auth)
+      try {
+        const response = await fetch(`/api/events/${params.id}/public`)
+        if (response.ok) {
+          const data = await response.json()
+          if (data.event) {
+            setEvent(data.event)
+            
+            // Try to get locations if available
+            if (data.locations) {
+              setLocations(data.locations)
+            }
+            setLoading(false)
+            return
+          }
+        }
+      } catch (apiError) {
+        console.log('API fetch failed, trying direct:', apiError)
+      }
+
+      // Fallback: Try direct supabase client
       const supabase = createClient()
       const { data, error } = await supabase
         .from('events')
@@ -30,7 +51,17 @@ export default function SimpleVotePage({
         .eq('id', params.id)
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('Error loading event:', error)
+        throw error
+      }
+      
+      if (!data) {
+        console.error('No event data returned')
+        setLoading(false)
+        return
+      }
+      
       setEvent(data)
 
       // Load locations for this event
@@ -53,6 +84,7 @@ export default function SimpleVotePage({
       }
     } catch (error) {
       console.error('Error loading event:', error)
+      // Don't throw, let the UI show error state
     } finally {
       setLoading(false)
     }
@@ -114,12 +146,24 @@ export default function SimpleVotePage({
     )
   }
 
-  if (!event) {
+  if (!event && !loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="bg-white rounded-lg shadow-lg p-8">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+        <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full text-center">
           <h1 className="text-2xl font-bold text-red-600 mb-4">Event nicht gefunden</h1>
-          <p className="text-gray-600">Dieses Event existiert nicht oder wurde gelöscht.</p>
+          <p className="text-gray-600 mb-4">Dieses Event existiert nicht oder wurde gelöscht.</p>
+          <p className="text-sm text-gray-500">
+            Event ID: {params.id}
+          </p>
+          <button
+            onClick={() => {
+              setLoading(true)
+              loadEvent()
+            }}
+            className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+          >
+            🔄 Erneut versuchen
+          </button>
         </div>
       </div>
     )

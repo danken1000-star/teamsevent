@@ -31,9 +31,26 @@ export async function GET(
       )
     }
 
-    console.log('API: Returning event:', event.title)
+    // Get event locations
+    const { data: eventLocations } = await supabase
+      .from('event_locations')
+      .select(`
+        *,
+        locations (*)
+      `)
+      .eq('event_id', params.id)
+      .order('order_index', { ascending: true })
+
+    const locations = eventLocations?.map(el => ({
+      ...el.locations,
+      start_time: el.start_time,
+      order_index: el.order_index
+    })).filter(Boolean) || []
+
+    console.log('API: Returning event:', event.title, 'with', locations.length, 'locations')
     return NextResponse.json({
-      event
+      event,
+      locations
     })
   } catch (error) {
     console.error('API: Error fetching event:', error)
