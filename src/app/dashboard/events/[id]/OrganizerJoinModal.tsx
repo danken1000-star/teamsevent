@@ -129,13 +129,13 @@ export default function OrganizerJoinModal({
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="omnivor">🍖 Ich esse alles</option>
-              <option value="vegetarian">🥗 Vegetarisch</option>
+              <option value="vegetarisch">🥗 Vegetarisch</option>
               <option value="vegan">🌱 Vegan</option>
-              <option value="gluten_free">🌾 Glutenfrei</option>
-              <option value="lactose_free">🥛 Laktosefrei</option>
-              <option value="halal">🕌 Halal</option>
-              <option value="kosher">✡️ Kosher</option>
-              <option value="other">Andere</option>
+              <option value="sonstiges">🌾 Glutenfrei</option>
+              <option value="sonstiges">🥛 Laktosefrei</option>
+              <option value="sonstiges">🕌 Halal</option>
+              <option value="sonstiges">✡️ Kosher</option>
+              <option value="sonstiges">Andere</option>
             </select>
           </div>
 
