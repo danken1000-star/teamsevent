@@ -31,7 +31,7 @@ export default function EventDetailsStep({
 }: EventDetailsStepProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (eventData.title && eventData.budget && eventData.participant_count) {
+    if (eventData.title && eventData.participant_count) {
       onNext()
     }
   }
@@ -78,7 +78,27 @@ export default function EventDetailsStep({
           />
         </div>
 
+        {/* Budget Toggle */}
+        <div className="mb-4">
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={eventData.budget > 0}
+              onChange={(e) => {
+                if (e.target.checked) {
+                  setEventData({ ...eventData, budget: 1000 })
+                } else {
+                  setEventData({ ...eventData, budget: 0 })
+                }
+              }}
+              className="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500"
+            />
+            <span className="text-sm font-medium text-gray-700">Budget festlegen</span>
+          </label>
+        </div>
+
         {/* Budget */}
+        {eventData.budget > 0 && (
         <div>
           <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
             Gesamtbudget (CHF)
@@ -103,6 +123,7 @@ export default function EventDetailsStep({
             💡 Pro Person: CHF {Math.round(eventData.budget / eventData.participant_count)}
           </p>
         </div>
+        )}
 
         {/* Teilnehmer */}
         <div>
