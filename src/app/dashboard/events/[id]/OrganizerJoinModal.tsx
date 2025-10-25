@@ -134,6 +134,8 @@ export default function OrganizerJoinModal({
               <option value="kein_schweinefleisch">🐷 Kein Schweinefleisch</option>
               <option value="sonstiges">Sonstiges</option>
 
+            </select>
+          </div>
           {/* Zusätzliche Notizen */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
