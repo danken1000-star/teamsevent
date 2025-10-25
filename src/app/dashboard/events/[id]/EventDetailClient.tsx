@@ -116,6 +116,16 @@ export default function EventDetailClient({
             }`}>
               {event.status === 'finalized' ? '✓ Finalisiert' : event.status || 'planning'}
             {/* Location Kontakt Button - nur wenn finalisiert */}
+            
+            {/* Location Kontakt Button - nur wenn finalisiert */}
+            {event.status === 'finalized' && (
+              <a
+                href={`/dashboard/events/${event.id}/contact-locations`}
+                className="w-full px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-center text-sm font-medium flex items-center justify-center gap-2"
+              >
+                📧 Locations kontaktieren
+              </a>
+            )}
             {event.status === 'finalized' && (
               <a
                 href={`/dashboard/events/${event.id}/contact-locations`}
