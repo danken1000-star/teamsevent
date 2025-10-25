@@ -52,7 +52,7 @@ export default function LocationSelectionStep({
   const [selectedLocations, setSelectedLocations] = useState<SelectedLocationWithTime[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [filterCategory, setFilterCategory] = useState<string>('all')
+  const [filterCategory, setFilterCategory] = useState<string[]>([])
   const [editingTimeIndex, setEditingTimeIndex] = useState<number | null>(null)
 
   // Load all locations
@@ -85,13 +85,20 @@ export default function LocationSelectionStep({
     fetchLocations()
   }, [])
 
+  const toggleCategory = (category: string) => {
+    setFilterCategory(prev => 
+      prev.includes(category) 
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
+    )
+  }
   // Filter locations based on preferences and budget
   const getFilteredLocations = () => {
     let filtered = [...locations]
 
     // Apply category filter (dropdown)
-    if (filterCategory !== 'all') {
-      filtered = filtered.filter(loc => loc.category === filterCategory)
+    if (filterCategory.length > 0) {
+      filtered = filtered.filter(loc => filterCategory.includes(loc.category))
     }
 
     // Apply preference filter ONLY if preferences exist and category filter is 'all'
@@ -207,26 +214,46 @@ export default function LocationSelectionStep({
       </div>
 
       {/* Category Filter */}
+
+      {/* Category Filter - Kacheln */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-700 mb-3">
           Kategorie filtern
         </label>
-        <select
-          value={filterCategory}
-          onChange={(e) => setFilterCategory(e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-        >
-          <option value="all">🔄 Alle Kategorien</option>
-          {categories.map(cat => (
-            <option key={cat} value={cat}>
-              {categoryEmojis[cat] || '📍'} {cat.charAt(0).toUpperCase() + cat.slice(1)}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Selected Locations with Time */}
-      {selectedLocations.length > 0 && (
+        <div className="flex flex-wrap gap-3">
+          {/* "Alle" Button */}
+          <button
+            type="button"
+            onClick={() => setFilterCategory([])}
+            className={`px-4 py-2 rounded-lg font-medium transition-all border-2 $
+              filterCategory.length === 0
+                ? 'bg-red-600 text-white border-red-600'
+                : 'bg-white text-gray-700 border-gray-300 hover:border-red-300'
+            }`}
+          >
+            🔄 Alle
+          </button>
+          
+          {/* Category Chips */}
+          {categories.map(cat => {
+            const isSelected = filterCategory.includes(cat)
+            return (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => toggleCategory(cat)}
+                className={`px-4 py-2 rounded-lg font-medium transition-all border-2 $
+                  isSelected
+                    ? 'bg-red-600 text-white border-red-600'
+                    : 'bg-white text-gray-700 border-gray-300 hover:border-red-300'
+                }`}
+              >
+                {categoryEmojis[cat] || '📍'} {cat.charAt(0).toUpperCase() + cat.slice(1)}
+              </button>
+            )
+          })}
+        </div>
+      </div>      {selectedLocations.length > 0 && (
         <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4">
           <p className="font-semibold text-green-900 mb-3">
             ✓ {selectedLocations.length} Location(s) ausgewählt
