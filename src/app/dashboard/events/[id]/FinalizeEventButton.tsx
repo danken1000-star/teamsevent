@@ -79,7 +79,7 @@ export default function FinalizeEventButton({
 
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-6">
               <p className="text-sm text-yellow-800">
-                <strong>Hinweis:</strong> Das Event wird als abgeschlossen markiert und das Team wird benachrichtigt.
+                <strong>Hinweis:</strong> Sobald das Event finalisiert wurde, können keine Änderungen mehr vorgenommen werden.
               </p>
             </div>
 
