@@ -121,6 +121,14 @@ export default function LocationSelectionStep({
       setSelectedLocations(selectedLocations.filter(loc => loc.id !== location.id))
       setEditingTimeIndex(null)
     } else {
+      // Check if another location from the same category is already selected
+      const hasCategorySelected = selectedLocations.some(loc => loc.category === location.category)
+      
+      if (hasCategorySelected) {
+        alert(`Sie haben bereits eine ${location.category === 'restaurant' ? 'Restaurant' : location.category === 'activity' ? 'Activity' : 'Location'} aus dieser Kategorie ausgewählt.\n\nWählen Sie pro Kategorie nur eine Location.`)
+        return
+      }
+      
       // Select (max 3) - with default time 12:00
       if (selectedLocations.length < 3) {
         setSelectedLocations([...selectedLocations, { ...location, startTime: '12:00' }])
@@ -171,7 +179,20 @@ export default function LocationSelectionStep({
     )
   }
 
-  // Get unique categories for filter
+  // Get unique categories for filter with emojis
+  const categoryEmojis: Record<string, string> = {
+    restaurant: '🍽️',
+    activity: '🎯',
+    venue: '🏛️',
+    outdoor: '🏔️',
+    sport: '⚽',
+    culture: '🎨',
+    wellness: '💆',
+    cafe: '☕',
+    entertainment: '🎮',
+    indoor: '🏢'
+  }
+
   const categories = [...new Set(locations.map(loc => loc.category))]
 
   return (
@@ -181,7 +202,7 @@ export default function LocationSelectionStep({
           Locations auswählen
         </h2>
         <p className="text-sm sm:text-base text-gray-600">
-          Wählen Sie bis zu 3 Locations aus, zwischen denen Ihr Team abstimmen kann
+          Wählen Sie bis zu 3 Locations aus unterschiedlichen Kategorien, zwischen denen Ihr Team abstimmen kann
         </p>
       </div>
 
@@ -195,9 +216,11 @@ export default function LocationSelectionStep({
           onChange={(e) => setFilterCategory(e.target.value)}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
         >
-          <option value="all">Alle Kategorien</option>
+          <option value="all">🔄 Alle Kategorien</option>
           {categories.map(cat => (
-            <option key={cat} value={cat}>{cat}</option>
+            <option key={cat} value={cat}>
+              {categoryEmojis[cat] || '📍'} {cat.charAt(0).toUpperCase() + cat.slice(1)}
+            </option>
           ))}
         </select>
       </div>
@@ -268,6 +291,7 @@ export default function LocationSelectionStep({
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
+                      <span className="text-2xl">{categoryEmojis[location.category] || '📍'}</span>
                       <h3 className="font-bold text-lg">{location.name}</h3>
                       {isSelected && (
                         <span className="bg-red-600 text-white text-xs px-2 py-1 rounded-full">
