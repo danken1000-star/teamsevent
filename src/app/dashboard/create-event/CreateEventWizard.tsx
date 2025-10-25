@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import EventDetailsStep from './EventDetailsStep'
 import ActivitySelectionStep from './ActivitySelectionStep'
+import LocationSelectionStep from './LocationSelectionStep'
 import ConfirmationStep from './ConfirmationStep'
 
 type Activity = {
@@ -18,6 +19,21 @@ type Activity = {
   popular: boolean
 }
 
+type Location = {
+  id: string
+  name: string
+  city: string
+  category: string
+  price_per_person: number
+  capacity_min: number
+  capacity_max: number
+  description?: string
+  address?: string
+  phone?: string
+  website?: string
+  startTime?: string
+}
+
 export default function CreateEventWizard() {
   const [currentStep, setCurrentStep] = useState(1)
   const [eventData, setEventData] = useState({
@@ -30,6 +46,7 @@ export default function CreateEventWizard() {
   })
 
   const [selectedActivities, setSelectedActivities] = useState<Activity[]>([])
+  const [selectedLocations, setSelectedLocations] = useState<Location[]>([])
 
   const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 3))
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1))
@@ -52,7 +69,7 @@ export default function CreateEventWizard() {
               </div>
               {step < 3 && (
                 <div
-                  className={`h-1 w-24 mx-2 ${
+                  className={`h-1 w-32 mx-2 ${
                     currentStep > step ? 'bg-red-600' : 'bg-gray-200'
                   }`}
                 />
@@ -65,7 +82,7 @@ export default function CreateEventWizard() {
             Details
           </span>
           <span className={currentStep >= 2 ? 'text-red-600 font-medium' : 'text-gray-500'}>
-            Activities
+            Locations
           </span>
           <span className={currentStep >= 3 ? 'text-red-600 font-medium' : 'text-gray-500'}>
             Bestätigung
@@ -84,12 +101,12 @@ export default function CreateEventWizard() {
         )}
 
         {currentStep === 2 && (
-          <ActivitySelectionStep
+          <LocationSelectionStep
             budget={eventData.budget}
             participantCount={eventData.participant_count}
             preferences={eventData.preferences}
-            onSelect={(activities) => {
-              setSelectedActivities(activities)
+            onSelect={(locations) => {
+              setSelectedLocations(locations)
               nextStep()
             }}
             onBack={prevStep}
@@ -99,7 +116,7 @@ export default function CreateEventWizard() {
         {currentStep === 3 && (
           <ConfirmationStep
             eventData={eventData}
-            selectedActivities={selectedActivities}
+            selectedLocations={selectedLocations}
             onBack={prevStep}
           />
         )}

@@ -4,13 +4,19 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient as createBrowserClient } from '@/lib/supabase-browser'
 
-type Activity = {
+type Location = {
   id: string
   name: string
-  description: string
+  city: string
   category: string
   price_per_person: number
-  duration_hours: number
+  capacity_min: number
+  capacity_max: number
+  description?: string
+  address?: string
+  phone?: string
+  website?: string
+  startTime?: string
 }
 
 interface ConfirmationStepProps {
@@ -22,7 +28,7 @@ interface ConfirmationStepProps {
     event_type: string
     preferences: string[]
   }
-  selectedActivities: Activity[]
+  selectedLocations: Location[]
   onBack: () => void
 }
 
@@ -38,7 +44,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 export default function ConfirmationStep({ 
   eventData, 
-  selectedActivities,
+  selectedLocations,
   onBack 
 }: ConfirmationStepProps) {
   const router = useRouter()
@@ -46,15 +52,11 @@ export default function ConfirmationStep({
   const [error, setError] = useState<string | null>(null)
 
   // Calculate totals
-  const totalCost = selectedActivities.reduce(
-    (sum, activity) => sum + (activity.price_per_person * eventData.participant_count),
+  const totalCost = selectedLocations.reduce(
+    (sum, location) => sum + (location.price_per_person * eventData.participant_count),
     0
   )
   const costPerPerson = totalCost / eventData.participant_count
-  const totalDuration = selectedActivities.reduce(
-    (sum, activity) => sum + activity.duration_hours,
-    0
-  )
 
   const handleSubmit = async () => {
     try {
@@ -88,20 +90,21 @@ export default function ConfirmationStep({
 
       if (eventError) throw eventError
 
-      // 2. Event-Activities verknüpfen (Junction Table)
-      const eventActivities = selectedActivities.map((activity, index) => ({
+      // 2. Event-Locations verknüpfen (Junction Table)
+      const eventLocations = selectedLocations.map((location, index) => ({
         event_id: event.id,
-        activity_id: activity.id,
-        order_index: index
+        location_id: location.id,
+        order_index: index,
+        start_time: location.startTime || null
       }))
 
       const { error: junctionError } = await supabase
-        .from('event_activities')
-        .insert(eventActivities)
+        .from('event_locations')
+        .insert(eventLocations)
 
       if (junctionError) {
         console.error('Junction insert error:', junctionError)
-        // Event wurde erstellt, aber Activities nicht verknüpft
+        // Event wurde erstellt, aber Locations nicht verknüpft
       }
 
       // 3. Aktivierten Key laden und Counter erhöhen
@@ -171,36 +174,44 @@ export default function ConfirmationStep({
           </div>
         </div>
 
-        {/* Selected Activities */}
+        {/* Selected Locations */}
         <div>
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Ausgewählte Activities ({selectedActivities.length})
+            Ausgewählte Locations ({selectedLocations.length})
           </h3>
           <div className="space-y-3">
-            {selectedActivities.map((activity, index) => (
-              <div key={activity.id} className="border rounded-lg p-4 bg-gray-50">
+            {selectedLocations.map((location, index) => (
+              <div key={location.id} className="border rounded-lg p-4 bg-gray-50">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-lg font-semibold text-gray-900">
-                        {index + 1}. {activity.name}
+                        {index + 1}. {location.name}
                       </span>
-                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
-                        {CATEGORY_LABELS[activity.category] || activity.category}
+                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full capitalize">
+                        {location.category}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-600 mb-2">{activity.description}</p>
+                    <p className="text-sm text-gray-600 mb-2">
+                      📍 {location.city}
+                      {location.address && ` - ${location.address}`}
+                    </p>
+                    {location.description && (
+                      <p className="text-sm text-gray-600 mb-2">{location.description}</p>
+                    )}
                     <div className="flex gap-4 text-xs text-gray-500">
-                      <span>⏱️ {activity.duration_hours}h</span>
-                      <span>👥 {eventData.participant_count} Personen</span>
+                      <span>👥 {location.capacity_min}-{location.capacity_max} Personen</span>
+                      {location.startTime && (
+                        <span>🕐 Startzeit: {location.startTime} Uhr</span>
+                      )}
                     </div>
                   </div>
                   <div className="text-right ml-4">
                     <p className="font-semibold text-gray-900">
-                      CHF {(activity.price_per_person * eventData.participant_count).toLocaleString('de-CH')}
+                      CHF {(location.price_per_person * eventData.participant_count).toLocaleString('de-CH')}
                     </p>
                     <p className="text-sm text-gray-600">
-                      CHF {activity.price_per_person} / Person
+                      CHF {location.price_per_person} / Person
                     </p>
                   </div>
                 </div>
@@ -212,7 +223,7 @@ export default function ConfirmationStep({
         {/* Cost Summary */}
         <div className="border-t pt-4">
           <div className="bg-gray-50 rounded-lg p-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-3">
               <div>
                 <p className="text-xs text-gray-600">Gesamtkosten</p>
                 <p className="text-lg font-bold text-gray-900">
@@ -223,12 +234,6 @@ export default function ConfirmationStep({
                 <p className="text-xs text-gray-600">Pro Person</p>
                 <p className="text-lg font-bold text-gray-900">
                   CHF {Math.round(costPerPerson)}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-600">Gesamtdauer</p>
-                <p className="text-lg font-bold text-gray-900">
-                  ~{totalDuration}h
                 </p>
               </div>
               <div>
@@ -244,7 +249,7 @@ export default function ConfirmationStep({
                 )}
               </div>
             </div>
-            {totalCost <= eventData.budget && (
+            {totalCost <= eventData.budget && eventData.budget > 0 && (
               <p className="text-xs text-gray-600">
                 💰 Verfügbares Budget: CHF {(eventData.budget - totalCost).toLocaleString('de-CH')}
               </p>

@@ -154,7 +154,7 @@ export default function EventDetailsStep({
             })}
           </div>
           <p className="mt-2 text-xs text-gray-500">
-            💡 Wir schlagen passende Activities basierend auf deinen Präferenzen vor
+            💡 Wir zeigen dir passende Locations basierend auf deinen Präferenzen
           </p>
         </div>
 
@@ -179,7 +179,7 @@ export default function EventDetailsStep({
           type="submit"
           className="w-full bg-red-600 text-white px-6 py-3 rounded-lg font-semibold text-sm sm:text-base hover:bg-red-700 transition-colors shadow-md"
         >
-          Weiter zu Activities auswählen →
+          Weiter zu Locations auswählen →
         </button>
       </form>
     </div>

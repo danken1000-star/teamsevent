@@ -38,14 +38,15 @@ export default async function EventDetailPage({
     .eq('event_id', params.id)
     .order('created_at', { ascending: true })
 
-  // Fetch event activities
-  const { data: eventActivities } = await supabase
-    .from('event_activities')
+  // Fetch event locations
+  const { data: eventLocations } = await supabase
+    .from('event_locations')
     .select(`
       *,
-      activities (*)
+      locations (*)
     `)
     .eq('event_id', params.id)
+    .order('order_index', { ascending: true })
 
   // Votes laden
   const { data: votes } = await supabase
@@ -57,7 +58,7 @@ export default async function EventDetailPage({
     <EventDetailClient
       event={event}
       teamMembers={teamMembers || []}
-      eventActivities={eventActivities || []}
+      eventLocations={eventLocations || []}
       votes={votes || []}
       user={user}
     />
