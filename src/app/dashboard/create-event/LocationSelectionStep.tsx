@@ -89,26 +89,18 @@ export default function LocationSelectionStep({
   const getFilteredLocations = () => {
     let filtered = [...locations]
 
-    // Apply category filter
+    // Apply category filter (dropdown)
     if (filterCategory !== 'all') {
       filtered = filtered.filter(loc => loc.category === filterCategory)
     }
 
-    // Apply preference filter if preferences exist
-    if (preferences.length > 0) {
-      const validCategories = new Set<string>()
-      preferences.forEach(pref => {
-        const categories = PREFERENCE_TO_CATEGORY[pref] || []
-        categories.forEach(cat => validCategories.add(cat))
-      })
-      
-      if (validCategories.size > 0) {
-        filtered = filtered.filter(loc => validCategories.has(loc.category))
-      }
-    }
+    // Apply preference filter ONLY if preferences exist and category filter is 'all'
+    // This way preferences are just suggestions, not hard filters
+    // Actually, let's not filter by preferences at all - just show all available locations
+    // Preferences are just for guidance, not filtering
 
-    // Apply budget filter if budget exists
-    if (budget) {
+    // Apply budget filter if budget exists and is provided
+    if (budget && budget > 0) {
       const budgetPerPerson = budget / participantCount
       filtered = filtered.filter(loc => loc.price_per_person <= budgetPerPerson)
     }
