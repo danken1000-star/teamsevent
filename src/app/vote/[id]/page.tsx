@@ -8,6 +8,7 @@ export default function SimpleVotePage({
   params: { id: string } 
 }) {
   const [event, setEvent] = useState<any>(null)
+  const [locations, setLocations] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedVote, setSelectedVote] = useState<'yes' | 'no' | 'abstain' | null>(null)
   const [voteStats, setVoteStats] = useState({ yes: 0, no: 0, abstain: 0 })
@@ -31,6 +32,25 @@ export default function SimpleVotePage({
 
       if (error) throw error
       setEvent(data)
+
+      // Load locations for this event
+      const { data: eventLocations } = await supabase
+        .from('event_locations')
+        .select(`
+          *,
+          locations (*)
+        `)
+        .eq('event_id', params.id)
+        .order('order_index', { ascending: true })
+
+      if (eventLocations) {
+        const locs = eventLocations.map(el => ({
+          ...el.locations,
+          start_time: el.start_time,
+          order_index: el.order_index
+        })).filter(Boolean)
+        setLocations(locs)
+      }
     } catch (error) {
       console.error('Error loading event:', error)
     } finally {
@@ -173,7 +193,7 @@ export default function SimpleVotePage({
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
           <h1 className="text-3xl font-bold mb-4">🎉 {event.title}</h1>
           
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm mb-6">
             <div>
               <div className="text-gray-600">Datum</div>
               <div className="font-medium">
@@ -191,6 +211,37 @@ export default function SimpleVotePage({
               </div>
             )}
           </div>
+
+          {/* Locations */}
+          {locations.length > 0 && (
+            <div className="border-t pt-4">
+              <h3 className="font-semibold text-gray-900 mb-3">
+                Gewählte Locations ({locations.length})
+              </h3>
+              <div className="space-y-2">
+                {locations.map((location, index) => (
+                  <div key={location.id} className="bg-gray-50 rounded-lg p-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-gray-900">
+                          {index + 1}. {location.name}
+                        </span>
+                        <span className="text-xs text-gray-500">📍 {location.city}</span>
+                      </div>
+                      {location.start_time && (
+                        <span className="text-xs text-gray-600">🕐 {location.start_time} Uhr</span>
+                      )}
+                    </div>
+                    {location.price_per_person && (
+                      <div className="mt-1 text-xs text-gray-600">
+                        CHF {location.price_per_person} / Person
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Voting Options */}
