@@ -46,7 +46,7 @@ export default function OrganizerJoinModal({
         .select()
         .single()
 
-      if (memberError) throw memberError
+      if (memberError) { console.error("Member insert error:", memberError); throw memberError; }
 
       // Create confirmed vote
       const { error: voteError } = await supabase
