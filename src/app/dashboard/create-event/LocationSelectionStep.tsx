@@ -59,8 +59,13 @@ export default function LocationSelectionStep({
   useEffect(() => {
     async function fetchLocations() {
       try {
-        const { createBrowserSupabaseClient } = await import('@/lib/supabase')
-        const supabaseClient = createBrowserSupabaseClient()
+        // Use direct Supabase client import for browser
+        const { createClient } = await import('@supabase/supabase-js')
+        
+        const supabaseClient = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        )
 
         const { data, error: fetchError } = await supabaseClient
           .from('locations')
