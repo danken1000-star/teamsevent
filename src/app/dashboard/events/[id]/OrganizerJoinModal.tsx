@@ -16,8 +16,8 @@ export default function OrganizerJoinModal({
   onClose 
 }: OrganizerJoinModalProps) {
   const [name, setName] = useState('')
-  const [dietaryPreference, setDietaryPreference] = useState('')
-  const [dietaryNotes, setDietaryNotes] = useState('')
+  const [dietaryPreference, setDietaryPreference] = useState('omnivor')
+  const [dietaryNotes, setDietaryNotes] = useState('omnivor')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
@@ -128,7 +128,7 @@ export default function OrganizerJoinModal({
               onChange={(e) => setDietaryPreference(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="">Keine Angabe</option>
+              <option value="omnivor">🍖 Ich esse alles</option>
               <option value="vegetarian">🥗 Vegetarisch</option>
               <option value="vegan">🌱 Vegan</option>
               <option value="gluten_free">🌾 Glutenfrei</option>
