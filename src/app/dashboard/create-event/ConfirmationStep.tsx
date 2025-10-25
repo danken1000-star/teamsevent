@@ -104,7 +104,7 @@ export default function ConfirmationStep({
 
       if (junctionError) {
         console.error('Junction insert error:', junctionError)
-        // Event wurde erstellt, aber Locations nicht verknüpft
+        throw new Error(`Fehler beim Speichern der Locations: ${junctionError.message}`)
       }
 
       // 3. Aktivierten Key laden und Counter erhöhen

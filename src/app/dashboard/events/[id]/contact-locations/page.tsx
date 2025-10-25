@@ -19,7 +19,7 @@ export default async function ContactLocationsPage({
     redirect('/auth/login')
   }
 
-  // Load event with activities
+  // Load event
   const { data: event, error } = await supabase
     .from('events')
     .select('*')

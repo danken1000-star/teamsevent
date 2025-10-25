@@ -80,3 +80,18 @@ CREATE POLICY "Users can delete event_locations for their own events"
 
 -- Zeige Ergebnis
 SELECT 'event_locations table created successfully' AS status;
+
+-- TEMPORÄR: Erlaube öffentlichen Zugriff für Testing (später entfernen!)
+DROP POLICY IF EXISTS "Allow public read for event_locations" ON event_locations;
+CREATE POLICY "Allow public read for event_locations"
+  ON event_locations
+  FOR SELECT
+  TO public
+  USING (true);
+
+DROP POLICY IF EXISTS "Allow public insert for event_locations" ON event_locations;
+CREATE POLICY "Allow public insert for event_locations"
+  ON event_locations
+  FOR INSERT
+  TO public
+  WITH CHECK (true);
