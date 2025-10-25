@@ -4,21 +4,23 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 import EventDetailsStep from './EventDetailsStep'
-import ActivitySelectionStep from './ActivitySelectionStep'
+import LocationSelectionStep from './LocationSelectionStep'
 import ConfirmationStep from './ConfirmationStep'
 import { toast } from 'sonner'
 
-type Activity = {
+type Location = {
   id: string
   name: string
-  description: string
+  city: string
   category: string
   price_per_person: number
-  min_persons: number
-  max_persons: number
-  duration_hours: number
-  tags: string[]
-  popular: boolean
+  capacity_min: number
+  capacity_max: number
+  description?: string
+  address?: string
+  phone?: string
+  website?: string
+  startTime?: string
 }
 
 export default function CreateEventPageClient() {
@@ -64,7 +66,7 @@ export default function CreateEventPageClient() {
     event_type: '',
     preferences: [] as string[]
   })
-  const [selectedActivities, setSelectedActivities] = useState<Activity[]>([])
+  const [selectedLocations, setSelectedLocations] = useState<Location[]>([])
 
   const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 3))
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1))
@@ -103,7 +105,7 @@ export default function CreateEventPageClient() {
         </div>
         <div className="flex justify-between text-xs sm:text-sm text-gray-600 px-1">
           <span className={currentStep === 1 ? 'font-semibold text-red-600' : ''}>Details</span>
-          <span className={currentStep === 2 ? 'font-semibold text-red-600' : ''}>Activities</span>
+          <span className={currentStep === 2 ? 'font-semibold text-red-600' : ''}>Locations</span>
           <span className={currentStep === 3 ? 'font-semibold text-red-600' : ''}>Bestätigung</span>
         </div>
       </div>
@@ -119,12 +121,12 @@ export default function CreateEventPageClient() {
         )}
 
         {currentStep === 2 && (
-          <ActivitySelectionStep
+          <LocationSelectionStep
             budget={eventData.budget}
             participantCount={eventData.participant_count}
             preferences={eventData.preferences}
-            onSelect={(activities) => {
-              setSelectedActivities(activities)
+            onSelect={(locations) => {
+              setSelectedLocations(locations)
               nextStep()
             }}
             onBack={prevStep}
@@ -134,7 +136,7 @@ export default function CreateEventPageClient() {
         {currentStep === 3 && (
           <ConfirmationStep
             eventData={eventData}
-            selectedActivities={selectedActivities}
+            selectedLocations={selectedLocations}
             onBack={prevStep}
           />
         )}
