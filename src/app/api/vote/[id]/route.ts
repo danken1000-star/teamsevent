@@ -16,6 +16,13 @@ export async function POST(
       )
     }
 
+    if (!voterName || !voterName.trim()) {
+      return NextResponse.json(
+        { error: 'Name is required for voting' },
+        { status: 400 }
+      )
+    }
+
     // Use service role for public access
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -36,37 +43,42 @@ export async function POST(
       )
     }
 
-    // Simplified voting - just create new vote each time
-    console.log('Creating new vote for event:', eventId, 'vote:', vote)
-    
-    // Create a dummy team member for anonymous voting
-    const { data: dummyMember, error: memberError } = await supabase
-      .from('team_members')
-      .insert({
-        event_id: eventId,
-        name: voterName || 'Anonym',
-        email: voterEmail || `anonymous_${Date.now()}@temp.com`
-      })
-      .select()
-      .single()
+    // Check if this voter name has already voted (prevent duplicate votes)
+    const { data: existingVotes, error: checkError } = await supabase
+      .from('votes')
+      .select('id')
+      .eq('event_id', eventId)
+      .eq('vote_type', 'event_approval')
+      .or(`voter_name.eq.${voterName.trim()},voter_email.eq.${voterEmail || ''}`)
+      .limit(1)
 
-    if (memberError) {
-      console.error('Create dummy member error:', memberError)
+    if (checkError) {
+      console.error('Check existing vote error:', checkError)
       return NextResponse.json(
-        { error: 'Failed to create voter record: ' + memberError.message },
+        { error: 'Failed to check existing votes' },
         { status: 500 }
       )
     }
 
-    console.log('Created dummy member:', dummyMember)
+    if (existingVotes && existingVotes.length > 0) {
+      return NextResponse.json(
+        { error: 'Sie haben bereits abgestimmt' },
+        { status: 400 }
+      )
+    }
 
+    console.log('Creating new vote for event:', eventId, 'vote:', vote, 'voter:', voterName)
+    
+    // Create vote WITHOUT creating a team member
     const { data: voteData, error: insertError } = await supabase
       .from('votes')
       .insert({
         event_id: eventId,
         vote_type: 'event_approval',
         vote_value: vote,
-        team_member_id: dummyMember.id
+        voter_name: voterName.trim(),
+        voter_email: voterEmail || null,
+        team_member_id: null  // No team member required for event approval votes
       })
       .select()
       .single()
@@ -90,7 +102,6 @@ export async function POST(
 
     if (statsError) {
       console.error('Stats error:', statsError)
-      // Return vote success even if stats fail
       return NextResponse.json({
         success: true,
         vote: voteData,
@@ -103,8 +114,6 @@ export async function POST(
       no: allVotes?.filter(v => v.vote_value === 'no').length || 0,
       abstain: allVotes?.filter(v => v.vote_value === 'abstain').length || 0
     }
-
-    console.log('Vote stats:', stats)
 
     return NextResponse.json({
       success: true,
@@ -128,13 +137,11 @@ export async function GET(
   try {
     const eventId = params.id
 
-    // Use service role for public access
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
 
-    // Get vote statistics
     const { data: allVotes, error: votesError } = await supabase
       .from('votes')
       .select('vote_value, created_at')
@@ -150,15 +157,11 @@ export async function GET(
       )
     }
 
-    console.log('GET /api/vote/[id]: Found votes:', allVotes)
-
     const stats = {
       yes: allVotes?.filter(v => v.vote_value === 'yes').length || 0,
       no: allVotes?.filter(v => v.vote_value === 'no').length || 0,
       abstain: allVotes?.filter(v => v.vote_value === 'abstain').length || 0
     }
-
-    console.log('GET /api/vote/[id]: Calculated stats:', stats)
 
     return NextResponse.json({
       stats,
