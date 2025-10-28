@@ -7,6 +7,7 @@ import SendReminderButton from './SendReminderButton'
 import Link from 'next/link'
 import EventCreatedToast from './EventCreatedToast'
 import FinalizeEventButton from './FinalizeEventButton'
+import ActivityDeleteButton from './ActivityDeleteButton'
 import VoteStatsDisplay from './VoteStatsDisplay'
 import OrganizerJoinModal from './OrganizerJoinModal'
 
@@ -23,7 +24,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 interface EventDetailClientProps {
   event: any
   teamMembers: any[]
-  eventLocations: any[]
+  eventActivities: any[]
   votes: any[]
   user: any
 }
@@ -31,7 +32,7 @@ interface EventDetailClientProps {
 export default function EventDetailClient({
   event,
   teamMembers,
-  eventLocations,
+  eventActivities,
   votes,
   user
 }: EventDetailClientProps) {
@@ -61,22 +62,32 @@ export default function EventDetailClient({
   const respondedMemberIds = new Set(attendanceVotes.map((v: any) => v.team_member_id))
   const pendingMembers = teamMembers?.filter(member => !respondedMemberIds.has(member.id)) || []
 
-  // Extract locations from junction
-  const locations = eventLocations?.map(el => ({
-    ...el.locations,
-    start_time: el.start_time,
-    order_index: el.order_index
-  })).filter(Boolean) || []
+  // Extract activities from junction
+  const activities = eventActivities?.map(ea => ea.activities).filter(Boolean) || []
 
   // Calculate totals
-  const totalCost = locations.reduce(
-    (sum, location) => sum + (location.price_per_person * event.participant_count),
+  const totalCost = activities.reduce(
+    (sum, activity) => sum + (activity.price_per_person * event.participant_count),
     0
   )
 
   // Check if organizer has joined
   const hasOrganizerJoined = teamMembers?.some(member => member.email === user.email) || false
-  const costPerPerson = locations.length > 0 ? totalCost / event.participant_count : 0
+  const costPerPerson = activities.length > 0 ? totalCost / event.participant_count : 0
+  const totalDuration = activities.reduce((sum, activity) => sum + activity.duration_hours, 0)
+
+  // Group team members by dietary preference
+  const dietaryGroups: Record<string, any[]> = {}
+  teamMembers?.forEach(member => {
+    if (member.dietary_preference) {
+      const pref = member.dietary_preference
+      if (!dietaryGroups[pref]) {
+        dietaryGroups[pref] = []
+      }
+      dietaryGroups[pref].push(member)
+    }
+  })
+
   return (
     <div className="max-w-5xl mx-auto">
       {/* Event Created Toast */}
@@ -115,25 +126,6 @@ export default function EventDetailClient({
                 : 'bg-blue-100 text-blue-800'
             }`}>
               {event.status === 'finalized' ? '✓ Finalisiert' : event.status || 'planning'}
-            {/* Location Kontakt Button - nur wenn finalisiert */}
-            
-            {/* Location Kontakt Button - nur wenn finalisiert */}
-            {event.status === 'finalized' && (
-              <a
-                href={`/dashboard/events/${event.id}/contact-locations`}
-                className="w-full px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-center text-sm font-medium flex items-center justify-center gap-2"
-              >
-                📧 Locations kontaktieren
-              </a>
-            )}
-            {event.status === 'finalized' && (
-              <a
-                href={`/dashboard/events/${event.id}/contact-locations`}
-                className="w-full px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-center text-sm font-medium flex items-center justify-center gap-2"
-              >
-                📞 Locations kontaktieren
-              </a>
-            )}
             </span>
             
             {/* Team abstimmen Button */}
@@ -160,52 +152,62 @@ export default function EventDetailClient({
         </div>
       </div>
 
-      {/* Locations Section */}
+      {/* Activities Section */}
       <div className="mt-6 mb-6 bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-bold mb-4">Locations</h2>
+        <h2 className="text-xl font-bold mb-4">Activities</h2>
         
-        {/* Locations List */}
+        {/* Activities List */}
         <div>
           <p className="text-xs sm:text-sm font-medium text-gray-700 mb-3">
-            🎯 Gewählte Locations ({locations.length})
+            🎯 Gewählte Activities ({activities.length})
           </p>
           <div className="space-y-3">
-            {locations.map((loc, index) => (
+            {eventActivities?.map((ea, index) => (
               <div 
-                key={loc.id}
-                className="bg-white border-2 border-gray-200 rounded-lg p-3 sm:p-4 hover:border-red-300 transition-colors"
+                key={ea.id}
+                className="bg-white border-2 border-gray-200 rounded-lg p-3 sm:p-4 hover:border-red-300 transition-colors relative group"
               >
-                <div className="flex justify-between items-start gap-3">
+                {/* Delete Button - NUR wenn Event NICHT finalisiert */}
+                <ActivityDeleteButton
+                  eventId={event.id}
+                  eventActivityId={ea.id}
+                  activityName={ea.activities.name}
+                  isVisible={event.status !== 'finalized'}
+                />
+
+                <div className="flex justify-between items-start gap-3 pr-8">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-base sm:text-lg font-bold text-gray-900">
-                        {index + 1}. {loc.name}
+                        {index + 1}. {ea.activities.name}
                       </span>
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 capitalize">
-                        {loc.category}
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        {CATEGORY_LABELS[ea.activities.category] || ea.activities.category}
                       </span>
                     </div>
                     <p className="text-xs sm:text-sm text-gray-600 mb-2">
-                      📍 {loc.city}{loc.address && `, ${loc.address}`}
+                      {ea.activities.description}
                     </p>
-                    {loc.description && (
-                      <p className="text-xs sm:text-sm text-gray-600 mb-2">
-                        {loc.description}
-                      </p>
-                    )}
                     <div className="flex flex-wrap gap-3 text-xs text-gray-500">
-                      {loc.start_time && (
-                        <span>🕐 {loc.start_time} Uhr</span>
+                      <span>⏱️ {ea.activities.duration_hours}h</span>
+                      <span>👥 {event.participant_count} Personen</span>
+                      {ea.activities.tags && ea.activities.tags.length > 0 && (
+                        <span className="flex gap-1">
+                          {ea.activities.tags.slice(0, 3).map((tag: string) => (
+                            <span key={tag} className="px-2 py-0.5 bg-gray-100 rounded-full">
+                              {tag}
+                            </span>
+                          ))}
+                        </span>
                       )}
-                      <span>👥 {loc.capacity_min}-{loc.capacity_max} Personen</span>
                     </div>
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-base sm:text-lg text-gray-900">
-                      CHF {(loc.price_per_person * event.participant_count).toLocaleString('de-CH')}
+                      CHF {(ea.activities.price_per_person * event.participant_count).toLocaleString('de-CH')}
                     </p>
                     <p className="text-xs text-gray-600">
-                      CHF {loc.price_per_person} / Person
+                      CHF {ea.activities.price_per_person} / Person
                     </p>
                   </div>
                 </div>
@@ -215,7 +217,7 @@ export default function EventDetailClient({
         </div>
 
         {/* Cost Summary */}
-        {locations.length > 0 && (
+        {activities.length > 0 && (
           <div className="mt-6 p-4 bg-gray-50 rounded-lg">
             <div className="flex justify-between items-center">
               <span className="font-medium text-gray-700">Gesamtkosten:</span>
@@ -224,8 +226,20 @@ export default function EventDetailClient({
               </span>
             </div>
             <div className="text-sm text-gray-600 mt-1">
-              CHF {costPerPerson.toFixed(2)} pro Person
+              CHF {costPerPerson.toFixed(2)} pro Person • {totalDuration}h Gesamtdauer
             </div>
+          </div>
+        )}
+
+        {/* Add Activity Button */}
+        {event.status !== 'finalized' && (
+          <div className="mt-4">
+            <Link
+              href={`/dashboard/events/${event.id}/contact-locations`}
+              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              + Activity hinzufügen
+            </Link>
           </div>
         )}
       </div>
@@ -409,6 +423,31 @@ export default function EventDetailClient({
         </div>
       </div>
 
+      {/* Dietary Preferences Section */}
+      {Object.keys(dietaryGroups).length > 0 && (
+        <div className="mt-6 mb-6 bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-xl font-bold mb-4">Ernährungspräferenzen</h2>
+          <div className="space-y-3">
+            {Object.entries(dietaryGroups).map(([preference, members]) => (
+              <div key={preference} className="flex items-center gap-2">
+                <span className="text-sm font-medium text-gray-700 min-w-0 flex-shrink-0">
+                  {preference === 'vegetarian' && '🥗 Vegetarisch'}
+                  {preference === 'vegan' && '🌱 Vegan'}
+                  {preference === 'gluten_free' && '🌾 Glutenfrei'}
+                  {preference === 'lactose_free' && '🥛 Laktosefrei'}
+                  {preference === 'halal' && '🕌 Halal'}
+                  {preference === 'kosher' && '✡️ Kosher'}
+                  {preference === 'other' && '⚠️ Andere'}
+                  {!['vegetarian', 'vegan', 'gluten_free', 'lactose_free', 'halal', 'kosher', 'other'].includes(preference) && preference}
+                </span>
+                <span className="text-sm text-gray-600">
+                  ({members.length} {members.length === 1 ? 'Person' : 'Personen'})
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Organizer Join Modal */}
       {showOrganizerModal && userEmail && (
